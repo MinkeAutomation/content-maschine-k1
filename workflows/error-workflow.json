@@ -1,0 +1,154 @@
+{
+  "name": "AGT-2606 W03T04 Zentraler Error Workflow",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "47724b75-1266-4503-bac0-08defa14f51c",
+      "name": "Fehler in überwachtem Workflow [Error Trigger]",
+      "type": "n8n-nodes-base.errorTrigger",
+      "typeVersion": 1,
+      "position": [
+        176,
+        256
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "betreff",
+              "name": "betreff",
+              "type": "string",
+              "value": "=Fehler in {{ $json.workflow.name }} (Lauf {{ $json.execution.id }})"
+            },
+            {
+              "id": "html",
+              "name": "html",
+              "type": "string",
+              "value": "=<div style=\"font-family:Arial,sans-serif;max-width:640px\"><h2 style=\"color:#b42318;margin:0 0 12px\">Workflow-Fehler</h2><table style=\"border-collapse:collapse;width:100%\"><tr><td style=\"padding:6px 10px;background:#f2f4f7;font-weight:bold;width:170px\">Workflow</td><td style=\"padding:6px 10px\">{{ $json.workflow.name }}</td></tr><tr><td style=\"padding:6px 10px;background:#f2f4f7;font-weight:bold\">Lauf (Execution-ID)</td><td style=\"padding:6px 10px\">{{ $json.execution.id }}</td></tr><tr><td style=\"padding:6px 10px;background:#f2f4f7;font-weight:bold\">Zeitpunkt</td><td style=\"padding:6px 10px\">{{ $now.setZone('Europe/Berlin').toFormat('dd.MM.yyyy HH:mm:ss') }}</td></tr><tr><td style=\"padding:6px 10px;background:#f2f4f7;font-weight:bold\">Letzter Knoten</td><td style=\"padding:6px 10px\">{{ $json.execution.lastNodeExecuted }}</td></tr><tr><td style=\"padding:6px 10px;background:#f2f4f7;font-weight:bold\">Fehlermeldung</td><td style=\"padding:6px 10px;color:#b42318\">{{ String($json.execution.error?.message ?? 'unbekannt').replace(/</g, '&lt;') }}</td></tr></table><p style=\"margin:16px 0 0\"><a href=\"{{ $json.execution.url }}\" style=\"background:#1d4ed8;color:#fff;padding:8px 14px;border-radius:6px;text-decoration:none\">Lauf in n8n öffnen</a></p></div>"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "93923458-3b37-4d5c-b305-6c1f61d52ca4",
+      "name": "Alert-Inhalt bauen [Set]",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        624,
+        256
+      ]
+    },
+    {
+      "parameters": {
+        "fromEmail": "<<REPLACE_WITH_YOUR_SENDER_EMAIL>>",
+        "toEmail": "<<REPLACE_WITH_YOUR_NOTIFICATION_EMAIL>>",
+        "subject": "={{ $json.betreff }}",
+        "html": "={{ $json.html }}",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "id": "91946fce-9205-4ecc-a868-df442ae7da46",
+      "name": "Alert-Mail an Testkontakt [Send Email]",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        960,
+        256
+      ],
+      "webhookId": "fb01d01c-37f4-4e14-89d5-2dbc4590a6be",
+      "credentials": {
+        "smtp": {
+          "id": "CREDENTIAL_ID",
+          "name": "SMTP | Alarm"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "# 🚨 Zentraler Error Workflow (Bonus W03T04)\n**Aufgabe:** Meldet per Mail, wenn ein überwachter Workflow abstürzt.\n**Die Idee:** Ein einziger Alarm-Workflow, den jeder Workflow unter Settings, „Error Workflow“ einträgt (hier AGT-2606 W03T03 RAG Testing).\n**Warum so?** n8n startet ihn bei einem Absturz selbst, ein Sub-Workflow würde nur auf Aufruf laufen.\n**Hinweis:** Feuert nur bei Produktivläufen, nicht bei manuellen Tests.",
+        "height": 252,
+        "width": 520,
+        "color": 2
+      },
+      "id": "5ba52f18-6702-44e4-8e78-cb9ec51f93f9",
+      "name": "Sticky Note Kopf",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        0,
+        -48
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Ablauf\n① Fehler kommt an\n② Betreff und HTML-Tabelle bauen\n③ Mail an den Testkontakt",
+        "height": 252,
+        "width": 268,
+        "color": 2
+      },
+      "id": "a2ab0917-bfe8-4c85-b7ec-f5a1e331cfc7",
+      "name": "Sticky Note Ablauf",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        544,
+        -48
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Status\n🟢 veröffentlicht und im Workflow eingetragen\n🟢 Test mit Beispieldaten: Mail kam an\n🟡 echter Absturz nur im Produktivlauf prüfbar\n🔴 Mail kommt an = ein Produktivlauf ist abgestürzt\n🔵 meldet nur, repariert nichts",
+        "height": 252,
+        "width": 380,
+        "color": 2
+      },
+      "id": "0702087d-0bc3-44fa-89ad-674c323e49ab",
+      "name": "Sticky Note Status",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        832,
+        -48
+      ]
+    }
+  ],
+  "connections": {
+    "Fehler in überwachtem Workflow [Error Trigger]": {
+      "main": [
+        [
+          {
+            "node": "Alert-Inhalt bauen [Set]",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Alert-Inhalt bauen [Set]": {
+      "main": [
+        [
+          {
+            "node": "Alert-Mail an Testkontakt [Send Email]",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "tags": [
+    "KI-AGT-2606",
+    "woche-3",
+    "error-workflow",
+    "monitoring"
+  ],
+  "staticData": null
+}
