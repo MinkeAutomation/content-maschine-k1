@@ -194,6 +194,12 @@
               "name": "signierte_url_sekunden",
               "value": 86400,
               "type": "number"
+            },
+            {
+              "id": "c17",
+              "name": "test_kaputtes_json",
+              "value": false,
+              "type": "boolean"
             }
           ]
         }
@@ -357,16 +363,16 @@
     },
     {
       "id": "ed842b56-5405-4298-8f30-c906c6b4cbf8",
-      "name": "Kunde unbekannt [Stop and Error]",
+      "name": "Lauf abbrechen [Stop and Error]",
       "type": "n8n-nodes-base.stopAndError",
       "typeVersion": 1,
       "position": [
-        1680,
-        1360
+        12000,
+        2490
       ],
       "parameters": {
         "errorType": "errorMessage",
-        "errorMessage": "=Kunde unbekannt oder inaktiv: {{ $('Konfiguration und Startzeit [Edit Fields]').first().json.kunde_kuerzel }} (F6)"
+        "errorMessage": "={{ 'Lauf abgebrochen: ' + $('Fehlerweg protokollieren [Supabase]').item.json.fehler_text }}"
       }
     },
     {
@@ -557,7 +563,8 @@
       },
       "retryOnFail": true,
       "maxTries": 3,
-      "waitBetweenTries": 5000
+      "waitBetweenTries": 5000,
+      "onError": "continueErrorOutput"
     },
     {
       "id": "47a91729-158e-4830-acd1-bf1156470e73",
@@ -633,6 +640,7 @@
       "retryOnFail": true,
       "maxTries": 3,
       "waitBetweenTries": 5000,
+      "onError": "continueErrorOutput",
       "credentials": {
         "httpHeaderAuth": {
           "id": "CREDENTIAL_ID",
@@ -652,7 +660,7 @@
       "parameters": {
         "mode": "runOnceForAllItems",
         "language": "javaScript",
-        "jsCode": "// Zweck: Video-Text aus der Supadata-Antwort holen und pruefen (mode native liefert bei vorhandenen Untertiteln direkt Text).\nconst r = $input.first().json;\nconst body = r.body || {};\n// Warum: 202 mit jobId heisst Auftrag statt Text, 206 heisst keine Untertitel. Der Ausweichweg F2 kommt am Mittwoch, bis dahin stoppt der Lauf mit klarer Meldung.\nif (r.statusCode === 202 || body.jobId) throw new Error('Supadata lieferte einen Auftrag (202, jobId) statt Text.');\nif (r.statusCode === 206) throw new Error('Supadata: keine Untertitel vorhanden (206).');\nlet text = typeof body.content === 'string' ? body.content : (Array.isArray(body.content) ? body.content.map(t => t.text || '').join(' ') : '');\ntext = text.split(String.fromCharCode(10)).join(' ').replace(/ {2,}/g, ' ').trim();\n// Warum 500 Zeichen: darunter reicht der Stoff nicht fuer 5 Folien.\nif (text.length < 500) throw new Error('Video-Text zu kurz oder leer (' + text.length + ' Zeichen, Status ' + r.statusCode + ').');\nreturn [{ json: { video_text: text, video_text_zeichen: text.length, sprache: body.lang || null } }];"
+        "jsCode": "// Zweck: Video-Text aus der Supadata-Antwort holen und pruefen (mode native liefert bei vorhandenen Untertiteln direkt Text).\nconst r = $input.first().json;\nconst body = r.body || {};\nlet text = typeof body.content === 'string' ? body.content : (Array.isArray(body.content) ? body.content.map(t => t.text || '').join(' ') : '');\ntext = text.split(String.fromCharCode(10)).join(' ').replace(/ {2,}/g, ' ').trim();\n// Warum kein Abbruch: 202 mit jobId (Auftrag statt Text), 206 (keine Untertitel) und zu kurzer Text laufen in den Ausweichweg F2.\nlet grund = '';\nif (r.statusCode === 202 || body.jobId) grund = 'Supadata lieferte einen Auftrag (202) statt Text';\nelse if (r.statusCode === 206) grund = 'keine Untertitel vorhanden (206)';\nelse if (text.length < 500) grund = 'Video-Text zu kurz oder leer (' + text.length + ' Zeichen)';\nreturn [{ json: { video_text: grund ? '' : text, video_text_zeichen: text.length, sprache: body.lang || null, f2_grund: grund, status_code: r.statusCode } }];"
       }
     },
     {
@@ -671,8 +679,10 @@
         "batching": {
           "batchSize": 1,
           "delayBetweenBatches": 0
-        }
-      }
+        },
+        "needsFallback": true
+      },
+      "onError": "continueErrorOutput"
     },
     {
       "id": "1311f85b-cad9-44bf-b7b2-2ace6ea7fe29",
@@ -693,7 +703,7 @@
         "options": {
           "baseURL": "https://openrouter.ai/api/v1",
           "temperature": 0.3,
-          "maxTokens": 3000,
+          "maxTokens": "={{ $('Konfiguration und Startzeit [Edit Fields]').first().json.test_kaputtes_json ? 20 : 3000 }}",
           "timeout": 120000,
           "maxRetries": 2
         }
@@ -711,7 +721,7 @@
       "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
       "typeVersion": 1.3,
       "position": [
-        3900,
+        3940,
         1360
       ],
       "parameters": {
@@ -731,7 +741,7 @@
       "parameters": {
         "mode": "runOnceForAllItems",
         "language": "javaScript",
-        "jsCode": "// Zweck: Paket der KI pruefen und in Form bringen (Folienzahl, Laengen, Hashtags, Kennzeichnung).\nconst ein = $input.first().json;\nconst p = ein.output || (typeof ein.text === 'string' ? JSON.parse(ein.text) : ein.text) || {};\nconst basis = $('Quelltext vereinheitlichen [Edit Fields]').first().json;\nconst kunde = basis.kunde || {};\nconst kuerze = (s, n) => { s = String(s || '').trim(); return s.length > n ? s.slice(0, n - 1).trimEnd() + '…' : s; };\nlet folien = (Array.isArray(p.folien) ? p.folien : []).filter(f => f && (f.ueberschrift || f.text));\n// Warum: G9 verlangt 5 bis 8 Folien. Zu viele werden gekuerzt (die Abschlussfolie bleibt), zu wenige sind ein Fehler.\nif (folien.length > 8) folien = folien.slice(0, 7).concat([folien[folien.length - 1]]);\nif (folien.length < 5) throw new Error('Paket hat nur ' + folien.length + ' Folien, verlangt sind 5 bis 8.');\nfolien = folien.map((f, i) => ({\n  nr: i + 1,\n  typ: i === 0 ? 'titel' : (i === folien.length - 1 ? 'abschluss' : 'inhalt'),\n  ueberschrift: kuerze(f.ueberschrift, 70),\n  text: kuerze(f.text, 260),\n  cta: ''\n}));\n// Warum: die letzte Folie traegt immer die Handlungsaufforderung aus dem Kundenprofil, nicht die Formulierung des Modells.\nfolien[folien.length - 1].cta = kunde.cta_text || '';\n// Warum: Hashtags ohne Leer- und Sonderzeichen, feste Marken-Hashtags zuerst, keine Doppelten.\nconst normTag = t => '#' + String(t || '').replace(/^#+/, '').replace(/[^A-Za-z0-9ÄÖÜäöüß_]/g, '');\nconst tags = Array.from(new Set((kunde.hashtags_fest || []).concat(p.hashtags || []).map(normTag).filter(t => t.length > 1))).slice(0, 15);\nreturn [{ json: {\n  post_id: basis.post_id,\n  kunde: kunde,\n  quelle_art: basis.quelle_art,\n  thema: basis.thema,\n  folien: folien,\n  anzahl_folien: folien.length,\n  caption_instagram: kuerze(p.caption_instagram, 2000),\n  hashtags: tags,\n  linkedin_post: kuerze(p.linkedin_post, 2900),\n  // Warum 2.048: Obergrenze des Bildprompts bei FLUX schnell (Recherche-Vergleich, Punkt 7).\n  bildprompt: kuerze(p.bildprompt, 2048),\n  kennzeichnung: 'KI-erstellt',\n  ki_erstellt: true\n} }];"
+        "jsCode": "// Zweck: Paket der KI pruefen und in Form bringen (Folienzahl, Laengen, Hashtags, Kennzeichnung).\nconst ein = $input.first().json;\nconst p = ein.output || (typeof ein.text === 'string' ? JSON.parse(ein.text) : ein.text) || {};\nconst basis = $('Quelltext vereinheitlichen [Edit Fields]').first().json;\nconst cfg = $('Konfiguration und Startzeit [Edit Fields]').first().json;\nconst kunde = basis.kunde || {};\n// Warum: F3, hat die Chain auf das Ersatzmodell umgeschaltet, steht das im Post und im Protokoll.\nlet ersatz = false;\ntry { ersatz = $('Ersatzmodell NVIDIA [NVIDIA Nemotron Chat Model]').isExecuted === true; } catch (e) { ersatz = false; }\nconst kuerze = (s, n) => { s = String(s || '').trim(); return s.length > n ? s.slice(0, n - 1).trimEnd() + '…' : s; };\nlet folien = (Array.isArray(p.folien) ? p.folien : []).filter(f => f && (f.ueberschrift || f.text));\n// Warum: G9 verlangt 5 bis 8 Folien. Zu viele werden gekuerzt (die Abschlussfolie bleibt), zu wenige sind ein Fehler.\nif (folien.length > 8) folien = folien.slice(0, 7).concat([folien[folien.length - 1]]);\nif (folien.length < 5) throw new Error('Paket hat nur ' + folien.length + ' Folien, verlangt sind 5 bis 8.');\nfolien = folien.map((f, i) => ({\n  nr: i + 1,\n  typ: i === 0 ? 'titel' : (i === folien.length - 1 ? 'abschluss' : 'inhalt'),\n  ueberschrift: kuerze(f.ueberschrift, 70),\n  text: kuerze(f.text, 260),\n  cta: ''\n}));\n// Warum: die letzte Folie traegt immer die Handlungsaufforderung aus dem Kundenprofil, nicht die Formulierung des Modells.\nfolien[folien.length - 1].cta = kunde.cta_text || '';\n// Warum: Hashtags ohne Leer- und Sonderzeichen, feste Marken-Hashtags zuerst, keine Doppelten.\nconst normTag = t => '#' + String(t || '').replace(/^#+/, '').replace(/[^A-Za-z0-9ÄÖÜäöüß_]/g, '');\nconst tags = Array.from(new Set((kunde.hashtags_fest || []).concat(p.hashtags || []).map(normTag).filter(t => t.length > 1))).slice(0, 15);\nreturn [{ json: {\n  post_id: basis.post_id,\n  kunde: kunde,\n  quelle_art: basis.quelle_art,\n  thema: basis.thema,\n  folien: folien,\n  anzahl_folien: folien.length,\n  caption_instagram: kuerze(p.caption_instagram, 2000),\n  hashtags: tags,\n  linkedin_post: kuerze(p.linkedin_post, 2900),\n  // Warum 2.048: Obergrenze des Bildprompts bei FLUX schnell (Recherche-Vergleich, Punkt 7).\n  bildprompt: kuerze(p.bildprompt, 2048),\n  kennzeichnung: 'KI-erstellt',\n  ki_erstellt: true,\n  ersatzmodell: ersatz,\n  modell_genutzt: ersatz ? 'nvidia/nemotron-3-super-120b-a12b' : cfg.modell_haupt\n} }];"
       }
     },
     {
@@ -903,7 +913,8 @@
       },
       "retryOnFail": true,
       "maxTries": 3,
-      "waitBetweenTries": 5000
+      "waitBetweenTries": 5000,
+      "onError": "continueErrorOutput"
     },
     {
       "id": "b0c1b7b6-0306-443b-b06f-284913ec58e4",
@@ -999,7 +1010,7 @@
         "sendBody": true,
         "contentType": "json",
         "specifyBody": "json",
-        "jsonBody": "={{ JSON.stringify({ folien: $('Paket prüfen [Code]').first().json.folien, folien_urls: $json.keys.filter(p => p.includes('/folie-')).map(p => p.replace($('Konfiguration und Startzeit [Edit Fields]').first().json.bucket + '/', '')).sort(), einzelbild_url: ($json.keys.find(p => p.includes('/einzelbild')) || '').replace($('Konfiguration und Startzeit [Edit Fields]').first().json.bucket + '/', ''), caption_instagram: $('Paket prüfen [Code]').first().json.caption_instagram, linkedin_post: $('Paket prüfen [Code]').first().json.linkedin_post, hashtags: $('Paket prüfen [Code]').first().json.hashtags, modell: $('Konfiguration und Startzeit [Edit Fields]').first().json.modell_haupt, ki_erstellt: true, status: 'wartet_auf_freigabe' }) }}",
+        "jsonBody": "={{ JSON.stringify({ folien: $('Paket prüfen [Code]').first().json.folien, folien_urls: $json.keys.filter(p => p.includes('/folie-')).map(p => p.replace($('Konfiguration und Startzeit [Edit Fields]').first().json.bucket + '/', '')).sort(), einzelbild_url: ($json.keys.find(p => p.includes('/einzelbild')) || '').replace($('Konfiguration und Startzeit [Edit Fields]').first().json.bucket + '/', ''), caption_instagram: $('Paket prüfen [Code]').first().json.caption_instagram, linkedin_post: $('Paket prüfen [Code]').first().json.linkedin_post, hashtags: $('Paket prüfen [Code]').first().json.hashtags, modell: $('Paket prüfen [Code]').first().json.modell_genutzt, ki_erstellt: true, status: 'wartet_auf_freigabe' }) }}",
         "options": {
           "timeout": 30000,
           "response": {
@@ -1132,7 +1143,7 @@
             },
             {
               "fieldId": "status",
-              "fieldValue": "={{ $('Render-Liste bauen [Code]').first().json.bild_quelle === 'flux' ? 'ok' : 'fallback' }}"
+              "fieldValue": "={{ ($('Render-Liste bauen [Code]').first().json.bild_quelle === 'flux' && !$('Paket prüfen [Code]').first().json.ersatzmodell) ? 'ok' : 'fallback' }}"
             },
             {
               "fieldId": "dauer_ms",
@@ -1140,7 +1151,7 @@
             },
             {
               "fieldId": "modell",
-              "fieldValue": "={{ $('Konfiguration und Startzeit [Edit Fields]').first().json.modell_haupt }}"
+              "fieldValue": "={{ $('Paket prüfen [Code]').first().json.modell_genutzt }}"
             },
             {
               "fieldId": "kunde_kuerzel",
@@ -1468,19 +1479,19 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatNvidia",
       "typeVersion": 1,
       "position": [
-        3940,
-        1820
+        4180,
+        1360
       ],
       "parameters": {
         "model": "nvidia/nemotron-3-super-120b-a12b",
         "options": {
           "temperature": 0.3,
-          "maxTokens": 6000,
-          "timeout": 120000,
+          "maxTokens": 16000,
+          "timeout": 240000,
           "maxRetries": 0
         }
       },
-      "disabled": true,
+      "disabled": false,
       "credentials": {
         "nvidiaApi": {
           "id": "CREDENTIAL_ID",
@@ -1545,7 +1556,7 @@
         176
       ],
       "parameters": {
-        "content": "## Ablauf\n① Auftrag annehmen\n② Einstellungen und Kundenprofil laden\n③ Kunde prüfen, Post anlegen\n④ Quellenart verteilen\n⑤ Artikel oder Video-Text holen\n⑥ Quelltext zusammenführen\n⑦ Content-Paket schreiben\n⑧ Paket prüfen\n⑨ Einzelbild erzeugen\n⑩ Logo laden, Folien bauen\n⑪ Bilder rendern und hochladen\n⑫ Bildpfade sammeln\n⑬ Post speichern, Telegram-Zugang prüfen\n⑭ Vorschau und Texte senden\n⑮ Freigabe abwarten\n⑯ Status setzen\n⑰ Lauf protokollieren",
+        "content": "## Ablauf\n① Auftrag annehmen\n② Einstellungen und Kundenprofil laden\n③ Kunde prüfen, Post anlegen\n④ Quellenart verteilen\n⑤ Artikel oder Video-Text holen\n⑥ Quelltext zusammenführen\n⑦ Content-Paket schreiben\n⑧ Paket prüfen\n⑨ Einzelbild erzeugen\n⑩ Logo laden, Folien bauen\n⑪ Bilder rendern und hochladen\n⑫ Bildpfade sammeln\n⑬ Post speichern, Telegram-Zugang prüfen\n⑭ Vorschau und Texte senden\n⑮ Freigabe abwarten\n⑯ Status setzen\n⑰ Lauf protokollieren\n⑱ Fallbacks F1 bis F7\n⑲ Fehlerweg protokollieren und melden",
         "color": 2,
         "width": 492,
         "height": 480
@@ -1561,7 +1572,7 @@
         176
       ],
       "parameters": {
-        "content": "## Status\n🟢 Happy Path läuft mit Testfall T01 bis zur Telegram-Weiche (Lauf 642).\n\n🟡 Telegram wartet auf Chat-ID und Nutzer-ID in k1_einstellungen, bis dahin endet der Lauf nach Schritt ⑬.\n\n🟡 Das Einzelbild nutzt den Farbverlauf, bis die Cloudflare-Konto-ID eingetragen ist.\n\n🔴 Das Formular hat noch keine Basic Auth, das Credential fehlt.\n\n🔵 Fallbacks F2, F3 und F5 folgen am Mittwoch.",
+        "content": "## Status\n🟢 Happy Path und Fallbacks F1 bis F7 gebaut, Testfälle ohne Telegram und Bildmodell gelaufen (Nummern in der Test-Tabelle).\n\n🟡 Telegram wartet auf Chat-ID und Nutzer-ID in k1_einstellungen, das Einzelbild auf die Cloudflare-Konto-ID.\n\n🔴 Das Formular hat noch keine Basic Auth, das Credential fehlt.\n\n🔵 Testschalter test_kaputtes_json und modell_basis_url im Konfigurationsknoten, Standard aus.",
         "color": 2,
         "width": 512,
         "height": 480
@@ -1717,7 +1728,7 @@
         884
       ],
       "parameters": {
-        "content": "## ⑤ Artikel oder Video-Text holen\nArtikel liest Jina ohne Schlüssel, Videos laufen über Supadata mit mode native (nur vorhandene Untertitel, 1 Credit).\n\n🟡 Fallbacks F1 und F2 folgen am Mittwoch und Donnerstag.",
+        "content": "## ⑤ Artikel oder Video-Text holen\nArtikel liest Jina ohne Schlüssel, Videos laufen über Supadata mit mode native (nur vorhandene Untertitel, 1 Credit). Die Weichen prüfen, ob genug Text kam.\n\n🟢 F1 und F2 im Fehlerweg darunter.",
         "width": 920,
         "height": 202
       }
@@ -1747,7 +1758,7 @@
         884
       ],
       "parameters": {
-        "content": "## ⑦ Paket schreiben\nKursmodell über OpenRouter, Ausgabe nach JSON-Schema.\n\n🟡 F3 Mittwoch: Ersatzmodell aus der Reserve.",
+        "content": "## ⑦ Paket schreiben\nKursmodell über OpenRouter, Ausgabe nach JSON-Schema.\n\n🟢 F3: Ersatzmodell NVIDIA angeschlossen.",
         "width": 300,
         "height": 202
       }
@@ -1777,7 +1788,7 @@
         884
       ],
       "parameters": {
-        "content": "## ⑨ Einzelbild erzeugen\nFLUX schnell malt das Motiv, die Konto-ID kommt aus k1_einstellungen.\n\n🟡 Ohne Konto-ID Farbverlauf plus Logo (F4).",
+        "content": "## ⑨ Einzelbild erzeugen\nFLUX schnell malt das Motiv, die Konto-ID kommt aus k1_einstellungen.\n\n🟡 F4: ohne Konto-ID oder bei Fehler Farbverlauf plus Logo.",
         "width": 580,
         "height": 202
       }
@@ -1807,7 +1818,7 @@
         884
       ],
       "parameters": {
-        "content": "## ⑪ Rendern und hochladen\nGotenberg macht aus jedem HTML ein PNG 1080 x 1350, der Upload schreibt mit x-upsert in den privaten Bucket.\n\n🟡 F5 Mittwoch: bei Render-Fehler nur Texte (nur_texte).",
+        "content": "## ⑪ Rendern und hochladen\nGotenberg macht aus jedem HTML ein PNG 1080 x 1350, der Upload schreibt mit x-upsert in den privaten Bucket.\n\n🟢 F5: bei Render-Fehler nur Texte (nur_texte).",
         "width": 580,
         "height": 202
       }
@@ -1909,7 +1920,7 @@
       "typeVersion": 1,
       "position": [
         0,
-        1608
+        2990
       ],
       "parameters": {
         "content": " ",
@@ -1924,7 +1935,7 @@
       "typeVersion": 1,
       "position": [
         16,
-        1624
+        3006
       ],
       "parameters": {
         "content": "## 📊 Testfälle für diesen Ablauf\n| Nr | Eingabe | Erwartung |\n|---|---|---|\n| T01 | Ordwin, Thema | 5 bis 8 Folien, Einzelbild, Texte |\n| T02 | Café, Artikel-Link | Café-Farben, Ablehnen mit Grund |\n| T03 | Ordwin, YouTube-Link | Video-Text, Paket zum Video |\n| T06 | englischer Artikel | Paket auf Deutsch |\n| T10 | Gotenberg falsch | Status nur_texte (ab Mittwoch) |",
@@ -1934,34 +1945,922 @@
       }
     },
     {
-      "id": "59b86172-2ada-47e3-ba66-b2e5d0b4574a",
-      "name": "Rahmen Reserve",
-      "type": "n8n-nodes-base.stickyNote",
-      "typeVersion": 1,
+      "id": "f16ec25d-3e9c-44e9-b5fd-b0831df75de1",
+      "name": "Artikel lesbar? [If]",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
       "position": [
-        3624,
-        1608
+        2700,
+        1120
       ],
       "parameters": {
-        "content": " ",
-        "width": 732,
-        "height": 392
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose"
+          },
+          "conditions": [
+            {
+              "id": "a1",
+              "leftValue": "={{ String($json.data || '').split('Markdown Content:').pop().trim().length }}",
+              "rightValue": 200,
+              "operator": {
+                "type": "number",
+                "operation": "gte"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
       }
     },
     {
-      "id": "0de1b999-3396-417e-a80c-e7a4015193e0",
-      "name": "Sticky Note fa75c434",
+      "id": "a70a245a-0587-44b6-8846-0f3abc7383dc",
+      "name": "Quelle-Fallback F1 [Edit Fields]",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        2380,
+        2010
+      ],
+      "parameters": {
+        "mode": "manual",
+        "includeOtherFields": false,
+        "assignments": {
+          "assignments": [
+            {
+              "id": "f1a",
+              "name": "data",
+              "value": "",
+              "type": "string"
+            },
+            {
+              "id": "f1b",
+              "name": "fallback",
+              "value": "F1",
+              "type": "string"
+            },
+            {
+              "id": "f1c",
+              "name": "status",
+              "value": "fallback",
+              "type": "string"
+            },
+            {
+              "id": "f1d",
+              "name": "fehler_text",
+              "value": "={{ 'F1: Quelle nicht lesbar' + ($json.error ? ' (' + String($json.error.message || $json.error).slice(0, 120) + ')' : ' (unter 200 Zeichen)') + ', Paket nur aus dem Thema' }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "9c66a896-90fb-4714-930e-e26b9baf4a97",
+      "name": "Video-Text vorhanden? [If]",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        3340,
+        1360
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose"
+          },
+          "conditions": [
+            {
+              "id": "v1",
+              "leftValue": "={{ String($json.video_text || '').length }}",
+              "rightValue": 500,
+              "operator": {
+                "type": "number",
+                "operation": "gte"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "619ac32c-53cf-4cbe-9355-a53fb2d66c9c",
+      "name": "Videotitel holen [HTTP Request]",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2700,
+        2010
+      ],
+      "parameters": {
+        "method": "GET",
+        "url": "=https://www.youtube.com/oembed?url={{ encodeURIComponent($('Video-ID ermitteln [Edit Fields]').first().json.video_url) }}&format=json",
+        "options": {
+          "timeout": 15000
+        }
+      },
+      "onError": "continueRegularOutput",
+      "alwaysOutputData": true
+    },
+    {
+      "id": "172c4640-fdd2-4648-be6d-d875164de927",
+      "name": "Video-Fallback F2 [Edit Fields]",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        3020,
+        2010
+      ],
+      "parameters": {
+        "mode": "manual",
+        "includeOtherFields": false,
+        "assignments": {
+          "assignments": [
+            {
+              "id": "f2a",
+              "name": "video_text",
+              "value": "={{ 'Videotitel: ' + ($json.title || 'unbekannt') + ($json.author_name ? ' (Kanal ' + $json.author_name + ')' : '') + '. Thema: ' + $('Konfiguration und Startzeit [Edit Fields]').first().json.thema }}",
+              "type": "string"
+            },
+            {
+              "id": "f2b",
+              "name": "fallback",
+              "value": "F2",
+              "type": "string"
+            },
+            {
+              "id": "f2c",
+              "name": "status",
+              "value": "fallback",
+              "type": "string"
+            },
+            {
+              "id": "f2d",
+              "name": "fehler_text",
+              "value": "={{ 'F2: kein Video-Text (' + (($('Video-Text zusammensetzen [Code]').isExecuted && $('Video-Text zusammensetzen [Code]').first().json.f2_grund) || 'Fehler beim Video-Text-Dienst') + '), Paket aus Videotitel und Thema' }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "4be58004-4e91-4e3f-8931-245aae586db9",
+      "name": "Modellfehler F3 [Edit Fields]",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        3720,
+        2010
+      ],
+      "parameters": {
+        "mode": "manual",
+        "includeOtherFields": false,
+        "assignments": {
+          "assignments": [
+            {
+              "id": "f3a",
+              "name": "fallback",
+              "value": "F3",
+              "type": "string"
+            },
+            {
+              "id": "f3b",
+              "name": "status",
+              "value": "fehler",
+              "type": "string"
+            },
+            {
+              "id": "f3c",
+              "name": "fehler_text",
+              "value": "={{ 'F3: Hauptmodell und Ersatzmodell ohne gültiges Paket (' + String(($json.error && ($json.error.message || $json.error)) || 'unbekannt').slice(0, 160) + ')' }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "c49d4f9d-cd07-4351-a673-df0580202d5d",
+      "name": "Status fehler setzen [Supabase]",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        3720,
+        2250
+      ],
+      "parameters": {
+        "resource": "row",
+        "operation": "update",
+        "tableId": "k1_posts",
+        "filterType": "manual",
+        "matchType": "allFilters",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "id",
+              "condition": "eq",
+              "keyValue": "={{ $('Post anlegen [Supabase]').first().json.id }}"
+            }
+          ]
+        },
+        "dataToSend": "defineBelow",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "status",
+              "fieldValue": "fehler"
+            }
+          ]
+        }
+      },
+      "credentials": {
+        "supabaseApi": {
+          "id": "CREDENTIAL_ID",
+          "name": "Supabase API | KI-AGT-2606"
+        }
+      }
+    },
+    {
+      "id": "dbdd2d3d-6ecb-4367-8ed5-dcece877fdba",
+      "name": "Ersatzmodell genutzt? [If]",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        4040,
+        2010
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose"
+          },
+          "conditions": [
+            {
+              "id": "e1",
+              "leftValue": "={{ $json.ersatzmodell }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "4264b4fb-a388-4d2d-b34f-b024760da261",
+      "name": "Ersatzmodell vermerken F3 [Edit Fields]",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        4360,
+        2010
+      ],
+      "parameters": {
+        "mode": "manual",
+        "includeOtherFields": false,
+        "assignments": {
+          "assignments": [
+            {
+              "id": "f3d",
+              "name": "fallback",
+              "value": "F3",
+              "type": "string"
+            },
+            {
+              "id": "f3e",
+              "name": "status",
+              "value": "fallback",
+              "type": "string"
+            },
+            {
+              "id": "f3f",
+              "name": "fehler_text",
+              "value": "F3: Hauptmodell ausgefallen, Paket vom Ersatzmodell NVIDIA",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "9821d90b-77bc-4942-83ac-69ce9008d62e",
+      "name": "Einzelbild-Fallback F4 [Edit Fields]",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        4680,
+        2010
+      ],
+      "parameters": {
+        "mode": "manual",
+        "includeOtherFields": false,
+        "assignments": {
+          "assignments": [
+            {
+              "id": "f4a",
+              "name": "fallback",
+              "value": "F4",
+              "type": "string"
+            },
+            {
+              "id": "f4b",
+              "name": "status",
+              "value": "fallback",
+              "type": "string"
+            },
+            {
+              "id": "f4c",
+              "name": "fehler_text",
+              "value": "={{ $json.error ? 'F4: Bildmodell-Fehler (' + String($json.error.message || $json.error).slice(0, 120) + '), Einzelbild als Farbverlauf' : 'F4: Konto-ID fehlt, Einzelbild als Farbverlauf' }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "c94106ff-eb63-4b94-9ca9-f579dd7ec1e3",
+      "name": "Render-Fehler F5 [Edit Fields]",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        5800,
+        2010
+      ],
+      "parameters": {
+        "mode": "manual",
+        "includeOtherFields": false,
+        "assignments": {
+          "assignments": [
+            {
+              "id": "f5a",
+              "name": "fallback",
+              "value": "F5",
+              "type": "string"
+            },
+            {
+              "id": "f5b",
+              "name": "status",
+              "value": "fehler",
+              "type": "string"
+            },
+            {
+              "id": "f5c",
+              "name": "fehler_text",
+              "value": "={{ 'F5: Rendern fehlgeschlagen (' + String(($json.error && ($json.error.message || $json.error)) || 'Render-Dienst nicht erreichbar').slice(0, 120) + '), Post nur mit Texten (nur_texte)' }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "executeOnce": true
+    },
+    {
+      "id": "bfa8ccfe-7b13-4ef4-a520-d82baf3a6aab",
+      "name": "Nur Texte speichern [HTTP Request]",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        6120,
+        2010
+      ],
+      "parameters": {
+        "method": "PATCH",
+        "url": "={{ $('Konfiguration und Startzeit [Edit Fields]').first().json.supabase_url }}/rest/v1/k1_posts?id=eq.{{ $('Paket prüfen [Code]').first().json.post_id }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "supabaseApi",
+        "sendHeaders": true,
+        "specifyHeaders": "keypair",
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Prefer",
+              "value": "return=representation"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ folien: $('Paket prüfen [Code]').first().json.folien, caption_instagram: $('Paket prüfen [Code]').first().json.caption_instagram, linkedin_post: $('Paket prüfen [Code]').first().json.linkedin_post, hashtags: $('Paket prüfen [Code]').first().json.hashtags, modell: $('Paket prüfen [Code]').first().json.modell_genutzt, ki_erstellt: true, status: 'nur_texte' }) }}",
+        "options": {
+          "timeout": 30000,
+          "response": {
+            "response": {
+              "fullResponse": true
+            }
+          }
+        }
+      },
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000,
+      "executeOnce": true,
+      "credentials": {
+        "supabaseApi": {
+          "id": "CREDENTIAL_ID",
+          "name": "Supabase API | KI-AGT-2606"
+        }
+      }
+    },
+    {
+      "id": "22cc265b-0e29-4ef4-8b81-f810474a31cc",
+      "name": "Kunde unbekannt F6 [Edit Fields]",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1680,
+        2010
+      ],
+      "parameters": {
+        "mode": "manual",
+        "includeOtherFields": false,
+        "assignments": {
+          "assignments": [
+            {
+              "id": "f6a",
+              "name": "fallback",
+              "value": "F6",
+              "type": "string"
+            },
+            {
+              "id": "f6b",
+              "name": "status",
+              "value": "fehler",
+              "type": "string"
+            },
+            {
+              "id": "f6c",
+              "name": "fehler_text",
+              "value": "={{ 'F6: Kunde unbekannt oder inaktiv: ' + $('Konfiguration und Startzeit [Edit Fields]').first().json.kunde_kuerzel }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "176eb3f3-b907-4102-aada-4f0bce37b763",
+      "name": "Frist abgelaufen? [If]",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        8740,
+        1360
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose"
+          },
+          "conditions": [
+            {
+              "id": "fr1",
+              "leftValue": "={{ !$json.data || $json.data.approved === undefined }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "e223c2fe-e7a4-4c75-b346-3a197e56a32b",
+      "name": "Status abgelaufen setzen [Supabase]",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        8740,
+        2010
+      ],
+      "parameters": {
+        "resource": "row",
+        "operation": "update",
+        "tableId": "k1_posts",
+        "filterType": "manual",
+        "matchType": "allFilters",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "id",
+              "condition": "eq",
+              "keyValue": "={{ $('Paket prüfen [Code]').first().json.post_id }}"
+            }
+          ]
+        },
+        "dataToSend": "defineBelow",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "status",
+              "fieldValue": "freigabe_abgelaufen"
+            },
+            {
+              "fieldId": "entschieden_am",
+              "fieldValue": "={{ $now.toISO() }}"
+            }
+          ]
+        }
+      },
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000,
+      "credentials": {
+        "supabaseApi": {
+          "id": "CREDENTIAL_ID",
+          "name": "Supabase API | KI-AGT-2606"
+        }
+      }
+    },
+    {
+      "id": "52a518b4-d060-43af-b28f-a6bcde395515",
+      "name": "Freigabe-Frist F7 [Edit Fields]",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        9060,
+        2010
+      ],
+      "parameters": {
+        "mode": "manual",
+        "includeOtherFields": false,
+        "assignments": {
+          "assignments": [
+            {
+              "id": "f7a",
+              "name": "fallback",
+              "value": "F7",
+              "type": "string"
+            },
+            {
+              "id": "f7b",
+              "name": "status",
+              "value": "fallback",
+              "type": "string"
+            },
+            {
+              "id": "f7c",
+              "name": "fehler_text",
+              "value": "F7: Freigabe-Frist 24 Stunden abgelaufen, Status freigabe_abgelaufen",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "7b4b2bcc-3ded-480c-88fe-a47b9ca52303",
+      "name": "Grund fehlt? [If]",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        9700,
+        2010
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose"
+          },
+          "conditions": [
+            {
+              "id": "g1",
+              "leftValue": "={{ $json.ablehnungsgrund }}",
+              "rightValue": "kein Grund angegeben, Frist abgelaufen",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "4038f25c-5973-48a7-9fb8-57c2d679bd96",
+      "name": "Grund-Frist F7 [Edit Fields]",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        10020,
+        2010
+      ],
+      "parameters": {
+        "mode": "manual",
+        "includeOtherFields": false,
+        "assignments": {
+          "assignments": [
+            {
+              "id": "f7d",
+              "name": "fallback",
+              "value": "F7",
+              "type": "string"
+            },
+            {
+              "id": "f7e",
+              "name": "status",
+              "value": "fallback",
+              "type": "string"
+            },
+            {
+              "id": "f7f",
+              "name": "fehler_text",
+              "value": "F7: Frist für den Ablehnungsgrund (2 Stunden) abgelaufen, Status abgelehnt ohne Grund",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "1d29826b-90aa-4cfa-86e4-6f3fe0d20c20",
+      "name": "Fehlerweg vorbereiten [Code]",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        10400,
+        2490
+      ],
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "language": "javaScript",
+        "jsCode": "// Zweck: aus dem Fallback-Vermerk eine Protokollzeile mit Stelle fehlerweg bauen, nur Metadaten.\nconst k = $('Konfiguration und Startzeit [Edit Fields]').first().json;\nlet post = null;\ntry { if ($('Post anlegen [Supabase]').isExecuted) post = $('Post anlegen [Supabase]').first().json.id || null; } catch (e) { post = null; }\nlet text = String($json.fehler_text || $json.fallback || 'Fallback ohne Text');\n// Warum: bricht der Lauf ab, laeuft der Protokollzweig frueherer Fallbacks nicht mehr, deshalb stehen sie in der Abbruchzeile mit.\nif ($json.status === 'fehler') {\n  const frueher = [['Quelle-Fallback F1 [Edit Fields]', 'F1'], ['Video-Fallback F2 [Edit Fields]', 'F2'], ['Ersatzmodell vermerken F3 [Edit Fields]', 'F3 Ersatzmodell'], ['Einzelbild-Fallback F4 [Edit Fields]', 'F4']]\n    .filter(n => { try { return $(n[0]).isExecuted === true; } catch (e) { return false; } })\n    .map(n => n[1]);\n  if (frueher.length) text += ' | vorher im Lauf: ' + frueher.join(', ');\n}\nconst zeile = {\n  workflow_name: k.workflow_name,\n  execution_id: k.execution_id,\n  ausfuehrung_modus: k.ausfuehrung_modus,\n  stelle: 'fehlerweg',\n  status: $json.status === 'fehler' ? 'fehler' : 'fallback',\n  dauer_ms: Math.round(Date.now() - new Date(k.startTime).getTime()),\n  modell: k.modell_haupt,\n  kunde_kuerzel: k.kunde_kuerzel,\n  fehler_text: text.slice(0, 300)\n};\n// Warum ohne post_id bei F6: vor dem Anlegen des Posts gibt es keine UUID, ein leerer Wert waere fuer die Spalte ungueltig.\nif (post) zeile.post_id = post;\nreturn { json: zeile };"
+      }
+    },
+    {
+      "id": "a226fac2-59bb-439d-a39a-af14e054c55d",
+      "name": "Fehlerweg protokollieren [Supabase]",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        10720,
+        2490
+      ],
+      "parameters": {
+        "resource": "row",
+        "operation": "create",
+        "tableId": "k1_laufprotokoll",
+        "dataToSend": "autoMapInputData"
+      },
+      "credentials": {
+        "supabaseApi": {
+          "id": "CREDENTIAL_ID",
+          "name": "Supabase API | KI-AGT-2606"
+        }
+      }
+    },
+    {
+      "id": "3b4129c2-fc61-4481-9853-e12c879d0af7",
+      "name": "Abbrechen? [If]",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        11040,
+        2490
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose"
+          },
+          "conditions": [
+            {
+              "id": "ab1",
+              "leftValue": "={{ $json.status }}",
+              "rightValue": "fehler",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "954c60f6-0a33-4ab7-90c2-1daff12a765c",
+      "name": "Telegram-Zugang für Fehler-Hinweis? [If]",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        11360,
+        2490
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose"
+          },
+          "conditions": [
+            {
+              "id": "th1",
+              "leftValue": "={{ ($('Einstellungen laden [HTTP Request]').first().json.body || []).find(r => r.schluessel === 'telegram_chat_id')?.wert || '' }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "th2",
+              "leftValue": "={{ ($('Einstellungen laden [HTTP Request]').first().json.body || []).find(r => r.schluessel === 'telegram_freigabe_nutzer_id')?.wert || '' }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "f92d2f61-57e2-4d06-bc90-396c70ff0c72",
+      "name": "Fehler-Hinweis senden [Telegram]",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        11680,
+        2490
+      ],
+      "parameters": {
+        "resource": "message",
+        "operation": "sendMessage",
+        "chatId": "={{ ($('Einstellungen laden [HTTP Request]').first().json.body || []).find(r => r.schluessel === 'telegram_chat_id')?.wert }}",
+        "text": "={{ ('Fehler im Content-Generator (Lauf ' + $json.execution_id + '): ' + $json.fehler_text).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').slice(0, 4000) }}",
+        "replyMarkup": "none",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "webhookId": "03c7c7f4-5a46-45f7-a2c1-8ed36ed5960c",
+      "credentials": {
+        "telegramApi": {
+          "id": "CREDENTIAL_ID",
+          "name": "Telegram API | Content-Generator"
+        }
+      }
+    },
+    {
+      "id": "5f650ce2-885d-46f3-9100-14166627bb22",
+      "name": "Telegram-Zugang für Fallback-Hinweis? [If]",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        11360,
+        2730
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose"
+          },
+          "conditions": [
+            {
+              "id": "tf1",
+              "leftValue": "={{ ($('Einstellungen laden [HTTP Request]').first().json.body || []).find(r => r.schluessel === 'telegram_chat_id')?.wert || '' }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "tf2",
+              "leftValue": "={{ ($('Einstellungen laden [HTTP Request]').first().json.body || []).find(r => r.schluessel === 'telegram_freigabe_nutzer_id')?.wert || '' }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "b917f6aa-90f4-445e-ba09-95ba0afe0b00",
+      "name": "Fallback-Hinweis senden [Telegram]",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        11680,
+        2730
+      ],
+      "parameters": {
+        "resource": "message",
+        "operation": "sendMessage",
+        "chatId": "={{ ($('Einstellungen laden [HTTP Request]').first().json.body || []).find(r => r.schluessel === 'telegram_chat_id')?.wert }}",
+        "text": "={{ ('Hinweis zum Content-Generator (Lauf ' + $json.execution_id + '): ' + $json.fehler_text).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').slice(0, 4000) }}",
+        "replyMarkup": "none",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "webhookId": "e93d2011-503a-42c0-83f8-e09a6447ebc0",
+      "credentials": {
+        "telegramApi": {
+          "id": "CREDENTIAL_ID",
+          "name": "Telegram API | Content-Generator"
+        }
+      }
+    },
+    {
+      "id": "3f985be0-9708-430e-978e-a0e9daf5c6fb",
+      "name": "Fehlerweg Flaeche",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        3640,
-        1624
+        0,
+        1610
       ],
       "parameters": {
-        "content": "# Reserve · Ersatzmodell (deaktiviert)\nNicht verbunden. NVIDIA Nemotron mit Free Endpoint wird am Mittwoch als Fallback F3 an Schritt ⑦ gehängt.",
-        "color": 2,
-        "width": 700,
-        "height": 360
+        "content": "# 06 · Fehlerweg\nFallbacks F1 bis F7: jeder schreibt eine Zeile fehlerweg ins Protokoll, Abbrüche lösen den zentralen Error Workflow aus.",
+        "width": 12200,
+        "height": 1300,
+        "color": 3
+      }
+    },
+    {
+      "id": "7f9ed02f-191a-4ba8-ab08-69c7b2d65b46",
+      "name": "Karte Fallbacks",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        32,
+        1722
+      ],
+      "parameters": {
+        "content": "## ⑱ Fallbacks F1 bis F7\nF1 Artikel nicht lesbar: weiter nur mit dem Thema. F2 kein Video-Text: Videotitel über oEmbed plus Thema. F3 Hauptmodell fällt aus: Ersatzmodell NVIDIA; fallen beide aus, Post auf fehler und Abbruch. F4 kein Bild: Farbverlauf plus Logo. F5 Rendern scheitert: Post nur mit Texten (nur_texte) und Abbruch. F6 Kunde unbekannt: Abbruch vor dem Post. F7 Frist abgelaufen: freigabe_abgelaufen bzw. abgelehnt ohne Grund.\n\n🟡 Retry nur an Diensten (3 x 5 Sekunden), danach der Fehlerausgang.",
+        "width": 1100,
+        "height": 420
+      }
+    },
+    {
+      "id": "ee113e3b-c3b3-4857-91de-4ab47c443eff",
+      "name": "Karte Fehlerweg",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        10360,
+        1722
+      ],
+      "parameters": {
+        "content": "## ⑲ Fehlerweg protokollieren und melden\nAus jedem Vermerk entsteht eine Protokollzeile mit Stelle fehlerweg. Status fehler bricht den Lauf mit Stop and Error ab, damit der zentrale Error Workflow den Alert schickt, Status fallback läuft weiter. Telegram-Hinweise gehen nur raus, wenn Chat-ID und Freigabe-Nutzer-ID eingetragen sind.\n\n🟡 Telegram-Hinweise erst nach Eintrag der Werte testbar.",
+        "width": 1780,
+        "height": 420
       }
     }
   ],
@@ -2021,7 +2920,7 @@
         ],
         [
           {
-            "node": "Kunde unbekannt [Stop and Error]",
+            "node": "Kunde unbekannt F6 [Edit Fields]",
             "type": "main",
             "index": 0
           }
@@ -2089,17 +2988,6 @@
         ]
       ]
     },
-    "Artikel lesen [HTTP Request]": {
-      "main": [
-        [
-          {
-            "node": "Quelltext vereinheitlichen [Edit Fields]",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
     "Video-ID ermitteln [Edit Fields]": {
       "main": [
         [
@@ -2116,6 +3004,13 @@
         [
           {
             "node": "Paket prüfen [Code]",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Modellfehler F3 [Edit Fields]",
             "type": "main",
             "index": 0
           }
@@ -2151,6 +3046,11 @@
             "node": "Konto-ID vorhanden? [If]",
             "type": "main",
             "index": 0
+          },
+          {
+            "node": "Ersatzmodell genutzt? [If]",
+            "type": "main",
+            "index": 0
           }
         ]
       ]
@@ -2166,7 +3066,7 @@
         ],
         [
           {
-            "node": "Logo laden [HTTP Request]",
+            "node": "Einzelbild-Fallback F4 [Edit Fields]",
             "type": "main",
             "index": 0
           }
@@ -2184,7 +3084,7 @@
         ],
         [
           {
-            "node": "Logo laden [HTTP Request]",
+            "node": "Einzelbild-Fallback F4 [Edit Fields]",
             "type": "main",
             "index": 0
           }
@@ -2218,6 +3118,13 @@
         [
           {
             "node": "Bild hochladen [HTTP Request]",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Render-Fehler F5 [Edit Fields]",
             "type": "main",
             "index": 0
           }
@@ -2301,17 +3208,6 @@
         ]
       ]
     },
-    "Freigabe abwarten [Telegram]": {
-      "main": [
-        [
-          {
-            "node": "Freigegeben? [If]",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
     "Freigegeben? [If]": {
       "main": [
         [
@@ -2359,6 +3255,11 @@
             "node": "Lauf protokollieren [Supabase]",
             "type": "main",
             "index": 0
+          },
+          {
+            "node": "Grund fehlt? [If]",
+            "type": "main",
+            "index": 0
           }
         ]
       ]
@@ -2371,14 +3272,10 @@
             "type": "main",
             "index": 0
           }
-        ]
-      ]
-    },
-    "Video-Text zusammensetzen [Code]": {
-      "main": [
+        ],
         [
           {
-            "node": "Quelltext vereinheitlichen [Edit Fields]",
+            "node": "Videotitel holen [HTTP Request]",
             "type": "main",
             "index": 0
           }
@@ -2402,6 +3299,364 @@
           }
         ]
       ]
+    },
+    "Ersatzmodell NVIDIA [NVIDIA Nemotron Chat Model]": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Content-Paket schreiben [Basic LLM Chain]",
+            "type": "ai_languageModel",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Kunde unbekannt F6 [Edit Fields]": {
+      "main": [
+        [
+          {
+            "node": "Fehlerweg vorbereiten [Code]",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Artikel lesen [HTTP Request]": {
+      "main": [
+        [
+          {
+            "node": "Artikel lesbar? [If]",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Quelle-Fallback F1 [Edit Fields]",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Artikel lesbar? [If]": {
+      "main": [
+        [
+          {
+            "node": "Quelltext vereinheitlichen [Edit Fields]",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Quelle-Fallback F1 [Edit Fields]",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Quelle-Fallback F1 [Edit Fields]": {
+      "main": [
+        [
+          {
+            "node": "Quelltext vereinheitlichen [Edit Fields]",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Fehlerweg vorbereiten [Code]",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Video-Text zusammensetzen [Code]": {
+      "main": [
+        [
+          {
+            "node": "Video-Text vorhanden? [If]",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Video-Text vorhanden? [If]": {
+      "main": [
+        [
+          {
+            "node": "Quelltext vereinheitlichen [Edit Fields]",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Videotitel holen [HTTP Request]",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Videotitel holen [HTTP Request]": {
+      "main": [
+        [
+          {
+            "node": "Video-Fallback F2 [Edit Fields]",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Video-Fallback F2 [Edit Fields]": {
+      "main": [
+        [
+          {
+            "node": "Quelltext vereinheitlichen [Edit Fields]",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Fehlerweg vorbereiten [Code]",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Modellfehler F3 [Edit Fields]": {
+      "main": [
+        [
+          {
+            "node": "Status fehler setzen [Supabase]",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Fehlerweg vorbereiten [Code]",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ersatzmodell genutzt? [If]": {
+      "main": [
+        [
+          {
+            "node": "Ersatzmodell vermerken F3 [Edit Fields]",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ersatzmodell vermerken F3 [Edit Fields]": {
+      "main": [
+        [
+          {
+            "node": "Fehlerweg vorbereiten [Code]",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Einzelbild-Fallback F4 [Edit Fields]": {
+      "main": [
+        [
+          {
+            "node": "Logo laden [HTTP Request]",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Fehlerweg vorbereiten [Code]",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Render-Fehler F5 [Edit Fields]": {
+      "main": [
+        [
+          {
+            "node": "Nur Texte speichern [HTTP Request]",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Fehlerweg vorbereiten [Code]",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Freigabe abwarten [Telegram]": {
+      "main": [
+        [
+          {
+            "node": "Frist abgelaufen? [If]",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Frist abgelaufen? [If]": {
+      "main": [
+        [
+          {
+            "node": "Status abgelaufen setzen [Supabase]",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Freigegeben? [If]",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Status abgelaufen setzen [Supabase]": {
+      "main": [
+        [
+          {
+            "node": "Freigabe-Frist F7 [Edit Fields]",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Lauf protokollieren [Supabase]",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Freigabe-Frist F7 [Edit Fields]": {
+      "main": [
+        [
+          {
+            "node": "Fehlerweg vorbereiten [Code]",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Grund fehlt? [If]": {
+      "main": [
+        [
+          {
+            "node": "Grund-Frist F7 [Edit Fields]",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Grund-Frist F7 [Edit Fields]": {
+      "main": [
+        [
+          {
+            "node": "Fehlerweg vorbereiten [Code]",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fehlerweg vorbereiten [Code]": {
+      "main": [
+        [
+          {
+            "node": "Fehlerweg protokollieren [Supabase]",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fehlerweg protokollieren [Supabase]": {
+      "main": [
+        [
+          {
+            "node": "Abbrechen? [If]",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Abbrechen? [If]": {
+      "main": [
+        [
+          {
+            "node": "Telegram-Zugang für Fehler-Hinweis? [If]",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Telegram-Zugang für Fallback-Hinweis? [If]",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Telegram-Zugang für Fehler-Hinweis? [If]": {
+      "main": [
+        [
+          {
+            "node": "Fehler-Hinweis senden [Telegram]",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Lauf abbrechen [Stop and Error]",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fehler-Hinweis senden [Telegram]": {
+      "main": [
+        [
+          {
+            "node": "Lauf abbrechen [Stop and Error]",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Telegram-Zugang für Fallback-Hinweis? [If]": {
+      "main": [
+        [
+          {
+            "node": "Fallback-Hinweis senden [Telegram]",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "pinData": {},
@@ -2418,7 +3673,7 @@
     "aiBuilderAssisted": true,
     "builderVariant": "mcp"
   },
-  "versionId": "402b338f-86db-4498-a7f3-c101e8ab9c21",
+  "versionId": "fc0f868a-988a-4d58-897a-c6c2969050df",
   "tags": [
     "KI-AGT-2606",
     "woche-4"
