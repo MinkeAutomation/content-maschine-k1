@@ -582,8 +582,8 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        2384,
-        1360
+        2064,
+        1520
       ]
     },
     {
@@ -622,8 +622,8 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        2704,
-        1360
+        2384,
+        1520
       ],
       "retryOnFail": true,
       "maxTries": 3,
@@ -645,8 +645,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        3024,
-        1360
+        2704,
+        1520
       ]
     },
     {
@@ -691,7 +691,7 @@
       "typeVersion": 1.3,
       "position": [
         3712,
-        1360
+        1520
       ],
       "credentials": {
         "openAiApi": {
@@ -711,7 +711,7 @@
       "typeVersion": 1.3,
       "position": [
         3952,
-        1360
+        1520
       ]
     },
     {
@@ -777,8 +777,8 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        4848,
-        1360
+        5168,
+        1520
       ],
       "retryOnFail": true,
       "maxTries": 3,
@@ -1368,7 +1368,7 @@
       "typeVersion": 1.2,
       "position": [
         9392,
-        1360
+        1520
       ],
       "webhookId": "f3ba73af-4b96-4082-9d96-a6985827ada5",
       "credentials": {
@@ -1419,7 +1419,7 @@
       "typeVersion": 1,
       "position": [
         9712,
-        1360
+        1520
       ],
       "retryOnFail": true,
       "maxTries": 3,
@@ -1447,7 +1447,7 @@
       "typeVersion": 1,
       "position": [
         4192,
-        1360
+        1520
       ],
       "credentials": {
         "nvidiaApi": {
@@ -1455,451 +1455,6 @@
           "name": "NVIDIA API | Bearer nvapi"
         }
       }
-    },
-    {
-      "parameters": {
-        "content": "# AGT-2606 P1 Content-Generator K1\nAus einem Thema, Artikel, Video oder eigenen Text entsteht ein Social-Media-Paket im Branding des Kunden, ein Mensch gibt es in Telegram frei.",
-        "height": 126,
-        "width": 2176,
-        "color": 5
-      },
-      "id": "ea951aca-fb15-4857-8a09-38c4ad833cf2",
-      "name": "Sticky Note 40a44089",
-      "type": "n8n-nodes-base.stickyNote",
-      "typeVersion": 1,
-      "position": [
-        0,
-        0
-      ]
-    },
-    {
-      "parameters": {
-        "content": " ",
-        "height": 512,
-        "width": 2176
-      },
-      "id": "127d1484-1588-4b42-b3ec-4bc465d66c79",
-      "name": "Rahmen Kopf",
-      "type": "n8n-nodes-base.stickyNote",
-      "typeVersion": 1,
-      "position": [
-        0,
-        160
-      ]
-    },
-    {
-      "parameters": {
-        "content": "# 🧪 Content-Generator K1, Happy Path\n**Aufgabe:** Ein Dienstleister gibt für einen seiner Kunden ein Thema, einen Artikel-Link, ein YouTube-Video oder eigenen Text ein und bekommt ein Content-Paket im Branding dieses Kunden.\n\n**Die Idee:** Die Quelle wird zu Text, ein Sprachmodell schreibt daraus ein JSON-Paket, Gotenberg rendert Karussell und Einzelbild, Supabase hält alles, Telegram holt die Freigabe.\n\n**Warum so?** Supabase ist die einzige Wahrheit für Telegram und das spätere Dashboard, und das Branding kommt aus dem Kundenprofil statt aus dem Zufall des Bildmodells.\n\n**Hinweis:** Laufzeit-Richtwert bis zur Telegram-Vorschau rund 20 Sekunden, gemessen 11 bis 12 Sekunden bis Schritt ⑬ ohne Bildmodell (Läufe 640 und 642); mit FLUX und Telegram kommen einige Sekunden dazu. Schlüssel, Konto-ID und Chat-ID stehen nie im Knoten.",
-        "height": 480,
-        "width": 1100,
-        "color": 2
-      },
-      "id": "41cbbe79-2b1c-4660-8aba-35b285dbdb68",
-      "name": "Sticky Note de79806a",
-      "type": "n8n-nodes-base.stickyNote",
-      "typeVersion": 1,
-      "position": [
-        16,
-        176
-      ]
-    },
-    {
-      "parameters": {
-        "content": "## Ablauf\n① Auftrag annehmen\n② Einstellungen und Kundenprofil laden\n③ Kunde prüfen, Post anlegen\n④ Quellenart verteilen\n⑤ Artikel oder Video-Text holen\n⑥ Quelltext zusammenführen\n⑦ Content-Paket schreiben\n⑧ Paket prüfen\n⑨ Einzelbild erzeugen\n⑩ Logo laden, Folien bauen\n⑪ Bilder rendern und hochladen\n⑫ Bildpfade sammeln\n⑬ Post speichern, Telegram-Zugang prüfen\n⑭ Vorschau und Texte senden\n⑮ Freigabe abwarten\n⑯ Status setzen\n⑰ Lauf protokollieren\n⑱ Fallbacks F1 bis F7\n⑲ Fehlerweg protokollieren und melden",
-        "height": 480,
-        "width": 492,
-        "color": 2
-      },
-      "id": "0bcae3fb-a905-493b-abd8-03d284e6c87b",
-      "name": "Sticky Note eacbce02",
-      "type": "n8n-nodes-base.stickyNote",
-      "typeVersion": 1,
-      "position": [
-        1136,
-        176
-      ]
-    },
-    {
-      "parameters": {
-        "content": "## Status\n🟢 Happy Path und Fallbacks F1 bis F7 gebaut, Formular mit Basic Auth, Telegram-Freigabe und FLUX-Einzelbild live getestet (Lauf 668 Freigeben, Lauf 669 Ablehnen mit Grund).\n\n🟡 Ablehnungsgrund öffnet noch eine Webseite (Respond), Umbau auf Antwort im Chat ist für V3 geplant.\n\n🔴 Scheitert der Telegram-Versand, bleibt der Post auf wartet_auf_freigabe statt fehler (Läufe 664, 666), Korrektur in V3.\n\n🔵 Testschalter test_kaputtes_json im Konfigurationsknoten, Standard aus.",
-        "height": 480,
-        "width": 512,
-        "color": 2
-      },
-      "id": "95bd5576-df0d-4251-ac09-6e290738f7f9",
-      "name": "Sticky Note aceb49a0",
-      "type": "n8n-nodes-base.stickyNote",
-      "typeVersion": 1,
-      "position": [
-        1648,
-        176
-      ]
-    },
-    {
-      "parameters": {
-        "content": "# 01 · Eingang\nNimmt den Auftrag an, lädt Einstellungen und Kundenprofil und legt den Post an.",
-        "height": 840,
-        "width": 1880,
-        "color": 4
-      },
-      "id": "7aaee2f1-b341-4d57-b7ee-3227d027b862",
-      "name": "Sticky Note 855f2073",
-      "type": "n8n-nodes-base.stickyNote",
-      "typeVersion": 1,
-      "position": [
-        0,
-        720
-      ]
-    },
-    {
-      "parameters": {
-        "content": "# 02 · Quelle holen\nMacht aus Thema, Artikel, Video oder eigenem Text einen einheitlichen Quelltext.",
-        "height": 840,
-        "width": 1560,
-        "color": 5
-      },
-      "id": "b0e2074a-cc23-4460-8520-dc193aab966e",
-      "name": "Sticky Note 376eef15",
-      "type": "n8n-nodes-base.stickyNote",
-      "typeVersion": 1,
-      "position": [
-        1984,
-        720
-      ]
-    },
-    {
-      "parameters": {
-        "content": "# 03 · KI\nDas Sprachmodell schreibt das Paket, ein Code-Knoten prüft es.",
-        "height": 840,
-        "width": 700,
-        "color": 6
-      },
-      "id": "1dc2c5a3-3ae1-4682-a94a-927e97228a63",
-      "name": "Sticky Note fafc30c7",
-      "type": "n8n-nodes-base.stickyNote",
-      "typeVersion": 1,
-      "position": [
-        3648,
-        720
-      ]
-    },
-    {
-      "parameters": {
-        "content": "# 04 · Gestalten\nBaut Folien und Einzelbild im Kundenbranding, rendert sie und legt sie im privaten Bucket ab.",
-        "height": 840,
-        "width": 2200,
-        "color": 5
-      },
-      "id": "580cecf5-1377-44a0-af1c-e6e035901b65",
-      "name": "Sticky Note 2909847c",
-      "type": "n8n-nodes-base.stickyNote",
-      "typeVersion": 1,
-      "position": [
-        4448,
-        720
-      ]
-    },
-    {
-      "parameters": {
-        "content": "# 05 · Ablage und Freigabe\nSpeichert den Post, holt die Freigabe in Telegram und schreibt das Protokoll.",
-        "height": 840,
-        "width": 3480,
-        "color": 2
-      },
-      "id": "e94f8e14-4f3b-498a-bb34-01c69aeb1f87",
-      "name": "Sticky Note 30cd927b",
-      "type": "n8n-nodes-base.stickyNote",
-      "typeVersion": 1,
-      "position": [
-        6752,
-        720
-      ]
-    },
-    {
-      "parameters": {
-        "content": "## ① Auftrag annehmen\nDas Formular nimmt Kunde, Thema, Quellenart und Quelle an, danach stehen Startzeit, Modell und Adressen an einer Stelle.\n\n🟢 Basic Auth aktiv: ohne Login lehnt das Formular mit 401 ab (geprüft 06.10.).",
-        "height": 202,
-        "width": 548
-      },
-      "id": "242bc6f2-cd59-463d-83a7-8415323679a3",
-      "name": "Sticky Note 0ec3cca2",
-      "type": "n8n-nodes-base.stickyNote",
-      "typeVersion": 1,
-      "position": [
-        32,
-        896
-      ]
-    },
-    {
-      "parameters": {
-        "content": "## ② Einstellungen und Kundenprofil\nLiest Chat-ID und Konto-ID aus k1_einstellungen und das Branding-Profil des Kunden aus k1_kunden.\n\n🟢 läuft",
-        "height": 202,
-        "width": 548
-      },
-      "id": "2353b954-fe18-40c4-8891-8166915a537d",
-      "name": "Sticky Note 00e606eb",
-      "type": "n8n-nodes-base.stickyNote",
-      "typeVersion": 1,
-      "position": [
-        672,
-        896
-      ]
-    },
-    {
-      "parameters": {
-        "content": "## ③ Kunde prüfen, Post anlegen\nUnbekannte oder inaktive Kunden stoppen den Lauf (F6), sonst entsteht der Post mit Status in_arbeit.\n\n🟢 post_id kommt von Supabase",
-        "height": 202,
-        "width": 548
-      },
-      "id": "df2561bc-42e0-4930-9af6-7b46d053f118",
-      "name": "Sticky Note cb2cc741",
-      "type": "n8n-nodes-base.stickyNote",
-      "typeVersion": 1,
-      "position": [
-        1312,
-        896
-      ]
-    },
-    {
-      "parameters": {
-        "content": "## ④ Quellenart verteilen\n4 Wege plus Auffangzweig, der wie ein Thema läuft.\n\n🟢 läuft",
-        "height": 202,
-        "width": 300
-      },
-      "id": "317bb6ff-60e6-4291-b484-4c8693edc927",
-      "name": "Sticky Note 2d7260e7",
-      "type": "n8n-nodes-base.stickyNote",
-      "typeVersion": 1,
-      "position": [
-        2016,
-        896
-      ]
-    },
-    {
-      "parameters": {
-        "content": "## ⑤ Artikel oder Video-Text holen\nArtikel liest Jina ohne Schlüssel, Videos laufen über Supadata mit mode native (nur vorhandene Untertitel, 1 Credit). Die Weichen prüfen, ob genug Text kam.\n\n🟢 F1 und F2 im Fehlerweg darunter.",
-        "height": 202,
-        "width": 920
-      },
-      "id": "0e0fe170-454f-4196-ab0c-7111f14de23a",
-      "name": "Sticky Note a73cb09c",
-      "type": "n8n-nodes-base.stickyNote",
-      "typeVersion": 1,
-      "position": [
-        2336,
-        896
-      ]
-    },
-    {
-      "parameters": {
-        "content": "## ⑥ Zusammenführen\nAlle Wege enden hier, der Text wird gekürzt.\n\n🟢 läuft",
-        "height": 202,
-        "width": 236
-      },
-      "id": "47a505f1-79c6-4094-936c-46d15ae65c3d",
-      "name": "Sticky Note 4df5e5c1",
-      "type": "n8n-nodes-base.stickyNote",
-      "typeVersion": 1,
-      "position": [
-        3296,
-        896
-      ]
-    },
-    {
-      "parameters": {
-        "content": "## ⑦ Paket schreiben\nKursmodell über OpenRouter, Ausgabe nach JSON-Schema.\n\n🟢 F3: Ersatzmodell NVIDIA angeschlossen.",
-        "height": 202,
-        "width": 300
-      },
-      "id": "c80c1086-cb01-42bb-94e2-81ffc67e1bf4",
-      "name": "Sticky Note 677a2326",
-      "type": "n8n-nodes-base.stickyNote",
-      "typeVersion": 1,
-      "position": [
-        3680,
-        896
-      ]
-    },
-    {
-      "parameters": {
-        "content": "## ⑧ Paket prüfen\n5 bis 8 Folien, Längen, Hashtags und Kennzeichnung.\n\n🟢 läuft",
-        "height": 202,
-        "width": 300
-      },
-      "id": "d6f7294b-8e0d-4fbd-9c35-aeb209a25909",
-      "name": "Sticky Note 2b08d6cf",
-      "type": "n8n-nodes-base.stickyNote",
-      "typeVersion": 1,
-      "position": [
-        4000,
-        896
-      ]
-    },
-    {
-      "parameters": {
-        "content": "## ⑨ Einzelbild erzeugen\nFLUX schnell malt das Motiv, die Konto-ID kommt aus k1_einstellungen.\n\n🟡 F4: ohne Konto-ID oder bei Fehler Farbverlauf plus Logo.",
-        "height": 202,
-        "width": 580
-      },
-      "id": "fccbe798-e318-4d79-b002-11f9b071f9a2",
-      "name": "Sticky Note 224c6c3e",
-      "type": "n8n-nodes-base.stickyNote",
-      "typeVersion": 1,
-      "position": [
-        4480,
-        896
-      ]
-    },
-    {
-      "parameters": {
-        "content": "## ⑩ Logo laden, Folien bauen\nDas Logo kommt aus dem privaten Bucket, jede Folie wird als HTML mit eingebettetem Logo und maskierten Texten gebaut.\n\n🟢 durchlaufendes Design über alle Folien",
-        "height": 202,
-        "width": 580
-      },
-      "id": "7e5bb3d1-daf9-40bf-aaf9-5d45661b912b",
-      "name": "Sticky Note bf9b3f7e",
-      "type": "n8n-nodes-base.stickyNote",
-      "typeVersion": 1,
-      "position": [
-        5120,
-        896
-      ]
-    },
-    {
-      "parameters": {
-        "content": "## ⑪ Rendern und hochladen\nGotenberg macht aus jedem HTML ein PNG 1080 x 1350, der Upload schreibt mit x-upsert in den privaten Bucket.\n\n🟢 F5: bei Render-Fehler nur Texte (nur_texte).",
-        "height": 202,
-        "width": 580
-      },
-      "id": "b41563d1-ab2e-4628-a183-1a5cd9bf0a83",
-      "name": "Sticky Note 1d32805b",
-      "type": "n8n-nodes-base.stickyNote",
-      "typeVersion": 1,
-      "position": [
-        5760,
-        896
-      ]
-    },
-    {
-      "parameters": {
-        "content": "## ⑫ Pfade sammeln\nAlle Bildpfade in einer Liste.\n\n🟢 läuft",
-        "height": 202,
-        "width": 236
-      },
-      "id": "95da08e5-9f18-4f32-8175-8285df3e18f4",
-      "name": "Sticky Note c7951ead",
-      "type": "n8n-nodes-base.stickyNote",
-      "typeVersion": 1,
-      "position": [
-        6400,
-        896
-      ]
-    },
-    {
-      "parameters": {
-        "content": "## ⑬ Post speichern\nSchreibt Texte und Bildpfade in den Post, Status wartet_auf_freigabe. Fehlt Chat-ID oder Freigabe-Nutzer-ID, endet der Lauf hier sauber.\n\n🟢 Beide Werte stehen in k1_einstellungen.",
-        "height": 202,
-        "width": 580
-      },
-      "id": "72d9041d-d5e5-445b-96d0-8b5e6711ccb5",
-      "name": "Sticky Note 3b063246",
-      "type": "n8n-nodes-base.stickyNote",
-      "typeVersion": 1,
-      "position": [
-        6784,
-        896
-      ]
-    },
-    {
-      "parameters": {
-        "content": "## ⑭ Vorschau und Texte senden\nSignierte Adressen mit Ablaufzeit statt öffentlicher Links. n8n lädt jedes Bild selbst und schickt es als Einzelbild mit Nummer, danach beide Texte als eigene Nachrichten.\n\n🟡 Album ging nicht: n8n verwirft die Bilderliste, Telegram lädt signierte Supabase-Adressen nicht (Läufe 664, 666).",
-        "height": 202,
-        "width": 1220
-      },
-      "id": "91790f36-c965-4814-a2c3-ad4db8061e9c",
-      "name": "Sticky Note 28093975",
-      "type": "n8n-nodes-base.stickyNote",
-      "typeVersion": 1,
-      "position": [
-        7424,
-        896
-      ]
-    },
-    {
-      "parameters": {
-        "content": "## ⑮ Freigabe abwarten\nFreigeben oder Ablehnen direkt im Chat, nur die eingetragene Nutzer-ID darf entscheiden, Frist 24 Stunden.\n\n🟢 Live getestet: Lauf 668 freigegeben, Lauf 669 abgelehnt.",
-        "height": 202,
-        "width": 580
-      },
-      "id": "58cf99b5-401f-4efa-b773-fb6cb3a06e24",
-      "name": "Sticky Note f2edcbea",
-      "type": "n8n-nodes-base.stickyNote",
-      "typeVersion": 1,
-      "position": [
-        8704,
-        896
-      ]
-    },
-    {
-      "parameters": {
-        "content": "## ⑯ Status setzen\nFreigegeben setzt fertig, Ablehnen fragt den Grund ab (Frist 2 Stunden). Die entscheidende Person kommt aus der Antwort im Chat.\n\n🟢 Live getestet (Lauf 668 fertig, Lauf 669 abgelehnt mit Grund).\n🟡 Der Grund wird über den Knopf Respond auf einer Webseite eingegeben, V3 stellt auf Antwort im Chat um.",
-        "height": 202,
-        "width": 580
-      },
-      "id": "07a7e989-0eef-4fc5-9b3d-c20daa1f7d80",
-      "name": "Sticky Note 68f56b98",
-      "type": "n8n-nodes-base.stickyNote",
-      "typeVersion": 1,
-      "position": [
-        9344,
-        896
-      ]
-    },
-    {
-      "parameters": {
-        "content": "## ⑰ Protokoll\nNur Metadaten nach k1_laufprotokoll.\n\n🟢 läuft",
-        "height": 202,
-        "width": 236
-      },
-      "id": "db7046ff-5201-410b-af8b-abf0582ecfde",
-      "name": "Sticky Note 440aae9e",
-      "type": "n8n-nodes-base.stickyNote",
-      "typeVersion": 1,
-      "position": [
-        9984,
-        896
-      ]
-    },
-    {
-      "parameters": {
-        "content": " ",
-        "height": 344,
-        "width": 840
-      },
-      "id": "46401dbd-7e14-46a8-be9d-3c7aa162077e",
-      "name": "Rahmen Testfaelle",
-      "type": "n8n-nodes-base.stickyNote",
-      "typeVersion": 1,
-      "position": [
-        16,
-        1952
-      ]
-    },
-    {
-      "parameters": {
-        "content": "## 📊 Testfälle für diesen Ablauf\n| Nr | Eingabe | Erwartung |\n|---|---|---|\n| T01 | Ordwin, Thema | 5 bis 8 Folien, Einzelbild, Texte |\n| T02 | Café, Artikel-Link | Café-Farben, Ablehnen mit Grund |\n| T03 | Ordwin, YouTube-Link | Video-Text, Paket zum Video |\n| T06 | englischer Artikel | Paket auf Deutsch |\n| T10 | Gotenberg falsch | Status nur_texte (ab Mittwoch) |",
-        "height": 312,
-        "width": 808,
-        "color": 5
-      },
-      "id": "38cf2d09-0e7d-41e3-a216-3d2f07e12aa7",
-      "name": "Sticky Note 43fe227f",
-      "type": "n8n-nodes-base.stickyNote",
-      "typeVersion": 1,
-      "position": [
-        32,
-        1968
-      ]
     },
     {
       "parameters": {
@@ -1971,7 +1526,7 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        2384,
+        3344,
         2016
       ]
     },
@@ -2004,8 +1559,8 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        3344,
-        1360
+        3024,
+        1520
       ]
     },
     {
@@ -2392,7 +1947,7 @@
       "typeVersion": 2.2,
       "position": [
         8752,
-        1360
+        1520
       ]
     },
     {
@@ -2719,7 +2274,7 @@
       "typeVersion": 2.2,
       "position": [
         11360,
-        2736
+        2896
       ]
     },
     {
@@ -2736,7 +2291,7 @@
       "typeVersion": 1.2,
       "position": [
         11680,
-        2736
+        2896
       ],
       "webhookId": "e93d2011-503a-42c0-83f8-e09a6447ebc0",
       "credentials": {
@@ -2748,38 +2303,6 @@
     },
     {
       "parameters": {
-        "content": "# 06 · Fehlerweg\nFallbacks F1 bis F7: jeder schreibt eine Zeile fehlerweg ins Protokoll, Abbrüche lösen den zentralen Error Workflow aus.\n\n## ⑱ Fallbacks F1 bis F7\nF1 Artikel nicht lesbar: weiter nur mit dem Thema. F2 kein Video-Text: Videotitel über oEmbed plus Thema. F3 Hauptmodell fällt aus: Ersatzmodell NVIDIA; fallen beide aus, Post auf fehler und Abbruch. F4 kein Bild: Farbverlauf plus Logo. F5 Rendern scheitert: Post nur mit Texten (nur_texte) und Abbruch. F6 Kunde unbekannt: Abbruch vor dem Post. F7 Frist abgelaufen: freigabe_abgelaufen bzw. abgelehnt ohne Grund.\n\n🟡 Retry nur an Diensten (3 x 5 Sekunden), danach der Fehlerausgang.",
-        "height": 256,
-        "width": 1100,
-        "color": 3
-      },
-      "id": "7f9ed02f-191a-4ba8-ab08-69c7b2d65b46",
-      "name": "Karte Fallbacks",
-      "type": "n8n-nodes-base.stickyNote",
-      "typeVersion": 1,
-      "position": [
-        32,
-        1616
-      ]
-    },
-    {
-      "parameters": {
-        "content": "## ⑲ Fehlerweg protokollieren und melden\nAus jedem Vermerk entsteht eine Protokollzeile mit Stelle fehlerweg. Status fehler bricht den Lauf mit Stop and Error ab, damit der zentrale Error Workflow den Alert schickt, Status fallback läuft weiter. Telegram-Hinweise gehen nur raus, wenn Chat-ID und Freigabe-Nutzer-ID eingetragen sind.\n\n🟢 Error Workflow live belegt: bei den Läufen 664 und 666 kam je eine Fehler-Mail.\n🟡 Telegram-Fehlerhinweis selbst noch nicht ausgelöst.",
-        "height": 164,
-        "width": 1780,
-        "color": 3
-      },
-      "id": "ee113e3b-c3b3-4857-91de-4ab47c443eff",
-      "name": "Karte Fehlerweg",
-      "type": "n8n-nodes-base.stickyNote",
-      "typeVersion": 1,
-      "position": [
-        10432,
-        2176
-      ]
-    },
-    {
-      "parameters": {
         "jsCode": "// Warum: Das Telegram-Album (sendMediaGroup) nimmt keine Bilderliste aus einem Ausdruck an,\n// n8n hat den Ausdruck beim Speichern verworfen (Lauf 664, media leer). Deshalb ein Element je Bild,\n// der folgende Knoten schickt jedes Bild einzeln.\nconst basis = $('Konfiguration und Startzeit [Edit Fields]').first().json.supabase_url + '/storage/v1';\nconst liste = ($json.body || []).filter(x => x.signedURL);\nif (liste.length === 0) {\n  throw new Error('Keine signierten Bildadressen erhalten, Vorschau nicht moeglich.');\n}\nreturn liste.map((x, i) => ({\n  json: { url: basis + x.signedURL, nr: i + 1, gesamt: liste.length, datei: x.path.split('/').pop() }\n}));"
       },
       "id": "676397ad-63ff-4595-af31-6a7b3b727b18",
@@ -2788,7 +2311,7 @@
       "typeVersion": 2,
       "position": [
         7472,
-        1328
+        1488
       ]
     },
     {
@@ -2808,40 +2331,438 @@
       "typeVersion": 4.2,
       "position": [
         7792,
-        1328
+        1488
       ]
     },
     {
+      "id": "421d8bc3-ebb5-4851-9d07-06663a0b92d1",
+      "name": "Setup 1",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        970,
+        968
+      ],
+      "parameters": {
+        "content": "# 🔧 Setup 1\n**Supabase-Zugang** hier auswählen.\n📋 Details: Setup-Checkliste",
+        "height": 334,
+        "width": 240,
+        "color": 2
+      }
+    },
+    {
+      "id": "6972ffaa-3333-467b-8fdc-71ac054b8510",
+      "name": "Setup 2",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        10,
+        968
+      ],
+      "parameters": {
+        "content": "# 🔧 Setup 2\n**Formular-Login** hier auswählen.\n📋 Details: Setup-Checkliste",
+        "height": 334,
+        "width": 240,
+        "color": 2
+      }
+    },
+    {
+      "id": "d6ebd993-bdf4-4cfe-8616-26436b35d6f7",
+      "name": "Setup 3",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2314,
+        1368
+      ],
+      "parameters": {
+        "content": "# 🔧 Setup 3\n**Supadata-Zugang** hier auswählen.\n📋 Details: Setup-Checkliste",
+        "height": 334,
+        "width": 240,
+        "color": 2
+      }
+    },
+    {
+      "id": "ae37a7c6-7e49-4b1c-827e-830a25ea2fc6",
+      "name": "Setup 4",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        5098,
+        1368
+      ],
+      "parameters": {
+        "content": "# 🔧 Setup 4\n**Cloudflare-Zugang** hier auswählen.\n📋 Details: Setup-Checkliste",
+        "height": 334,
+        "width": 240,
+        "color": 2
+      }
+    },
+    {
+      "id": "ef26a2cb-283a-4242-9903-12f890a2800b",
+      "name": "Setup 5",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        11610,
+        2720
+      ],
+      "parameters": {
+        "content": "# 🔧 Setup 5\n**Telegram-Zugang** hier und in allen Telegram-Knoten auswählen.\n📋 Details: Setup-Checkliste",
+        "height": 358,
+        "width": 240,
+        "color": 2
+      }
+    },
+    {
+      "id": "12aaeffe-d8e6-4427-b316-f296593fa378",
+      "name": "Setup 6",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        3658,
+        968
+      ],
+      "parameters": {
+        "content": "# 🔧 Setup 6\n**Sprachmodelle** hier auswählen.\n📋 Details: Setup-Checkliste",
+        "height": 334,
+        "width": 240,
+        "color": 2
+      }
+    },
+    {
+      "id": "53878385-5460-49fd-a89a-14006cecfd40",
+      "name": "Karte ①",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        30,
+        658
+      ],
+      "parameters": {
+        "content": "## ① Eingang\n**Auftrag annehmen:** Das Formular nimmt Kunde, Thema, Quellenart und Quelle an, danach stehen Startzeit, Modell und Adressen an einer Stelle.\n**Einstellungen und Kundenprofil:** Liest Chat-ID und Konto-ID aus k1_einstellungen und das Branding-Profil des Kunden aus k1_kunden.\n**Kunde prüfen, Post anlegen:** Unbekannte oder inaktive Kunden stoppen den Lauf (F6), sonst entsteht der Post mit Status in_arbeit, die post_id kommt von Supabase.\n### 🟢 Basic Auth aktiv, ohne Login lehnt das Formular mit 401 ab (geprüft 06.10.)\n🩺 **Wenn es hakt:** Meldet der Lauf „Kunde unbekannt“, in k1_kunden das Kürzel und die Spalte aktiv prüfen.",
+        "height": 280,
+        "width": 1780,
+        "color": 1
+      }
+    },
+    {
+      "id": "c2ee61fc-b1f9-4bed-8fce-3e72dd3462bb",
+      "name": "Karte ②",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2010,
+        658
+      ],
+      "parameters": {
+        "content": "## ② Quelle holen\n**Quellenart verteilen:** 4 Wege plus Auffangzweig, der wie ein Thema läuft.\n**Artikel oder Video-Text holen:** Artikel liest Jina ohne Schlüssel, Videos laufen über Supadata mit mode native (nur vorhandene Untertitel, 1 Credit). Die Weichen prüfen, ob genug Text kam.\n**Zusammenführen:** Alle Wege enden in einem Knoten, der Text wird gekürzt.\n### 🟢 läuft, F1 und F2 im Fehlerweg darunter\n🩺 **Wenn es hakt:** Kommt nur das Thema an, war der Artikel nicht lesbar (F1) oder das Video hat keine Untertitel (F2), im Protokoll die Zeile fehlerweg ansehen.",
+        "height": 280,
+        "width": 1480,
+        "color": 1
+      }
+    },
+    {
+      "id": "4148abe7-9376-4fdd-a85f-2781621f8ad8",
+      "name": "Karte ③",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        3660,
+        658
+      ],
+      "parameters": {
+        "content": "## ③ KI\n**Paket schreiben:** Kursmodell über OpenRouter, Ausgabe nach JSON-Schema.\n**Paket prüfen:** 5 bis 8 Folien, Längen, Hashtags und Kennzeichnung.\n### 🟢 läuft, F3: Ersatzmodell NVIDIA angeschlossen\n🩺 **Wenn es hakt:** Steht der Post auf fehler, sind beide Modelle ausgefallen oder die Antwort passte nicht ins Schema, dann „Content-Paket schreiben“ in der Ausführung öffnen.",
+        "height": 280,
+        "width": 680,
+        "color": 1
+      }
+    },
+    {
+      "id": "314d0158-7cff-4296-9134-b953ab77399e",
+      "name": "Karte ④",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        4470,
+        658
+      ],
+      "parameters": {
+        "content": "## ④ Gestalten\n**Einzelbild erzeugen:** FLUX schnell malt das Motiv, die Konto-ID kommt aus k1_einstellungen.\n**Logo laden, Folien bauen:** Das Logo kommt aus dem privaten Bucket, jede Folie wird als HTML mit eingebettetem Logo und maskierten Texten gebaut, mit durchlaufendem Design über alle Folien.\n**Rendern und hochladen:** Gotenberg macht aus jedem HTML ein PNG 1080 x 1350, der Upload schreibt mit x-upsert in den privaten Bucket, danach stehen alle Bildpfade in einer Liste.\n### 🟡 F4: ohne Konto-ID oder bei Fehler Farbverlauf plus Logo; F5: bei Render-Fehler nur Texte (nur_texte)\n🩺 **Wenn es hakt:** Zeigt das Einzelbild nur einen Farbverlauf, in k1_einstellungen den Wert cloudflare_account_id prüfen.",
+        "height": 280,
+        "width": 2140,
+        "color": 1
+      }
+    },
+    {
+      "id": "69887797-998a-4e0c-9fbf-7b4246320141",
+      "name": "Karte ⑤",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        6780,
+        658
+      ],
+      "parameters": {
+        "content": "## ⑤ Ablage und Freigabe\n**Post speichern:** Schreibt Texte und Bildpfade in den Post, Status wartet_auf_freigabe. Fehlt Chat-ID oder Freigabe-Nutzer-ID, endet der Lauf hier sauber.\n**Vorschau und Texte senden:** Signierte Adressen mit Ablaufzeit statt öffentlicher Links. n8n lädt jedes Bild selbst und schickt es als Einzelbild mit Nummer, danach beide Texte als eigene Nachrichten.\n**Freigabe abwarten:** Freigeben oder Ablehnen direkt im Chat, nur die eingetragene Nutzer-ID darf entscheiden, Frist 24 Stunden.\n**Status setzen:** Freigegeben setzt fertig, Ablehnen fragt den Grund ab (Frist 2 Stunden). Die entscheidende Person kommt aus der Antwort im Chat.\n**Protokoll:** Nur Metadaten nach k1_laufprotokoll.\n### 🟢 Live getestet: Lauf 668 freigegeben, Lauf 669 abgelehnt mit Grund\n🟡 Album ging nicht: n8n verwirft die Bilderliste, Telegram lädt signierte Supabase-Adressen nicht (Läufe 664, 666).\n🟡 Der Grund wird über den Knopf Respond auf einer Webseite eingegeben, V3 stellt auf Antwort im Chat um.\n🩺 **Wenn es hakt:** Kommt keine Vorschau, in k1_einstellungen Chat-ID und Freigabe-Nutzer-ID prüfen.",
+        "height": 280,
+        "width": 3400,
+        "color": 1
+      }
+    },
+    {
+      "id": "704ab796-570f-44d4-b9e2-37cef8110970",
+      "name": "Titel",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        0,
+        -212
+      ],
+      "parameters": {
+        "content": "# AGT-2606 P1 Content-Generator K1\nAus einem Thema, Artikel, Video oder eigenen Text entsteht ein Social-Media-Paket im Branding des Kunden, ein Mensch gibt es in Telegram frei.",
+        "height": 104,
+        "width": 2156,
+        "color": 5
+      }
+    },
+    {
+      "id": "bbb1305d-5918-4762-906e-1718eb3db53d",
+      "name": "Rahmen Kopf",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        0,
+        -74
+      ],
       "parameters": {
         "content": "",
-        "height": 296,
-        "width": 1132,
-        "color": 5
-      },
-      "id": "d7bcf0e8-f928-4330-9f7f-1bfaef401aed",
-      "name": "Rahmen Fallbacks",
+        "height": 672,
+        "width": 2156
+      }
+    },
+    {
+      "id": "7b639278-85fa-40e4-8857-ac77b26b89d1",
+      "name": "Workflow-Beschreibung",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
         16,
-        1600
-      ]
+        -58
+      ],
+      "parameters": {
+        "content": "# 📋 Workflow-Beschreibung\n### 🎯 Zweck\nMacht aus einem **Thema**, einem **Artikel-Link**, einem **YouTube-Video** oder **eigenem Text** ein freigabefertiges **Content-Paket** im Branding eines Kunden: Karussell mit 5 bis 8 Folien, Einzelbild, Instagram-Text mit Hashtags und LinkedIn-Post. Gepostet wird nichts.\n### 👥 Für wen\nSocial-Media-Dienstleister, die für mehrere Kunden Beiträge vorbereiten. Vorwissen: Credentials in n8n anlegen und eine Supabase-Tabelle bearbeiten.\n### 🕹️ So nutzt du ihn\n▶️ **Starten:** Formular „Auftrag empfangen [Form Trigger]“ öffnen und mit dem Formular-Login anmelden.\n⌨️ **Eingeben:** Kunde, Thema, Quellenart, Quelle und Hinweis.\n📦 **Ergebnis:** Paket in Supabase (k1_posts, Bilder im privaten Bucket k1-medien), Vorschau und Freigabe in Telegram. Bei Störungen greifen die Fallbacks F1 bis F7, Abbrüche melden sich per Fehler-Mail.\n## Status: 🟡 Testbetrieb im Kurs, Happy Path und Fallbacks laufen, für den Kundenbetrieb noch nicht freigegeben.\nErst die Karte „✅ Setup-Checkliste“ rechts neben dem Workflow abarbeiten.",
+        "height": 352,
+        "width": 1612,
+        "color": 7
+      }
     },
     {
+      "id": "b631ff42-abd9-4ee2-9440-c5b5521a6319",
+      "name": "Version",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1648,
+        -58
+      ],
       "parameters": {
-        "content": "",
-        "height": 196,
-        "width": 1812,
-        "color": 5
-      },
-      "id": "536ab984-8d45-4138-9883-cc9db24a13a5",
+        "content": "# 🧾 Version\n### 🏷️ Stand\n**Version:** v04\n**Datum:** 07.10.2026\n### 📝 Änderungen\nAlle Änderungen mit Grund stehen in **ChangeLog.md**.\nv04 stellt nur die Notizen von Variante A auf D um, Knoten und Logik sind wie in v03.",
+        "height": 352,
+        "width": 492,
+        "color": 7
+      }
+    },
+    {
+      "id": "4efdd9e3-dc59-41f0-8929-490687de04df",
+      "name": "Kopf",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        16,
+        310
+      ],
+      "parameters": {
+        "content": "# 🧪 Content-Generator K1, Happy Path\n**Aufgabe:** Ein Dienstleister gibt für einen seiner Kunden ein Thema, einen Artikel-Link, ein YouTube-Video oder eigenen Text ein und bekommt ein Content-Paket im Branding dieses Kunden.\n**Die Idee:** Die Quelle wird zu Text, ein Sprachmodell schreibt daraus ein JSON-Paket, Gotenberg rendert Karussell und Einzelbild, Supabase hält alles, Telegram holt die Freigabe.\n**Warum so?** Supabase ist die einzige Wahrheit für Telegram und das spätere Dashboard, und das Branding kommt aus dem Kundenprofil statt aus dem Zufall des Bildmodells.\n**Hinweis:** Laufzeit-Richtwert bis zur Telegram-Vorschau rund 20 Sekunden, gemessen 11 bis 12 Sekunden bis zur Telegram-Weiche ohne Bildmodell (Läufe 640 und 642); mit FLUX und Telegram kommen einige Sekunden dazu. Schlüssel, Konto-ID und Chat-ID stehen nie im Knoten.",
+        "height": 272,
+        "width": 1100,
+        "color": 7
+      }
+    },
+    {
+      "id": "4034f25c-84c6-4756-a0cc-fd1db04ac316",
+      "name": "Ablauf",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1136,
+        310
+      ],
+      "parameters": {
+        "content": "## Ablauf\n① Eingang: Auftrag annehmen, Einstellungen und Kundenprofil laden, Post anlegen\n② Quelle holen: Artikel, Video, Thema oder eigener Text wird ein Quelltext\n③ KI: Content-Paket schreiben und prüfen\n④ Gestalten: Einzelbild und Folien rendern und hochladen\n⑤ Ablage und Freigabe: speichern, Telegram-Freigabe, Status, Protokoll\n⑥ Fehlerweg: Fallbacks F1 bis F7 protokollieren und melden",
+        "height": 272,
+        "width": 492,
+        "color": 7
+      }
+    },
+    {
+      "id": "c8b277e5-0c44-4940-b35d-577d367d59c7",
+      "name": "Status",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1648,
+        310
+      ],
+      "parameters": {
+        "content": "## Status\n🟢 Happy Path und Fallbacks F1 bis F7 gebaut, Formular mit Basic Auth, Telegram-Freigabe und FLUX-Einzelbild live getestet (Lauf 668 Freigeben, Lauf 669 Ablehnen mit Grund).\n🟡 Ablehnungsgrund öffnet noch eine Webseite (Respond), Umbau auf Antwort im Chat ist für V3 geplant.\n🔴 Scheitert der Telegram-Versand, bleibt der Post auf wartet_auf_freigabe statt fehler (Läufe 664, 666), Korrektur in V3.\n🔵 Testschalter test_kaputtes_json im Konfigurationsknoten, Standard aus.",
+        "height": 272,
+        "width": 492,
+        "color": 7
+      }
+    },
+    {
+      "id": "e0da65aa-3df5-44a5-baf2-03a56de77b53",
       "name": "Rahmen Fehlerweg",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
         10416,
-        2160
-      ]
+        2128
+      ],
+      "parameters": {
+        "content": "",
+        "height": 312,
+        "width": 1792,
+        "color": 5
+      }
+    },
+    {
+      "id": "74017106-f735-4a03-97a5-e7557b68e5f8",
+      "name": "Karte ⑥",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        10432,
+        2144
+      ],
+      "parameters": {
+        "content": "## ⑥ Fehlerweg\nFallbacks F1 bis F7: jeder schreibt eine Zeile fehlerweg ins Protokoll. Status fehler bricht den Lauf mit Stop and Error ab, damit der zentrale Error Workflow den Alert schickt, Status fallback läuft weiter. Telegram-Hinweise gehen nur raus, wenn Chat-ID und Freigabe-Nutzer-ID eingetragen sind.\nF1 Artikel nicht lesbar: weiter nur mit dem Thema. F2 kein Video-Text: Videotitel über oEmbed plus Thema. F3 Hauptmodell fällt aus: Ersatzmodell NVIDIA; fallen beide aus, Post auf fehler und Abbruch. F4 kein Bild: Farbverlauf plus Logo. F5 Rendern scheitert: Post nur mit Texten (nur_texte) und Abbruch. F6 Kunde unbekannt: Abbruch vor dem Post. F7 Frist abgelaufen: freigabe_abgelaufen bzw. abgelehnt ohne Grund.\n🟡 Retry nur an Diensten (3 x 5 Sekunden), danach der Fehlerausgang.\n### 🟢 Error Workflow live belegt: bei den Läufen 664 und 666 kam je eine Fehler-Mail\n🟡 Telegram-Fehlerhinweis selbst noch nicht ausgelöst.\n🩺 **Wenn es hakt:** die Karte Fehlerbehebung rechts abarbeiten.",
+        "height": 280,
+        "width": 1260,
+        "color": 3
+      }
+    },
+    {
+      "id": "70aa7f1f-cadc-4593-98a6-a9f441439b03",
+      "name": "Error Report",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        11712,
+        2144
+      ],
+      "parameters": {
+        "content": "# 📋 Error Report\n👉 **Ausführungen:** Reiter **Executions** öffnen, den ersten roten Lauf ansehen.\n👉 **Protokoll:** in Supabase die Tabelle k1_laufprotokoll nach der Stelle fehlerweg filtern.\n👉 **Alert:** der zentrale Error Workflow schickt bei jedem Abbruch eine Fehler-Mail.\n⏳ Dashboard folgt in Woche 5.",
+        "height": 280,
+        "width": 480,
+        "color": 3
+      }
+    },
+    {
+      "id": "b5707d74-cfab-495b-8060-c689d8b8e23c",
+      "name": "Rahmen Hilfe-Spalte",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        12320,
+        -74
+      ],
+      "parameters": {
+        "content": "",
+        "height": 2008,
+        "width": 584,
+        "color": 5
+      }
+    },
+    {
+      "id": "95548a25-a84a-480c-886d-0875d9090235",
+      "name": "Setup-Checkliste",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        12336,
+        -58
+      ],
+      "parameters": {
+        "content": "# ✅ Setup-Checkliste\nEinrichtung **in dieser Reihenfolge**. Setup 1 bis 6 liegen als braune Fläche um ihren Knoten.\n✅ erledigt, ⏳ offen, 🟡 Hinweis\n\n### 🗂️ Setup 1: Supabase\n✅ 4 Tabellen k1_kunden, k1_posts, k1_laufprotokoll und k1_einstellungen per SQL anlegen, Row Level Security an.\n✅ Bucket k1-medien **privat** anlegen, Logos unter logos/ ablegen.\n✅ Supabase-Credential im Knoten „Kundenprofil laden [Supabase]“ auswählen.\n\n### 🔑 Setup 2: Formular-Login\n✅ Credential Basic Auth anlegen und im Knoten „Auftrag empfangen [Form Trigger]“ auswählen.\n\n### 🎬 Setup 3: Supadata\n✅ Schlüssel als Header Auth mit Kopfname x-api-key, Specific Domains api.supadata.ai, im Knoten „Video-Text holen [HTTP Request]“.\n🟡 Gratisplan: 100 Credits im Monat.\n\n### 🖼️ Setup 4: Cloudflare FLUX\n✅ Token als Header Auth mit Kopfname Authorization, Specific Domains api.cloudflare.com, im Knoten „Einzelbild erzeugen [HTTP Request]“.\n✅ Konto-ID in k1_einstellungen unter cloudflare_account_id eintragen.\n\n### ✉️ Setup 5: Telegram\n✅ Bot bei BotFather anlegen, das Credential in allen 7 Telegram-Knoten auswählen; die Fläche Setup 5 liegt am Knoten „Fallback-Hinweis senden [Telegram]“.\n✅ telegram_chat_id und telegram_freigabe_nutzer_id in k1_einstellungen eintragen.\n\n### 🤖 Setup 6: Sprachmodelle\n✅ OpenRouter über „OpenAI Chat Model“ mit Base URL https://openrouter.ai/api/v1, Ersatzmodell NVIDIA (Free Endpoint), beide am Knoten „Content-Paket schreiben [Basic LLM Chain]“.\n🟡 Gotenberg läuft intern ohne Schlüssel unter http://gotenberg:3000.\n\n### 🧪 Schritt 7: Erster Testlauf\n✅ Formular mit dem Testkunden Ordwin und der Quellenart Thema absenden (Lauf 668).\n👉 Ergebnis in k1_posts, Bilder im Bucket und Vorschau in Telegram ansehen.\n\n### 🚀 Schritt 8: Aktivieren\n⏳ Erst nach der Test-Tabelle mit 10 Fällen veröffentlichen, im Kurs bleibt der Workflow unveröffentlicht.\n\n### 🎓 Anleitungsvideos\n⏳ noch keine verlinkt.",
+        "height": 1128,
+        "width": 552,
+        "color": 7
+      }
+    },
+    {
+      "id": "1b7c09ca-eeb7-40b5-8576-b80cd4970704",
+      "name": "Plattform-Hinweise",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        12336,
+        1086
+      ],
+      "parameters": {
+        "content": "# 🌐 Plattform-Hinweise\n### 📸 Instagram\n**Erlaubt:** Karussell mit 5 bis 8 Folien als PNG 1080 x 1350, Einzelbild, Text mit Hashtags.\n🟡 **Besonderheit:** gepostet wird nichts, das Paket geht nur zur Freigabe nach Telegram.\n\n### 💼 LinkedIn\n**Erlaubt:** eigener Post-Text, getrennt vom Instagram-Text.\n🟡 **Besonderheit:** Telegram nimmt höchstens 4.096 Zeichen je Nachricht, deshalb gehen beide Texte einzeln raus.\n⏳ Hilfe-Links je Plattform folgen.",
+        "height": 320,
+        "width": 552,
+        "color": 7
+      }
+    },
+    {
+      "id": "a3c51246-0b4b-4bf9-9e43-b58777526054",
+      "name": "Fehlerbehebung",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        12336,
+        1422
+      ],
+      "parameters": {
+        "content": "# 🩺 Fehlerbehebung\n### 🔒 Formular meldet 401?\n👉 Mit dem Formular-Login anmelden, das Credential steht im Knoten „Auftrag empfangen [Form Trigger]“.\n### 👤 Lauf stoppt mit „Kunde unbekannt“?\n👉 In k1_kunden das Kürzel und die Spalte aktiv prüfen.\n### 📭 Keine Vorschau in Telegram?\n👉 In k1_einstellungen telegram_chat_id und telegram_freigabe_nutzer_id prüfen, die Chat-ID steht in getUpdates im Feld chat.id, nicht in update_id.\n### 🎨 Einzelbild nur Farbverlauf?\n👉 In k1_einstellungen cloudflare_account_id prüfen (Fallback F4).\n### ⏸️ Post bleibt auf wartet_auf_freigabe?\n👉 Der Telegram-Versand ist gescheitert, im Lauf den Knoten „Vorschau senden [Telegram]“ öffnen (Korrektur in V3).\n### 🔴 Lauf rot, aber keine Meldung?\n👉 In der Ausführungsliste den **ersten roten Knoten** öffnen und seine Meldung lesen.",
+        "height": 496,
+        "width": 552,
+        "color": 7
+      }
+    },
+    {
+      "id": "2f82c988-972f-4d16-8002-a12f3a23ca08",
+      "name": "Rahmen Testfaelle",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        16,
+        1952
+      ],
+      "parameters": {
+        "content": "",
+        "height": 264,
+        "width": 840
+      }
+    },
+    {
+      "id": "437a3f4c-85d6-4f41-bbc7-9031144ef902",
+      "name": "Testfälle",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        32,
+        1968
+      ],
+      "parameters": {
+        "content": "## 📊 Testfälle für diesen Ablauf\n| Nr | Eingabe | Erwartung |\n|---|---|---|\n| T01 | Ordwin, Thema | 5 bis 8 Folien, Einzelbild, Texte |\n| T02 | Café, Artikel-Link | Café-Farben, Ablehnen mit Grund |\n| T03 | Ordwin, YouTube-Link | Video-Text, Paket zum Video |\n| T06 | englischer Artikel | Paket auf Deutsch |\n| T10 | Gotenberg falsch | Status nur_texte (ab Mittwoch) |",
+        "height": 232,
+        "width": 808,
+        "color": 5
+      }
     }
   ],
   "connections": {
@@ -3676,7 +3597,7 @@
     "aiBuilderAssisted": true,
     "builderVariant": "mcp"
   },
-  "versionId": "4ab88a4d-a63b-4499-9148-5da385be019e",
+  "versionId": "b152dea0-f65f-4aee-9e4f-bbb27d901488",
   "tags": [
     "KI-AGT-2606",
     "woche-4"
