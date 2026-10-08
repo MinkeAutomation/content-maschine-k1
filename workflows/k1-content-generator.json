@@ -382,10 +382,10 @@
             {
               "conditions": {
                 "options": {
-                  "caseSensitive": false,
+                  "caseSensitive": true,
                   "leftValue": "",
                   "typeValidation": "strict",
-                  "version": 1
+                  "version": 2
                 },
                 "conditions": [
                   {
@@ -394,7 +394,8 @@
                       "type": "string",
                       "operation": "equals"
                     },
-                    "rightValue": "Thema"
+                    "rightValue": "Thema",
+                    "id": "f5925af3-a5c5-406d-94cc-aaf16245244b"
                   }
                 ],
                 "combinator": "and"
@@ -403,10 +404,10 @@
             {
               "conditions": {
                 "options": {
-                  "caseSensitive": false,
+                  "caseSensitive": true,
                   "leftValue": "",
                   "typeValidation": "strict",
-                  "version": 1
+                  "version": 2
                 },
                 "conditions": [
                   {
@@ -415,7 +416,8 @@
                       "type": "string",
                       "operation": "equals"
                     },
-                    "rightValue": "Eigener Text"
+                    "rightValue": "Eigener Text",
+                    "id": "3b31fd84-6708-4b0e-8bfa-afd596570f9e"
                   }
                 ],
                 "combinator": "and"
@@ -424,10 +426,10 @@
             {
               "conditions": {
                 "options": {
-                  "caseSensitive": false,
+                  "caseSensitive": true,
                   "leftValue": "",
                   "typeValidation": "strict",
-                  "version": 1
+                  "version": 2
                 },
                 "conditions": [
                   {
@@ -436,7 +438,8 @@
                       "type": "string",
                       "operation": "equals"
                     },
-                    "rightValue": "Artikel-Link"
+                    "rightValue": "Artikel-Link",
+                    "id": "abdcb435-4c4a-40af-9477-0413cdbb7012"
                   }
                 ],
                 "combinator": "and"
@@ -445,10 +448,10 @@
             {
               "conditions": {
                 "options": {
-                  "caseSensitive": false,
+                  "caseSensitive": true,
                   "leftValue": "",
                   "typeValidation": "strict",
-                  "version": 1
+                  "version": 2
                 },
                 "conditions": [
                   {
@@ -457,7 +460,8 @@
                       "type": "string",
                       "operation": "equals"
                     },
-                    "rightValue": "YouTube-Link"
+                    "rightValue": "YouTube-Link",
+                    "id": "1af0ddb9-bbda-4dcf-916f-ebeb66d99d33"
                   }
                 ],
                 "combinator": "and"
@@ -634,13 +638,13 @@
       "retryOnFail": true,
       "maxTries": 3,
       "waitBetweenTries": 5000,
+      "onError": "continueErrorOutput",
       "credentials": {
         "httpHeaderAuth": {
           "id": "CREDENTIAL_ID",
           "name": "Supadata API | Content-Generator"
         }
-      },
-      "onError": "continueErrorOutput"
+      }
     },
     {
       "parameters": {
@@ -657,7 +661,7 @@
     },
     {
       "parameters": {
-        "jsCode": "// Zweck: Paket der KI pruefen und in Form bringen (Folienzahl, Laengen, Hashtags, Kennzeichnung).\nconst ein = $input.first().json;\nconst p = ein.output || (typeof ein.text === 'string' ? JSON.parse(ein.text) : ein.text) || {};\nconst basis = $('Quelltext vereinheitlichen [Edit Fields]').first().json;\nconst cfg = $('Konfiguration und Startzeit [Edit Fields]').first().json;\nconst kunde = basis.kunde || {};\n// Warum: F3, hat die Chain auf das Ersatzmodell umgeschaltet, steht das im Post und im Protokoll.\nlet ersatz = false;\ntry { ersatz = $('Ersatzmodell NVIDIA [NVIDIA Nemotron Chat Model]').isExecuted === true; } catch (e) { ersatz = false; }\n// Warum: Tokens und Kosten je Lauf fuer das Laufprotokoll (BONUS Kosten-Kalkulation). OpenRouter liefert sie in usage, NVIDIA in tokenUsage des Modellknotens.\nconst zahl = v => (typeof v === 'number' && isFinite(v)) ? v : null;\n// Warum all(0) und all(1): Ausgang 0 ist die Antwort, Ausgang 1 der Fehlerausgang (Timeout, HTTP-Fehler).\nconst ausgang = (n, i) => { try { return $(n).all(i) || []; } catch (e) { return []; } };\nconst vermerk = [];\nlet tok;\nif (!ersatz) {\n  tok = { token_prompt: zahl(ein.token_prompt), token_antwort: zahl(ein.token_antwort), token_gesamt: zahl(ein.token_gesamt), kosten_usd: zahl(ein.kosten_usd), token_quelle: 'openrouter usage' };\n  // Warum kein 0: fehlt usage, ist der Preis unbekannt, nicht kostenlos.\n  if (tok.kosten_usd === null) vermerk.push('Kosten unbekannt: OpenRouter-Antwort ohne usage.cost');\n  if (tok.token_gesamt === null) vermerk.push('Tokens unbekannt: OpenRouter-Antwort ohne usage');\n} else {\n  // Warum OpenRouter mitzaehlen: war nur die Antwort unbrauchbar, hat der Aufruf Tokens und Kosten verursacht.\n  const orOk = ausgang('Content-Paket schreiben [HTTP Request]', 0);\n  const orFehler = ausgang('Content-Paket schreiben [HTTP Request]', 1);\n  const u = orOk.length && orOk[0].json ? orOk[0].json.usage : null;\n  const orTok = u ? { p: zahl(u.prompt_tokens), a: zahl(u.completion_tokens), g: zahl(u.total_tokens) } : { p: null, a: null, g: null };\n  let orKosten = u ? zahl(u.cost) : null;\n  if (orOk.length && orKosten === null) vermerk.push('Kosten unbekannt: OpenRouter-Antwort ohne usage.cost');\n  // Warum unbekannt statt 0: ein Timeout beweist nur, dass keine Antwort kam, nicht dass nichts abgerechnet wurde.\n  if (!orOk.length && orFehler.length) vermerk.push('Kosten unbekannt: OpenRouter ohne Antwort (Zeitlimit oder Fehler), Abrechnung nicht messbar');\n  let tu = null;\n  try { const d = $('Ersatzmodell NVIDIA [NVIDIA Nemotron Chat Model]').first(); tu = d && d.json ? d.json.tokenUsage : null; } catch (e) { tu = null; }\n  const nv = tu ? { p: zahl(tu.promptTokens), a: zahl(tu.completionTokens), g: zahl(tu.totalTokens) } : null;\n  if (!nv) vermerk.push('NVIDIA-Tokens nicht lesbar' + (u ? ', Token-Spalten nur OpenRouter' : ''));\n  const summe = (a, b) => (a === null && b === null) ? null : (a || 0) + (b || 0);\n  // Warum Summe: die Spalten zaehlen alle Tokens des Laufs, die bekannt sind; NVIDIA Free Endpoint kostet 0.\n  const kostenGesamt = (!orOk.length && !orFehler.length) ? 0 : orKosten;\n  tok = {\n    token_prompt: summe(orTok.p, nv ? nv.p : null),\n    token_antwort: summe(orTok.a, nv ? nv.a : null),\n    token_gesamt: summe(orTok.g, nv ? nv.g : null),\n    kosten_usd: kostenGesamt,\n    token_quelle: (u ? 'openrouter usage' : 'ohne openrouter usage') + (nv ? ' plus nvidia tokenUsage' : ', nvidia ohne Tokenangabe')\n  };\n}\nconst kuerze = (s, n) => { s = String(s || '').trim(); return s.length > n ? s.slice(0, n - 1).trimEnd() + '…' : s; };\nlet folien = (Array.isArray(p.folien) ? p.folien : []).filter(f => f && (f.ueberschrift || f.text));\n// Warum: G9 verlangt 5 bis 8 Folien. Zu viele werden gekuerzt (die Abschlussfolie bleibt), zu wenige sind ein Fehler.\nif (folien.length > 8) folien = folien.slice(0, 7).concat([folien[folien.length - 1]]);\n// Warum Testschalter: 'pruefen' kuerzt hier auf 4 Folien, damit der Fehlerausgang dieses Knotens nachweisbar ist, Standard 'aus'.\nif (cfg.test_folien_kuerzen === 'pruefen') folien = folien.slice(0, 4);\nif (folien.length < 5) throw new Error('Paket hat nur ' + folien.length + ' Folien, verlangt sind 5 bis 8.');\nfolien = folien.map((f, i) => ({\n  nr: i + 1,\n  typ: i === 0 ? 'titel' : (i === folien.length - 1 ? 'abschluss' : 'inhalt'),\n  ueberschrift: kuerze(f.ueberschrift, 70),\n  text: kuerze(f.text, 260),\n  cta: ''\n}));\n// Warum: die letzte Folie traegt immer die Handlungsaufforderung aus dem Kundenprofil, nicht die Formulierung des Modells.\nfolien[folien.length - 1].cta = kunde.cta_text || '';\n// Warum: Hashtags ohne Leer- und Sonderzeichen, feste Marken-Hashtags zuerst, keine Doppelten.\nconst normTag = t => '#' + String(t || '').replace(/^#+/, '').replace(/[^A-Za-z0-9ÄÖÜäöüß_]/g, '');\nconst tags = Array.from(new Set((kunde.hashtags_fest || []).concat(p.hashtags || []).map(normTag).filter(t => t.length > 1))).slice(0, 15);\nreturn [{ json: {\n  post_id: basis.post_id,\n  kunde: kunde,\n  quelle_art: basis.quelle_art,\n  thema: basis.thema,\n  folien: folien,\n  anzahl_folien: folien.length,\n  caption_instagram: kuerze(p.caption_instagram, 2000),\n  hashtags: tags,\n  linkedin_post: kuerze(p.linkedin_post, 2900),\n  // Warum 2.048: Obergrenze des Bildprompts bei FLUX schnell (Recherche-Vergleich, Punkt 7).\n  bildprompt: kuerze(p.bildprompt, 2048),\n  kennzeichnung: 'KI-erstellt',\n  ki_erstellt: true,\n  ersatzmodell: ersatz,\n  modell_genutzt: ersatz ? 'nvidia/nemotron-3-super-120b-a12b' : (ein.modell_antwort || cfg.modell_haupt),\n  token_prompt: tok.token_prompt,\n  token_antwort: tok.token_antwort,\n  token_gesamt: tok.token_gesamt,\n  kosten_usd: tok.kosten_usd,\n  token_quelle: tok.token_quelle,\n  kosten_vermerk: vermerk.join('; ')\n} }];"
+        "jsCode": "// Zweck: Paket der KI pruefen und in Form bringen (Folienzahl, Laengen, Hashtags, Kennzeichnung).\nconst ein = $input.first().json;\nconst p = ein.output || (typeof ein.text === 'string' ? JSON.parse(ein.text) : ein.text) || {};\nconst basis = $('Quelltext vereinheitlichen [Edit Fields]').first().json;\nconst cfg = $('Konfiguration und Startzeit [Edit Fields]').first().json;\nconst kunde = basis.kunde || {};\n// Warum: F3, hat die Chain auf das Ersatzmodell umgeschaltet, steht das im Post und im Protokoll.\nlet ersatz = false;\ntry { ersatz = $('Ersatzmodell NVIDIA [NVIDIA Nemotron Chat Model]').isExecuted === true; } catch (e) { ersatz = false; }\n// Warum aus dem Kostenknoten (v03): Tokens und Kosten erfasst der eigene Knoten direkt hinter dem HTTP-Aufruf, hier werden sie nur uebernommen.\nconst kost = $('Tokens und Kosten erfassen [Code]').first().json;\nconst vermerk = kost.kosten_vermerk ? [kost.kosten_vermerk] : [];\nconst tok = { token_prompt: kost.token_prompt, token_antwort: kost.token_antwort, token_gesamt: kost.token_gesamt, kosten_usd: kost.kosten_usd, token_quelle: kost.token_quelle };\n// Warum nur ein Vermerk bei NVIDIA: der Ersatzweg laeuft durch dieselbe Kostenerfassung; NVIDIA Free Endpoint kostet 0, seine Tokens stehen nur im Modellknoten und sind im Code nicht lesbar.\nif (ersatz) { vermerk.push('NVIDIA-Tokens nicht lesbar' + (kost.usage_da ? ', Token-Spalten nur OpenRouter' : '')); tok.token_quelle += ', nvidia ohne Tokenangabe'; }\nconst kuerze = (s, n) => { s = String(s || '').trim(); return s.length > n ? s.slice(0, n - 1).trimEnd() + '…' : s; };\nlet folien = (Array.isArray(p.folien) ? p.folien : []).filter(f => f && (f.ueberschrift || f.text));\n// Warum: G9 verlangt 5 bis 8 Folien. Zu viele werden gekuerzt (die Abschlussfolie bleibt), zu wenige sind ein Fehler.\nif (folien.length > 8) folien = folien.slice(0, 7).concat([folien[folien.length - 1]]);\n// Warum Testschalter: 'pruefen' kuerzt hier auf 4 Folien, damit der Fehlerausgang dieses Knotens nachweisbar ist, Standard 'aus'.\nif (cfg.test_folien_kuerzen === 'pruefen') folien = folien.slice(0, 4);\nif (folien.length < 5) throw new Error('Paket hat nur ' + folien.length + ' Folien, verlangt sind 5 bis 8.');\nfolien = folien.map((f, i) => ({\n  nr: i + 1,\n  typ: i === 0 ? 'titel' : (i === folien.length - 1 ? 'abschluss' : 'inhalt'),\n  ueberschrift: kuerze(f.ueberschrift, 70),\n  text: kuerze(f.text, 260),\n  cta: ''\n}));\n// Warum: die letzte Folie traegt immer die Handlungsaufforderung aus dem Kundenprofil, nicht die Formulierung des Modells.\nfolien[folien.length - 1].cta = kunde.cta_text || '';\n// Warum: Hashtags ohne Leer- und Sonderzeichen, feste Marken-Hashtags zuerst, keine Doppelten.\nconst normTag = t => '#' + String(t || '').replace(/^#+/, '').replace(/[^A-Za-z0-9ÄÖÜäöüß_]/g, '');\nconst tags = Array.from(new Set((kunde.hashtags_fest || []).concat(p.hashtags || []).map(normTag).filter(t => t.length > 1))).slice(0, 15);\nreturn [{ json: {\n  post_id: basis.post_id,\n  kunde: kunde,\n  quelle_art: basis.quelle_art,\n  thema: basis.thema,\n  folien: folien,\n  anzahl_folien: folien.length,\n  caption_instagram: kuerze(p.caption_instagram, 2000),\n  hashtags: tags,\n  linkedin_post: kuerze(p.linkedin_post, 2900),\n  // Warum 2.048: Obergrenze des Bildprompts bei FLUX schnell (Recherche-Vergleich, Punkt 7).\n  bildprompt: kuerze(p.bildprompt, 2048),\n  kennzeichnung: 'KI-erstellt',\n  ki_erstellt: true,\n  ersatzmodell: ersatz,\n  modell_genutzt: ersatz ? 'nvidia/nemotron-3-super-120b-a12b' : (ein.modell_antwort || cfg.modell_haupt),\n  token_prompt: tok.token_prompt,\n  token_antwort: tok.token_antwort,\n  token_gesamt: tok.token_gesamt,\n  kosten_usd: tok.kosten_usd,\n  token_quelle: tok.token_quelle,\n  kosten_vermerk: vermerk.join('; ')\n} }];"
       },
       "id": "8d78869b-ec2c-4790-a3b0-fb660bebfe60",
       "name": "Paket prüfen [Code]",
@@ -725,13 +729,13 @@
       "retryOnFail": true,
       "maxTries": 3,
       "waitBetweenTries": 5000,
+      "onError": "continueErrorOutput",
       "credentials": {
         "httpHeaderAuth": {
           "id": "CREDENTIAL_ID",
           "name": "Cloudflare Workers AI | Content-Generator"
         }
-      },
-      "onError": "continueErrorOutput"
+      }
     },
     {
       "parameters": {
@@ -760,13 +764,13 @@
       "retryOnFail": true,
       "maxTries": 3,
       "waitBetweenTries": 5000,
+      "onError": "continueErrorOutput",
       "credentials": {
         "supabaseApi": {
           "id": "CREDENTIAL_ID",
           "name": "Supabase API | KI-AGT-2606"
         }
-      },
-      "onError": "continueErrorOutput"
+      }
     },
     {
       "parameters": {
@@ -874,13 +878,13 @@
       "retryOnFail": true,
       "maxTries": 3,
       "waitBetweenTries": 5000,
+      "onError": "continueErrorOutput",
       "credentials": {
         "supabaseApi": {
           "id": "CREDENTIAL_ID",
           "name": "Supabase API | KI-AGT-2606"
         }
-      },
-      "onError": "continueErrorOutput"
+      }
     },
     {
       "parameters": {
@@ -942,13 +946,13 @@
       "retryOnFail": true,
       "maxTries": 3,
       "waitBetweenTries": 5000,
+      "onError": "continueErrorOutput",
       "credentials": {
         "supabaseApi": {
           "id": "CREDENTIAL_ID",
           "name": "Supabase API | KI-AGT-2606"
         }
-      },
-      "onError": "continueErrorOutput"
+      }
     },
     {
       "parameters": {
@@ -1023,13 +1027,13 @@
       "retryOnFail": true,
       "maxTries": 3,
       "waitBetweenTries": 5000,
+      "onError": "continueErrorOutput",
       "credentials": {
         "supabaseApi": {
           "id": "CREDENTIAL_ID",
           "name": "Supabase API | KI-AGT-2606"
         }
-      },
-      "onError": "continueErrorOutput"
+      }
     },
     {
       "parameters": {
@@ -1270,8 +1274,8 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        3296,
-        1136
+        3648,
+        1072
       ]
     },
     {
@@ -1394,7 +1398,7 @@
       "type": "n8n-nodes-base.supabase",
       "typeVersion": 1,
       "position": [
-        5664,
+        5984,
         1664
       ],
       "credentials": {
@@ -1487,7 +1491,7 @@
     },
     {
       "parameters": {
-        "jsCode": "// Zweck: aus jedem Abbruch (E5, F6, F3, F5, F8) genau eine Protokollzeile mit Stelle fehlerweg bauen, nur Metadaten.\n// Warum seit v05 nur Abbrueche: Ersatzwege (F1, F2, F3 Ersatzmodell, F4, F7) stehen in der Protokollzeile am Ende.\n// Warum einmal fuer alle Elemente (v02): kommen mehrere Fehler-Elemente an (Bild hochladen je Bild), entsteht trotzdem nur eine Zeile.\nconst k = $('Konfiguration und Startzeit [Edit Fields]').first().json;\nconst ein = $input.first().json;\nconst lief = n => { try { return $(n).isExecuted === true; } catch (e) { return false; } };\n// Warum all(i): Ausgang 0 ist das Ergebnis, Ausgang 1 der Fehlerausgang mit der Fehlermeldung.\nconst ausgang = (n, i) => { try { return $(n).all(i) || []; } catch (e) { return []; } };\nconst fehlerVon = n => { const it = ausgang(n, 1)[0]; const e = it && it.json && it.json.error; return e ? String(e.message || e).slice(0, 160) : ''; };\nlet post = null;\nif (lief('Post anlegen [Supabase]')) post = $('Post anlegen [Supabase]').first().json.id || null;\n// Warum diese Liste (v02): nach dem bezahlten Modellaufruf darf kein Abbruch mehr ohne Zeile enden; F8 = Abbruch nach dem Modellaufruf.\nconst nachModell = ['Paket prüfen [Code]', 'Logo laden [HTTP Request]', 'Bild hochladen [HTTP Request]', 'Post speichern [HTTP Request]', 'Signierte Adressen holen [HTTP Request]', 'Bild laden [HTTP Request]'];\nconst abbruch = nachModell.find(n => lief(n) && ausgang(n, 1).length > 0);\nlet text;\n// Warum am gelaufenen Knoten erkannt: F5 und F3 kommen ohne eigenen Vermerkknoten an (v05).\nif (lief('Nur Texte speichern [HTTP Request]')) text = 'F5: Rendern fehlgeschlagen (' + (fehlerVon('Bild rendern [HTTP Request]') || 'Render-Dienst nicht erreichbar') + '), Post nur mit Texten (nur_texte)';\nelse if (abbruch) text = 'F8: Abbruch nach dem Modellaufruf in ' + abbruch.replace(/ \\[[^\\]]*\\]$/, '') + ' (' + (fehlerVon(abbruch) || 'ohne Meldung') + ')';\nelse if (lief('Status fehler setzen [Supabase]')) text = 'F3: Hauptmodell und Ersatzmodell ohne gültiges Paket (' + (fehlerVon('Ersatzpaket schreiben [Basic LLM Chain]') || 'unbekannt') + ')';\nelse text = String(ein.fehler_text || 'Abbruch ohne Text');\n// Warum: bricht der Lauf ab, laeuft die Protokollzeile am Ende nicht mehr, deshalb stehen fruehere Ersatzwege hier mit.\nconst ppOk = ausgang('Paket prüfen [Code]', 0);\nconst pp = ppOk.length ? ppOk[0].json : null;\nconst nvLief = ausgang('Ersatzpaket schreiben [Basic LLM Chain]', 0).length > 0 || ausgang('Ersatzpaket schreiben [Basic LLM Chain]', 1).length > 0;\nconst frueher = [];\nif (lief('Quelle-Fallback F1 [Edit Fields]')) frueher.push('F1');\nif (lief('Video-Fallback F2 [Edit Fields]')) frueher.push('F2');\nif ((pp && pp.ersatzmodell) || (!pp && nvLief && !lief('Status fehler setzen [Supabase]'))) frueher.push('F3 Ersatzmodell');\nconst rl = ausgang('Render-Liste bauen [Code]', 0);\nif (rl.length && rl[0].json.bild_quelle !== 'flux') frueher.push('F4');\nconst zeile = {\n  workflow_name: k.workflow_name,\n  execution_id: k.execution_id,\n  ausfuehrung_modus: k.ausfuehrung_modus,\n  stelle: 'fehlerweg',\n  status: 'fehler',\n  dauer_ms: Math.round(Date.now() - new Date(k.startTime).getTime()),\n  modell: nvLief ? 'nvidia/nemotron-3-super-120b-a12b' : k.modell_haupt,\n  kunde_kuerzel: k.kunde_kuerzel\n};\n// Warum ohne post_id bei E5 und F6: vor dem Anlegen des Posts gibt es keine UUID, ein leerer Wert waere fuer die Spalte ungueltig.\nif (post) zeile.post_id = post;\n// Warum: auch ein Abbruch nach einem bezahlten Modellaufruf traegt Tokens und Kosten, fehlende Kosten bleiben null mit Vermerk.\nconst zahl = v => (typeof v === 'number' && isFinite(v)) ? v : null;\nconst vermerk = [];\nif (pp) {\n  zeile.modell = pp.modell_genutzt; zeile.token_prompt = pp.token_prompt; zeile.token_antwort = pp.token_antwort; zeile.token_gesamt = pp.token_gesamt; zeile.kosten_usd = pp.kosten_usd;\n  if (pp.kosten_vermerk) vermerk.push(pp.kosten_vermerk);\n} else if (lief('Content-Paket schreiben [HTTP Request]')) {\n  const orOk = ausgang('Content-Paket schreiben [HTTP Request]', 0);\n  const u = orOk.length && orOk[0].json ? orOk[0].json.usage : null;\n  zeile.token_prompt = u ? zahl(u.prompt_tokens) : null;\n  zeile.token_antwort = u ? zahl(u.completion_tokens) : null;\n  zeile.token_gesamt = u ? zahl(u.total_tokens) : null;\n  zeile.kosten_usd = u ? zahl(u.cost) : null;\n  if (zeile.kosten_usd === null) vermerk.push(orOk.length ? 'Kosten unbekannt: OpenRouter-Antwort ohne usage.cost' : 'Kosten unbekannt: OpenRouter ohne Antwort (Zeitlimit oder Fehler)');\n  if (nvLief) vermerk.push('NVIDIA-Tokens nicht lesbar');\n}\nif (vermerk.length) text += ' | ' + vermerk.join('; ');\nif (frueher.length) text += ' | vorher im Lauf: ' + frueher.join(', ');\nzeile.fehler_text = text.slice(0, 300);\nreturn [{ json: zeile }];"
+        "jsCode": "// Zweck: aus jedem Abbruch (E5, F6, F3, F5, F8) genau eine Protokollzeile mit Stelle fehlerweg bauen, nur Metadaten.\n// Warum seit v05 nur Abbrueche: Ersatzwege (F1, F2, F3 Ersatzmodell, F4, F7) stehen in der Protokollzeile am Ende.\n// Warum einmal fuer alle Elemente (v02): kommen mehrere Fehler-Elemente an (Bild hochladen je Bild), entsteht trotzdem nur eine Zeile.\nconst k = $('Konfiguration und Startzeit [Edit Fields]').first().json;\nconst ein = $input.first().json;\nconst lief = n => { try { return $(n).isExecuted === true; } catch (e) { return false; } };\n// Warum all(i): Ausgang 0 ist das Ergebnis, Ausgang 1 der Fehlerausgang mit der Fehlermeldung.\nconst ausgang = (n, i) => { try { return $(n).all(i) || []; } catch (e) { return []; } };\nconst fehlerVon = n => { const it = ausgang(n, 1)[0]; const e = it && it.json && it.json.error; return e ? String(e.message || e).slice(0, 160) : ''; };\nlet post = null;\nif (lief('Post anlegen [Supabase]')) post = $('Post anlegen [Supabase]').first().json.id || null;\n// Warum diese Liste (v02): nach dem bezahlten Modellaufruf darf kein Abbruch mehr ohne Zeile enden; F8 = Abbruch nach dem Modellaufruf.\nconst nachModell = ['Paket prüfen [Code]', 'Logo laden [HTTP Request]', 'Bild hochladen [HTTP Request]', 'Post speichern [HTTP Request]', 'Signierte Adressen holen [HTTP Request]', 'Bild laden [HTTP Request]'];\nconst abbruch = nachModell.find(n => lief(n) && ausgang(n, 1).length > 0);\nlet text;\n// Warum am gelaufenen Knoten erkannt: F5 und F3 kommen ohne eigenen Vermerkknoten an (v05).\nif (lief('Nur Texte speichern [HTTP Request]')) text = 'F5: Rendern fehlgeschlagen (' + (fehlerVon('Bild rendern [HTTP Request]') || 'Render-Dienst nicht erreichbar') + '), Post nur mit Texten (nur_texte)';\nelse if (abbruch) text = 'F8: Abbruch nach dem Modellaufruf in ' + abbruch.replace(/ \\[[^\\]]*\\]$/, '') + ' (' + (fehlerVon(abbruch) || 'ohne Meldung') + ')';\nelse if (lief('Status fehler setzen [Supabase]')) text = 'F3: Hauptmodell und Ersatzmodell ohne gültiges Paket (' + (fehlerVon('Ersatzpaket schreiben [Basic LLM Chain]') || 'unbekannt') + ')';\nelse text = String(ein.fehler_text || 'Abbruch ohne Text');\n// Warum: bricht der Lauf ab, laeuft die Protokollzeile am Ende nicht mehr, deshalb stehen fruehere Ersatzwege hier mit.\nconst ppOk = ausgang('Paket prüfen [Code]', 0);\nconst pp = ppOk.length ? ppOk[0].json : null;\nconst nvLief = ausgang('Ersatzpaket schreiben [Basic LLM Chain]', 0).length > 0 || ausgang('Ersatzpaket schreiben [Basic LLM Chain]', 1).length > 0;\nconst frueher = [];\nif (lief('Quelle-Fallback F1 [Edit Fields]')) frueher.push('F1');\nif (lief('Video-Fallback F2 [Edit Fields]')) frueher.push('F2');\nif ((pp && pp.ersatzmodell) || (!pp && nvLief && !lief('Status fehler setzen [Supabase]'))) frueher.push('F3 Ersatzmodell');\nconst rl = ausgang('Render-Liste bauen [Code]', 0);\nif (rl.length && rl[0].json.bild_quelle !== 'flux') frueher.push('F4');\nconst zeile = {\n  workflow_name: k.workflow_name,\n  execution_id: k.execution_id,\n  ausfuehrung_modus: k.ausfuehrung_modus,\n  stelle: 'fehlerweg',\n  status: 'fehler',\n  dauer_ms: Math.round(Date.now() - new Date(k.startTime).getTime()),\n  modell: nvLief ? 'nvidia/nemotron-3-super-120b-a12b' : k.modell_haupt,\n  kunde_kuerzel: k.kunde_kuerzel\n};\n// Warum ohne post_id bei E5 und F6: vor dem Anlegen des Posts gibt es keine UUID, ein leerer Wert waere fuer die Spalte ungueltig.\nif (post) zeile.post_id = post;\n// Warum: auch ein Abbruch nach einem bezahlten Modellaufruf traegt Tokens und Kosten, fehlende Kosten bleiben null mit Vermerk.\nconst vermerk = [];\nif (pp) {\n  zeile.modell = pp.modell_genutzt; zeile.token_prompt = pp.token_prompt; zeile.token_antwort = pp.token_antwort; zeile.token_gesamt = pp.token_gesamt; zeile.kosten_usd = pp.kosten_usd;\n  if (pp.kosten_vermerk) vermerk.push(pp.kosten_vermerk);\n} else if (lief('Tokens und Kosten erfassen [Code]')) {\n  // Warum aus dem Kostenknoten (v03): er laeuft auf beiden Wegen (Antwort und Fehlerausgang), auch wenn danach beide Modelle scheitern.\n  const kq = $('Tokens und Kosten erfassen [Code]').first().json;\n  zeile.token_prompt = kq.token_prompt;\n  zeile.token_antwort = kq.token_antwort;\n  zeile.token_gesamt = kq.token_gesamt;\n  zeile.kosten_usd = kq.kosten_usd;\n  if (kq.kosten_vermerk) vermerk.push(kq.kosten_vermerk);\n  if (nvLief) vermerk.push('NVIDIA-Tokens nicht lesbar');\n}\nif (vermerk.length) text += ' | ' + vermerk.join('; ');\nif (frueher.length) text += ' | vorher im Lauf: ' + frueher.join(', ');\nzeile.fehler_text = text.slice(0, 300);\nreturn [{ json: zeile }];"
       },
       "id": "5308a263-af31-4c89-871a-c45a822a53f9",
       "name": "Fehlerweg vorbereiten [Code]",
@@ -1862,15 +1866,15 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        2272,
+        2256,
         464
       ]
     },
     {
       "parameters": {
-        "content": "# 03 · KI\nPaket schreiben, Tokens und Kosten merken, prüfen.",
+        "content": "# 03 · KI\nPaket schreiben, Tokens und Kosten erfassen, Paket lesen und prüfen.",
         "height": 1400,
-        "width": 1310,
+        "width": 1630,
         "color": 6
       },
       "id": "a94f3244-b13a-4e30-9a02-a74a9cbbfdf3",
@@ -1878,7 +1882,7 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        4864,
+        4880,
         464
       ]
     },
@@ -1932,7 +1936,7 @@
     },
     {
       "parameters": {
-        "content": "# 🧪 AGT-2606 P1 Content-Generator K1 W04T04 Token-Logging\n**Aufgabe:** Ein Dienstleister gibt für einen Kunden ein Thema, einen Artikel-Link, ein YouTube-Video oder eigenen Text ein und bekommt ein Content-Paket im Branding dieses Kunden zur Freigabe in Telegram.\n**Die Idee:** Die Quelle wird zu Text, ein Sprachmodell schreibt ein JSON-Paket, Gotenberg rendert die Bilder, Supabase hält alles, Telegram holt die Freigabe.\n**Warum so?** Supabase ist die einzige Wahrheit für Telegram und das spätere Dashboard, das Branding kommt aus dem Kundenprofil.\n**Hinweis:** Ein HTTP-Aufruf an OpenRouter ersetzt die Basic LLM Chain, damit Tokens und Kosten aus usage ins Laufprotokoll gehen; NVIDIA bleibt der Ersatzweg.\nStufe: Durchstich bis 14.10.2026",
+        "content": "# 🧪 AGT-2606 P1 Content-Generator K1 W04T04 Token-Logging\n**Aufgabe:** Ein Dienstleister gibt für einen Kunden ein Thema, einen Artikel-Link, ein YouTube-Video oder eigenen Text ein und bekommt ein Content-Paket im Branding dieses Kunden zur Freigabe in Telegram.\n**Die Idee:** Die Quelle wird zu Text, ein Sprachmodell schreibt ein JSON-Paket, Gotenberg rendert die Bilder, Supabase hält alles, Telegram holt die Freigabe.\n**Warum so?** Supabase ist die einzige Wahrheit für Telegram und das spätere Dashboard, das Branding kommt aus dem Kundenprofil.\n**Hinweis:** Ein HTTP-Aufruf an OpenRouter ersetzt die Basic LLM Chain, damit ein eigener Knoten Tokens und Kosten aus usage erfasst; NVIDIA bleibt der Ersatzweg.\nStufe: Durchstich bis 14.10.2026",
         "height": 288,
         "width": 1100,
         "color": 7
@@ -1948,7 +1952,7 @@
     },
     {
       "parameters": {
-        "content": "## Ablauf\n① Eingang: Auftrag annehmen, Eingabe prüfen, Kundenprofil laden, Post anlegen\n② Quelle holen: Artikel, Video, Thema oder eigener Text wird ein Quelltext\n③ KI: Paket per HTTP schreiben, Tokens und Kosten merken, prüfen\n④ Gestalten: Einzelbild und Folien rendern und hochladen\n⑤ Ablage und Freigabe: speichern, Telegram-Freigabe, Status, Protokollzeile\n⑥ Fehlerweg: Abbrüche E5, F3, F5, F6, F8 protokollieren, melden, stoppen",
+        "content": "## Ablauf\n① Eingang: Auftrag annehmen, Eingabe prüfen, Kundenprofil laden, Post anlegen\n② Quelle holen: Artikel, Video, Thema oder eigener Text wird ein Quelltext\n③ KI: Paket per HTTP schreiben, Tokens und Kosten erfassen, prüfen\n④ Gestalten: Einzelbild und Folien rendern und hochladen\n⑤ Ablage und Freigabe: speichern, Telegram-Freigabe, Status, Protokollzeile\n⑥ Fehlerweg: Abbrüche E5, F3, F5, F6, F8 protokollieren, melden, stoppen",
         "height": 288,
         "width": 492,
         "color": 7
@@ -1964,7 +1968,7 @@
     },
     {
       "parameters": {
-        "content": "## Status\n🟢 Kopie von K1 v05: Token-Logging (token_prompt, token_antwort, token_gesamt, kosten_usd), Läufe im Bau-Protokoll Vorarbeit W04T04.\n🟡 Der Ablehnungsgrund öffnet noch eine Webseite, die Antwort im Chat kommt mit der Telegram-Steuerung.\n🔴 Kundenschicht (Setup, Hilfe-Spalte, Fehlerbehebung) fehlt bis zum Feinschliff.\n🔵 Testschalter test_kaputtes_json (Standard false) und test_folien_kuerzen (Standard aus) im Konfigurationsknoten.",
+        "content": "## Status\n🟢 Kopie von K1 v05: Token-Logging im eigenen Kostenknoten (token_prompt, token_antwort, token_gesamt, kosten_usd), Läufe im Bau-Protokoll.\n🟡 Der Ablehnungsgrund öffnet noch eine Webseite, die Antwort im Chat kommt mit der Telegram-Steuerung.\n🔴 Kundenschicht (Setup, Hilfe-Spalte, Fehlerbehebung) fehlt bis zum Feinschliff.\n🔵 Testschalter test_kaputtes_json (Standard false) und test_folien_kuerzen (Standard aus) im Konfigurationsknoten.",
         "height": 288,
         "width": 492,
         "color": 7
@@ -2026,16 +2030,16 @@
     },
     {
       "parameters": {
-        "content": "## ③ KI\nEin HTTP-Aufruf an OpenRouter schreibt das Paket nach JSON-Schema und liefert in usage Tokens und Kosten. Ist die Antwort kein gültiges Paket oder fällt der Aufruf aus, schreibt NVIDIA das Paket (F3). Scheitern beide, steht der Post auf fehler.\n### 🟢 Token-Logging (W04T04), v02: Folien 5 bis 8 auch im Lesen-Knoten",
+        "content": "## ③ KI\nEin HTTP-Aufruf an OpenRouter schreibt das Paket nach JSON-Schema. Der Knoten „Tokens und Kosten erfassen“ liest Tokens und Kosten aus usage, bei Ausfall null mit Vermerk. Ist das Paket ungültig oder fällt der Aufruf aus, schreibt NVIDIA es (F3); scheitern beide, steht der Post auf fehler.\n### 🟢 v03: eigener Kostenknoten, auch der NVIDIA-Weg läuft durch ihn",
         "height": 136,
-        "width": 1240
+        "width": 1192
       },
       "id": "7652345b-35f5-4449-9daf-9150eb219bc8",
       "name": "Karte ③",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        4896,
+        4928,
         640
       ]
     },
@@ -2125,24 +2129,24 @@
       "retryOnFail": true,
       "maxTries": 2,
       "waitBetweenTries": 2000,
+      "onError": "continueErrorOutput",
       "credentials": {
         "openAiApi": {
           "id": "CREDENTIAL_ID",
           "name": "OpenRouter API | KI-AGT-2606"
         }
-      },
-      "onError": "continueErrorOutput"
+      }
     },
     {
       "parameters": {
-        "jsCode": "// Zweck: Antwort von OpenRouter in das bisherige Paketformat bringen, gegen das Schema von K1 v05 pruefen und Tokens und Kosten aus usage merken.\nconst r = $input.first().json;\nconst cfg = $('Konfiguration und Startzeit [Edit Fields]').first().json;\nconst wahl = (r.choices || [])[0] || {};\nconst inhalt = String((wahl.message || {}).content || '');\n// Warum Codeblock entfernen: manche Modelle setzen das JSON trotz Vorgabe zwischen drei Backticks.\nconst roh = inhalt.replace(/^\\s*```(?:json)?\\s*/i, '').replace(/\\s*```\\s*$/, '');\nlet paket;\ntry { paket = JSON.parse(roh); } catch (e) { throw new Error('Antwort ist kein gültiges JSON (finish_reason ' + (wahl.finish_reason || 'unbekannt') + ')'); }\nif (!paket || typeof paket !== 'object' || Array.isArray(paket)) throw new Error('Antwort ist kein JSON-Objekt');\n// Warum Testschalter: (07.10.2026) laesst sich nur mit einem zu kurzen Paket nachweisen; 'lesen' kuerzt hier auf 4 Folien, Standard 'aus'.\nif (cfg.test_folien_kuerzen === 'lesen' && Array.isArray(paket.folien)) paket.folien = paket.folien.slice(0, 4);\n// Warum hier pruefen: dieselben Grenzen wie der Structured Output Parser in K1 v05, ein Verstoss geht ueber den Fehlerausgang zum Ersatzmodell (F3).\nconst pflicht = ['folien', 'caption_instagram', 'hashtags', 'linkedin_post', 'bildprompt'];\nconst fehlt = pflicht.filter(f => paket[f] === undefined);\nif (fehlt.length) throw new Error('Paket ohne Pflichtfelder: ' + fehlt.join(', '));\nconst verstoss = [];\nif (!Array.isArray(paket.folien)) verstoss.push('folien ist keine Liste');\nelse {\n  // Warum 5 bis 8: minItems und maxItems im Parser-Schema von K1 v05 (G9).\n  if (paket.folien.length < 5 || paket.folien.length > 8) verstoss.push(paket.folien.length + ' Folien statt 5 bis 8');\n  paket.folien.forEach((f, i) => {\n    if (!f || typeof f !== 'object') { verstoss.push('Folie ' + (i + 1) + ' ist kein Objekt'); return; }\n    if (!['titel', 'inhalt', 'abschluss'].includes(f.typ)) verstoss.push('Folie ' + (i + 1) + ' mit unbekanntem typ');\n    if (typeof f.ueberschrift !== 'string' || typeof f.text !== 'string') verstoss.push('Folie ' + (i + 1) + ' ohne Überschrift oder Text als Zeichenkette');\n  });\n  // Warum zusaetzlich: Paket pruefen verwirft leere Folien, danach duerfen es nicht weniger als 5 sein.\n  const gefuellt = paket.folien.filter(f => f && (f.ueberschrift || f.text)).length;\n  if (gefuellt < 5 && paket.folien.length >= 5) verstoss.push('nur ' + gefuellt + ' gefüllte Folien');\n}\nfor (const f of ['caption_instagram', 'linkedin_post', 'bildprompt']) if (typeof paket[f] !== 'string') verstoss.push(f + ' ist keine Zeichenkette');\nif (!Array.isArray(paket.hashtags) || paket.hashtags.some(t => typeof t !== 'string')) verstoss.push('hashtags ist keine Liste aus Zeichenketten');\nif (verstoss.length) throw new Error('Paket verletzt das Schema: ' + verstoss.join('; '));\n// Warum usage: OpenRouter liefert Tokens und Kosten in USD schon fertig mit (usage.cost), keine Preistabelle noetig.\nconst u = r.usage || {};\nconst zahl = v => (typeof v === 'number' && isFinite(v)) ? v : null;\nreturn [{ json: {\n  output: paket,\n  modell_antwort: r.model || '',\n  token_prompt: zahl(u.prompt_tokens),\n  token_antwort: zahl(u.completion_tokens),\n  token_gesamt: zahl(u.total_tokens),\n  kosten_usd: zahl(u.cost)\n} }];"
+        "jsCode": "// Zweck: Antwort von OpenRouter in das bisherige Paketformat bringen und gegen das Schema von K1 v05 pruefen. Tokens und Kosten erfasst seit v03 der Knoten davor.\nconst k = $input.first().json;\nconst cfg = $('Konfiguration und Startzeit [Edit Fields]').first().json;\n// Warum Wurf ohne Antwort: Zeitlimit oder HTTP-Fehler, die Kostenerfassung hat den Vermerk schon; der Fehlerausgang fuehrt zum Ersatzmodell NVIDIA (F3).\nif (!k.antwort_da) throw new Error('OpenRouter ohne Antwort (' + (k.openrouter_fehler || 'ohne Meldung') + ')');\nconst r = k.openrouter_antwort || {};\nconst wahl = (r.choices || [])[0] || {};\nconst inhalt = String((wahl.message || {}).content || '');\n// Warum Codeblock entfernen: manche Modelle setzen das JSON trotz Vorgabe zwischen drei Backticks.\nconst roh = inhalt.replace(/^\\s*```(?:json)?\\s*/i, '').replace(/\\s*```\\s*$/, '');\nlet paket;\ntry { paket = JSON.parse(roh); } catch (e) { throw new Error('Antwort ist kein gültiges JSON (finish_reason ' + (wahl.finish_reason || 'unbekannt') + ')'); }\nif (!paket || typeof paket !== 'object' || Array.isArray(paket)) throw new Error('Antwort ist kein JSON-Objekt');\n// Warum Testschalter: (07.10.2026) laesst sich nur mit einem zu kurzen Paket nachweisen; 'lesen' kuerzt hier auf 4 Folien, Standard 'aus'.\nif (cfg.test_folien_kuerzen === 'lesen' && Array.isArray(paket.folien)) paket.folien = paket.folien.slice(0, 4);\n// Warum hier pruefen: dieselben Grenzen wie der Structured Output Parser in K1 v05, ein Verstoss geht ueber den Fehlerausgang zum Ersatzmodell (F3).\nconst pflicht = ['folien', 'caption_instagram', 'hashtags', 'linkedin_post', 'bildprompt'];\nconst fehlt = pflicht.filter(f => paket[f] === undefined);\nif (fehlt.length) throw new Error('Paket ohne Pflichtfelder: ' + fehlt.join(', '));\nconst verstoss = [];\nif (!Array.isArray(paket.folien)) verstoss.push('folien ist keine Liste');\nelse {\n  // Warum 5 bis 8: minItems und maxItems im Parser-Schema von K1 v05 (G9).\n  if (paket.folien.length < 5 || paket.folien.length > 8) verstoss.push(paket.folien.length + ' Folien statt 5 bis 8');\n  paket.folien.forEach((f, i) => {\n    if (!f || typeof f !== 'object') { verstoss.push('Folie ' + (i + 1) + ' ist kein Objekt'); return; }\n    if (!['titel', 'inhalt', 'abschluss'].includes(f.typ)) verstoss.push('Folie ' + (i + 1) + ' mit unbekanntem typ');\n    if (typeof f.ueberschrift !== 'string' || typeof f.text !== 'string') verstoss.push('Folie ' + (i + 1) + ' ohne Überschrift oder Text als Zeichenkette');\n  });\n  // Warum zusaetzlich: Paket pruefen verwirft leere Folien, danach duerfen es nicht weniger als 5 sein.\n  const gefuellt = paket.folien.filter(f => f && (f.ueberschrift || f.text)).length;\n  if (gefuellt < 5 && paket.folien.length >= 5) verstoss.push('nur ' + gefuellt + ' gefüllte Folien');\n}\nfor (const f of ['caption_instagram', 'linkedin_post', 'bildprompt']) if (typeof paket[f] !== 'string') verstoss.push(f + ' ist keine Zeichenkette');\nif (!Array.isArray(paket.hashtags) || paket.hashtags.some(t => typeof t !== 'string')) verstoss.push('hashtags ist keine Liste aus Zeichenketten');\nif (verstoss.length) throw new Error('Paket verletzt das Schema: ' + verstoss.join('; '));\nreturn [{ json: { output: paket, modell_antwort: k.modell_antwort } }];"
       },
       "id": "557d2c29-65c0-4f35-a6a5-1782fbc02fe1",
       "name": "Paket aus Antwort lesen [Code]",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        5344,
+        5664,
         864
       ],
       "onError": "continueErrorOutput"
@@ -2162,7 +2166,7 @@
       "type": "@n8n/n8n-nodes-langchain.chainLlm",
       "typeVersion": 1.9,
       "position": [
-        5664,
+        5984,
         864
       ],
       "onError": "continueErrorOutput"
@@ -2182,7 +2186,7 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatNvidia",
       "typeVersion": 1,
       "position": [
-        5600,
+        6000,
         1136
       ],
       "credentials": {
@@ -2202,11 +2206,12 @@
       "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
       "typeVersion": 1.3,
       "position": [
-        5840,
+        6208,
         1136
       ]
     },
     {
+      "parameters": {},
       "id": "51bb8be4-ea12-41ef-96ae-b43ce67b03c6",
       "name": "Abbruch nach Modellaufruf F8 [No Operation, do nothing]",
       "type": "n8n-nodes-base.noOp",
@@ -2214,8 +2219,20 @@
       "position": [
         2400,
         2720
-      ],
-      "parameters": {}
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Zweck: Tokens und Kosten des OpenRouter-Aufrufs erfassen, als eigener sichtbarer Schritt direkt hinter dem HTTP-Knoten (W04T04 Punkt 3).\n// Warum beide Ausgaenge hier ankommen: auch der Ersatzweg NVIDIA laeuft durch diese Kostenerfassung, damit ein Ausfall sichtbar null mit Vermerk schreibt, nie 0.\n// Warum kein Wurf: der Knoten steht nach dem bezahlten Aufruf, ein Fehler hier darf die Antwort nicht verlieren; Probleme landen im Vermerk.\nconst zahl = v => (typeof v === 'number' && isFinite(v)) ? v : null;\nconst vermerk = [];\nlet r = {};\nlet antwortDa = false, usageDa = false;\nlet tok = { token_prompt: null, token_antwort: null, token_gesamt: null, kosten_usd: null };\nlet fehlerText = '';\ntry {\n  r = ($input.first() || {}).json || {};\n  // Warum choices als Kennzeichen der Antwort: nur eine echte Antwort von OpenRouter traegt choices, der Fehlerausgang traegt error.\n  antwortDa = Array.isArray(r.choices);\n  // Warum usage unabhaengig von choices: liefert OpenRouter usage ohne choices, sind die Kosten trotzdem angefallen und bekannt.\n  const u = (r.usage && typeof r.usage === 'object') ? r.usage : null;\n  usageDa = !!u;\n  if (u) {\n    // Warum usage.cost: OpenRouter liefert die Kosten in USD fertig mit, keine Preistabelle, die still veraltet.\n    tok = { token_prompt: zahl(u.prompt_tokens), token_antwort: zahl(u.completion_tokens), token_gesamt: zahl(u.total_tokens), kosten_usd: zahl(u.cost) };\n    // Warum kein 0: fehlt usage.cost, ist der Preis unbekannt, nicht kostenlos.\n    if (tok.kosten_usd === null) vermerk.push('Kosten unbekannt: OpenRouter-Antwort ohne usage.cost');\n    if (tok.token_gesamt === null) vermerk.push('Tokens unbekannt: OpenRouter-Antwort ohne usage');\n  } else if (antwortDa) {\n    vermerk.push('Kosten unbekannt: OpenRouter-Antwort ohne usage.cost');\n    vermerk.push('Tokens unbekannt: OpenRouter-Antwort ohne usage');\n  } else {\n    // Warum unbekannt statt 0: ein Zeitlimit beweist nur, dass keine Antwort kam, nicht dass nichts abgerechnet wurde.\n    vermerk.push('Kosten unbekannt: OpenRouter ohne Antwort (Zeitlimit oder Fehler), Abrechnung nicht messbar');\n  }\n  if (!antwortDa) {\n    // Warum Zeichenkette zulassen: der HTTP-Knoten liefert den Fehler teils als Text, teils als Objekt mit Ursache.\n    const e = r.error;\n    const teile = typeof e === 'string' ? [e] : (e && typeof e === 'object') ? [e.message || e.description, e.cause && e.cause.message] : [];\n    fehlerText = (teile.filter(Boolean).join(', ') || (usageDa ? 'Antwort ohne choices' : 'Fehlerausgang ohne Meldung')).slice(0, 160);\n  }\n} catch (e) {\n  vermerk.push('Kostenerfassung fehlgeschlagen: ' + String(e.message || e).slice(0, 120));\n}\nreturn [{ json: {\n  antwort_da: antwortDa,\n  usage_da: usageDa,\n  openrouter_antwort: antwortDa ? r : null,\n  openrouter_fehler: fehlerText,\n  modell_antwort: antwortDa ? (r.model || '') : '',\n  token_prompt: tok.token_prompt,\n  token_antwort: tok.token_antwort,\n  token_gesamt: tok.token_gesamt,\n  kosten_usd: tok.kosten_usd,\n  token_quelle: usageDa ? 'openrouter usage' : 'ohne openrouter usage',\n  kosten_vermerk: vermerk.join('; ')\n} }];"
+      },
+      "id": "b7e3c1a2-4d5f-4e6a-9b8c-0d3a5f1e7c21",
+      "name": "Tokens und Kosten erfassen [Code]",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        5344,
+        864
+      ]
     }
   ],
   "connections": {
@@ -2886,24 +2903,6 @@
         ]
       ]
     },
-    "Content-Paket schreiben [HTTP Request]": {
-      "main": [
-        [
-          {
-            "node": "Paket aus Antwort lesen [Code]",
-            "type": "main",
-            "index": 0
-          }
-        ],
-        [
-          {
-            "node": "Ersatzpaket schreiben [Basic LLM Chain]",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
     "Paket aus Antwort lesen [Code]": {
       "main": [
         [
@@ -2972,6 +2971,35 @@
           }
         ]
       ]
+    },
+    "Content-Paket schreiben [HTTP Request]": {
+      "main": [
+        [
+          {
+            "node": "Tokens und Kosten erfassen [Code]",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Tokens und Kosten erfassen [Code]",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tokens und Kosten erfassen [Code]": {
+      "main": [
+        [
+          {
+            "node": "Paket aus Antwort lesen [Code]",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "pinData": {},
@@ -2989,7 +3017,7 @@
     "aiBuilderAssisted": true,
     "builderVariant": "mcp"
   },
-  "versionId": "168bce5f-f871-4b73-af09-156b3e2be3b1",
+  "versionId": "baacf324-cc72-4fe8-b528-f7ae4cc5abcf",
   "tags": [
     "KI-AGT-2606",
     "woche-4"
