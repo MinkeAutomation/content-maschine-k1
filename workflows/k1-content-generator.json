@@ -559,8 +559,8 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        2656,
-        864
+        2640,
+        928
       ],
       "retryOnFail": true,
       "maxTries": 3,
@@ -1233,8 +1233,8 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        2976,
-        864
+        2992,
+        896
       ]
     },
     {
@@ -1498,8 +1498,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        2336,
-        1664
+        2320,
+        1680
       ]
     },
     {
@@ -1921,7 +1921,7 @@
     {
       "parameters": {
         "content": "",
-        "height": 184,
+        "height": 240,
         "width": 1552,
         "color": 5
       },
@@ -2075,8 +2075,8 @@
     },
     {
       "parameters": {
-        "content": "## ⑥ Fehlerweg\nNur Abbrüche laufen hierher: E5 Eingabe ungültig, F6 Kunde unbekannt, F3 beide Modelle ohne gültiges Paket, F5 Rendern gescheitert, F8 Abbruch nach dem Modellaufruf (mit Tokens und Kosten). Eine Zeile fehlerweg ins Protokoll, ein Hinweis in Telegram, dann Stop and Error, damit der zentrale Error Workflow den Alert schickt.\n### 🟢 Ersatzwege F1, F2, F4, F7 laufen nicht mehr doppelt hierher (v05)",
-        "height": 152,
+        "content": "## ⑥ Fehlerweg\nNur Abbrüche laufen hierher: E5 Eingabe ungültig, F6 Kunde unbekannt, F3 beide Modelle ohne gültiges Paket, F5 Rendern gescheitert, F8 Abbruch nach dem Modellaufruf (mit Tokens und Kosten). Erst eine Zeile fehlerweg ins Protokoll, danach Stop and Error. Scheitert das Protokoll oder der Telegram-Hinweis selbst, endet der Lauf schon dort mit Fehler.\n🟡 Der Hinweis in Telegram geht nur raus, wenn Chat-ID und Freigabe-Nutzer-ID gesetzt sind, sonst stoppt der Lauf ohne Hinweis.\n🟡 Die Alarm-Mail schickt der zentrale Error Workflow nur bei automatischen Läufen, nicht bei manuellen Testläufen.\n### 🟢 Ersatzwege F1, F2, F4, F7 laufen nicht mehr doppelt hierher (v05)",
+        "height": 208,
         "width": 1520,
         "color": 3
       },
@@ -2186,7 +2186,7 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatNvidia",
       "typeVersion": 1,
       "position": [
-        6000,
+        5984,
         1136
       ],
       "credentials": {
@@ -3017,7 +3017,7 @@
     "aiBuilderAssisted": true,
     "builderVariant": "mcp"
   },
-  "versionId": "baacf324-cc72-4fe8-b528-f7ae4cc5abcf",
+  "versionId": "7702d087-94a7-4adf-bb4f-f4675c8f6c07",
   "tags": [
     "KI-AGT-2606",
     "woche-4"
