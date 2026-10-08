@@ -82,7 +82,7 @@
       "typeVersion": 2.6,
       "position": [
         64,
-        864
+        720
       ],
       "webhookId": "2e84fee7-4dfa-4067-bcda-8c889f1463b0",
       "credentials": {
@@ -202,7 +202,7 @@
       "typeVersion": 3.4,
       "position": [
         384,
-        864
+        720
       ]
     },
     {
@@ -225,7 +225,7 @@
       "typeVersion": 4.2,
       "position": [
         704,
-        864
+        720
       ],
       "retryOnFail": true,
       "maxTries": 3,
@@ -264,7 +264,7 @@
       "typeVersion": 1,
       "position": [
         1344,
-        864
+        720
       ],
       "retryOnFail": true,
       "maxTries": 3,
@@ -306,7 +306,7 @@
       "typeVersion": 2.2,
       "position": [
         1664,
-        864
+        720
       ]
     },
     {
@@ -347,7 +347,7 @@
       "typeVersion": 1,
       "position": [
         1984,
-        864
+        720
       ],
       "credentials": {
         "supabaseApi": {
@@ -365,8 +365,8 @@
       "type": "n8n-nodes-base.stopAndError",
       "typeVersion": 1,
       "position": [
-        3614,
-        1944
+        3120,
+        1424
       ]
     },
     {
@@ -469,8 +469,8 @@
       "type": "n8n-nodes-base.switch",
       "typeVersion": 3.2,
       "position": [
-        2334,
-        864
+        2336,
+        720
       ]
     },
     {
@@ -528,8 +528,8 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        4574,
-        864
+        4480,
+        736
       ]
     },
     {
@@ -549,8 +549,8 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        2654,
-        864
+        2656,
+        720
       ],
       "retryOnFail": true,
       "maxTries": 3,
@@ -582,8 +582,8 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        2654,
-        1384
+        2656,
+        1088
       ]
     },
     {
@@ -622,8 +622,8 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        2974,
-        1384
+        2960,
+        1088
       ],
       "retryOnFail": true,
       "maxTries": 3,
@@ -645,8 +645,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        3294,
-        1384
+        3248,
+        1120
       ]
     },
     {
@@ -665,8 +665,8 @@
       "type": "@n8n/n8n-nodes-langchain.chainLlm",
       "typeVersion": 1.9,
       "position": [
-        5020,
-        864
+        5024,
+        720
       ],
       "onError": "continueErrorOutput"
     },
@@ -690,8 +690,8 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
       "typeVersion": 1.3,
       "position": [
-        4956,
-        1136
+        4960,
+        928
       ],
       "credentials": {
         "openAiApi": {
@@ -710,8 +710,8 @@
       "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
       "typeVersion": 1.3,
       "position": [
-        5196,
-        1136
+        5200,
+        928
       ]
     },
     {
@@ -723,8 +723,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        5980,
-        1664
+        5680,
+        1224
       ]
     },
     {
@@ -755,8 +755,8 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        64,
-        2904
+        80,
+        1616
       ]
     },
     {
@@ -777,8 +777,8 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        384,
-        3164
+        288,
+        1536
       ],
       "retryOnFail": true,
       "maxTries": 3,
@@ -811,8 +811,8 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        704,
-        2904
+        512,
+        1648
       ],
       "executeOnce": true,
       "retryOnFail": true,
@@ -834,8 +834,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1024,
-        2904
+        720,
+        1648
       ]
     },
     {
@@ -886,8 +886,8 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        1344,
-        2904
+        1008,
+        1616
       ],
       "retryOnFail": true,
       "maxTries": 3,
@@ -925,8 +925,8 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        1664,
-        2904
+        1312,
+        1728
       ],
       "retryOnFail": true,
       "maxTries": 3,
@@ -956,8 +956,8 @@
       "type": "n8n-nodes-base.aggregate",
       "typeVersion": 1,
       "position": [
-        1984,
-        2904
+        1584,
+        1744
       ]
     },
     {
@@ -992,8 +992,8 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        2720,
-        2904
+        3472,
+        1792
       ],
       "retryOnFail": true,
       "maxTries": 3,
@@ -1045,8 +1045,8 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        3040,
-        2904
+        3792,
+        1792
       ]
     },
     {
@@ -1072,8 +1072,8 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        3360,
-        2904
+        4112,
+        1792
       ],
       "retryOnFail": true,
       "maxTries": 3,
@@ -1095,8 +1095,8 @@
       "type": "n8n-nodes-base.supabase",
       "typeVersion": 1,
       "position": [
-        4960,
-        3204
+        5712,
+        2096
       ],
       "executeOnce": true,
       "credentials": {
@@ -1120,8 +1120,8 @@
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1.2,
       "position": [
-        4320,
-        2904
+        5072,
+        1792
       ],
       "webhookId": "57f2c1a0-36d7-452c-b975-47f9fe376e62",
       "credentials": {
@@ -1145,8 +1145,8 @@
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1.2,
       "position": [
-        4640,
-        2904
+        5392,
+        1792
       ],
       "executeOnce": true,
       "webhookId": "a774deeb-428e-4289-938f-9414ad4aea6a",
@@ -1171,8 +1171,8 @@
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1.2,
       "position": [
-        4960,
-        2904
+        5712,
+        1792
       ],
       "executeOnce": true,
       "webhookId": "e19da7fc-e526-470d-9a60-c39ecef8c70e",
@@ -1211,8 +1211,8 @@
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1.2,
       "position": [
-        3360,
-        3204
+        4112,
+        2096
       ],
       "executeOnce": true,
       "webhookId": "928f1e73-d810-4410-b345-9c61fff131d2",
@@ -1243,8 +1243,8 @@
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1.2,
       "position": [
-        4000,
-        3464
+        4752,
+        2240
       ],
       "webhookId": "f3ba73af-4b96-4082-9d96-a6985827ada5",
       "credentials": {
@@ -1269,8 +1269,8 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatNvidia",
       "typeVersion": 1,
       "position": [
-        5436,
-        1136
+        5072,
+        1104
       ],
       "credentials": {
         "nvidiaApi": {
@@ -1308,8 +1308,8 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        2974,
-        864
+        2976,
+        720
       ]
     },
     {
@@ -1349,8 +1349,8 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        3294,
-        1124
+        3584,
+        864
       ]
     },
     {
@@ -1382,8 +1382,8 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        3614,
-        1384
+        3568,
+        1120
       ]
     },
     {
@@ -1398,8 +1398,8 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        3934,
-        1384
+        3904,
+        1136
       ],
       "alwaysOutputData": true,
       "onError": "continueRegularOutput"
@@ -1441,8 +1441,8 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        4254,
-        1384
+        4256,
+        1136
       ]
     },
     {
@@ -1473,8 +1473,8 @@
       "type": "n8n-nodes-base.supabase",
       "typeVersion": 1,
       "position": [
-        5660,
-        1664
+        5408,
+        1224
       ],
       "credentials": {
         "supabaseApi": {
@@ -1515,8 +1515,8 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        1664,
-        3164
+        1296,
+        1520
       ],
       "retryOnFail": true,
       "maxTries": 3,
@@ -1560,8 +1560,8 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        1984,
-        1664
+        1856,
+        1152
       ]
     },
     {
@@ -1574,8 +1574,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        2334,
-        1664
+        2032,
+        1408
       ]
     },
     {
@@ -1588,8 +1588,8 @@
       "type": "n8n-nodes-base.supabase",
       "typeVersion": 1,
       "position": [
-        2654,
-        1944
+        2288,
+        1408
       ],
       "credentials": {
         "supabaseApi": {
@@ -1638,8 +1638,8 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        2974,
-        1944
+        2544,
+        1408
       ]
     },
     {
@@ -1655,8 +1655,8 @@
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1.2,
       "position": [
-        3294,
-        1944
+        2832,
+        1408
       ],
       "webhookId": "03c7c7f4-5a46-45f7-a2c1-8ed36ed5960c",
       "credentials": {
@@ -1675,8 +1675,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        3680,
-        2904
+        4432,
+        1792
       ]
     },
     {
@@ -1695,19 +1695,11 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        4000,
-        2904
+        4752,
+        1792
       ]
     },
     {
-      "id": "b1a0e5a1-0001-4a5e-9c01-000000000e51",
-      "name": "Eingabe gültig? [If]",
-      "type": "n8n-nodes-base.if",
-      "typeVersion": 2.2,
-      "position": [
-        1024,
-        864
-      ],
       "parameters": {
         "conditions": {
           "options": {
@@ -1749,23 +1741,21 @@
           ]
         },
         "options": {}
-      }
+      },
+      "id": "b1a0e5a1-0001-4a5e-9c01-000000000e51",
+      "name": "Eingabe gültig? [If]",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1024,
+        720
+      ]
     },
     {
-      "id": "b1a0e5a1-0002-4a5e-9c01-000000000f07",
-      "name": "Entscheidung verteilen [Switch]",
-      "type": "n8n-nodes-base.switch",
-      "typeVersion": 3.2,
-      "position": [
-        3680,
-        3204
-      ],
       "parameters": {
         "rules": {
           "values": [
             {
-              "renameOutput": true,
-              "outputKey": "freigegeben",
               "conditions": {
                 "options": {
                   "caseSensitive": true,
@@ -1785,11 +1775,11 @@
                     }
                   }
                 ]
-              }
+              },
+              "renameOutput": true,
+              "outputKey": "freigegeben"
             },
             {
-              "renameOutput": true,
-              "outputKey": "abgelehnt",
               "conditions": {
                 "options": {
                   "caseSensitive": true,
@@ -1809,7 +1799,9 @@
                     }
                   }
                 ]
-              }
+              },
+              "renameOutput": true,
+              "outputKey": "abgelehnt"
             }
           ]
         },
@@ -1817,17 +1809,17 @@
           "fallbackOutput": "extra",
           "renameFallbackOutput": "abgelaufen (F7)"
         }
-      }
+      },
+      "id": "b1a0e5a1-0002-4a5e-9c01-000000000f07",
+      "name": "Entscheidung verteilen [Switch]",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        4432,
+        2096
+      ]
     },
     {
-      "id": "b1a0e5a1-0003-4a5e-9c01-000000000005",
-      "name": "Status setzen [Supabase]",
-      "type": "n8n-nodes-base.supabase",
-      "typeVersion": 1,
-      "position": [
-        4320,
-        3204
-      ],
       "parameters": {
         "operation": "update",
         "tableId": "k1_posts",
@@ -1862,6 +1854,14 @@
           ]
         }
       },
+      "id": "b1a0e5a1-0003-4a5e-9c01-000000000005",
+      "name": "Status setzen [Supabase]",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        5072,
+        2096
+      ],
       "retryOnFail": true,
       "credentials": {
         "supabaseApi": {
@@ -1871,19 +1871,24 @@
       }
     },
     {
+      "parameters": {
+        "jsCode": "// Zweck: genau eine Protokollzeile am Ende des Laufs bauen, mit allen Ersatzwegen dieses Laufs, nur Metadaten.\n// Warum ein Knoten statt Linien in den Fehlerweg: jeder Ersatzweg braucht eine Spur, aber keine eigene Linie quer ueber die Leinwand (v05).\nconst k = $('Konfiguration und Startzeit [Edit Fields]').first().json;\nconst p = $('Paket prüfen [Code]').first().json;\nconst r = $('Render-Liste bauen [Code]').first().json;\nconst lief = n => { try { return $(n).isExecuted === true; } catch (e) { return false; } };\nconst einst = $('Einstellungen laden [HTTP Request]').first().json.body || [];\nconst wert = s => (einst.find(z => z.schluessel === s) || {}).wert || '';\nconst ersatz = [];\nif (lief('Quelle-Fallback F1 [Edit Fields]')) ersatz.push($('Quelle-Fallback F1 [Edit Fields]').first().json.fehler_text);\nif (lief('Video-Fallback F2 [Edit Fields]')) ersatz.push($('Video-Fallback F2 [Edit Fields]').first().json.fehler_text);\n// Warum ueber Paket pruefen: es merkt sich, ob die Chain auf das Ersatzmodell umgeschaltet hat (F3).\nif (p.ersatzmodell) ersatz.push('F3: Hauptmodell ausgefallen, Paket vom Ersatzmodell NVIDIA');\n// Warum ueber Render-Liste bauen: sie erkennt selbst, ob ein FLUX-Bild kam (F4).\nif (r.bild_hinweis) ersatz.push(r.bild_hinweis);\n// Warum F7 hier: die Frist laeuft im Telegram-Knoten ab, ohne Antwort fehlt data.approved bzw. data.text.\nif (lief('Freigabe abwarten [Telegram]')) {\n  const d = $('Freigabe abwarten [Telegram]').first().json.data;\n  if (!d || d.approved === undefined) ersatz.push('F7: Freigabe-Frist 24 Stunden abgelaufen, Status freigabe_abgelaufen');\n  else if (lief('Grund abfragen [Telegram]')) { const g = $('Grund abfragen [Telegram]').first().json.data; if (!g || !g.text) ersatz.push('F7: Frist für den Ablehnungsgrund (2 Stunden) abgelaufen, Status abgelehnt ohne Grund'); }\n}\nconst hinweise = ersatz.slice();\nif (!(wert('telegram_chat_id') && wert('telegram_freigabe_nutzer_id'))) hinweise.push('Telegram übersprungen: Chat-ID oder Freigabe-Nutzer-ID fehlt, Status bleibt wartet_auf_freigabe');\nreturn [{ json: {\n  workflow_name: k.workflow_name, execution_id: k.execution_id, ausfuehrung_modus: k.ausfuehrung_modus,\n  stelle: 'ende', status: ersatz.length ? 'fallback' : 'ok',\n  dauer_ms: Math.round(Date.now() - new Date(k.startTime).getTime()),\n  modell: p.modell_genutzt, kunde_kuerzel: (p.kunde || {}).kuerzel, post_id: p.post_id,\n  fehler_text: hinweise.join('; ').slice(0, 300)\n} }];"
+      },
       "id": "b1a0e5a1-0004-4a5e-9c01-0000000000aa",
       "name": "Protokollzeile bauen [Code]",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        4640,
-        3204
-      ],
-      "parameters": {
-        "jsCode": "// Zweck: genau eine Protokollzeile am Ende des Laufs bauen, mit allen Ersatzwegen dieses Laufs, nur Metadaten.\n// Warum ein Knoten statt Linien in den Fehlerweg: jeder Ersatzweg braucht eine Spur, aber keine eigene Linie quer ueber die Leinwand (v05).\nconst k = $('Konfiguration und Startzeit [Edit Fields]').first().json;\nconst p = $('Paket prüfen [Code]').first().json;\nconst r = $('Render-Liste bauen [Code]').first().json;\nconst lief = n => { try { return $(n).isExecuted === true; } catch (e) { return false; } };\nconst einst = $('Einstellungen laden [HTTP Request]').first().json.body || [];\nconst wert = s => (einst.find(z => z.schluessel === s) || {}).wert || '';\nconst ersatz = [];\nif (lief('Quelle-Fallback F1 [Edit Fields]')) ersatz.push($('Quelle-Fallback F1 [Edit Fields]').first().json.fehler_text);\nif (lief('Video-Fallback F2 [Edit Fields]')) ersatz.push($('Video-Fallback F2 [Edit Fields]').first().json.fehler_text);\n// Warum ueber Paket pruefen: es merkt sich, ob die Chain auf das Ersatzmodell umgeschaltet hat (F3).\nif (p.ersatzmodell) ersatz.push('F3: Hauptmodell ausgefallen, Paket vom Ersatzmodell NVIDIA');\n// Warum ueber Render-Liste bauen: sie erkennt selbst, ob ein FLUX-Bild kam (F4).\nif (r.bild_hinweis) ersatz.push(r.bild_hinweis);\n// Warum F7 hier: die Frist laeuft im Telegram-Knoten ab, ohne Antwort fehlt data.approved bzw. data.text.\nif (lief('Freigabe abwarten [Telegram]')) {\n  const d = $('Freigabe abwarten [Telegram]').first().json.data;\n  if (!d || d.approved === undefined) ersatz.push('F7: Freigabe-Frist 24 Stunden abgelaufen, Status freigabe_abgelaufen');\n  else if (lief('Grund abfragen [Telegram]')) { const g = $('Grund abfragen [Telegram]').first().json.data; if (!g || !g.text) ersatz.push('F7: Frist für den Ablehnungsgrund (2 Stunden) abgelaufen, Status abgelehnt ohne Grund'); }\n}\nconst hinweise = ersatz.slice();\nif (!(wert('telegram_chat_id') && wert('telegram_freigabe_nutzer_id'))) hinweise.push('Telegram übersprungen: Chat-ID oder Freigabe-Nutzer-ID fehlt, Status bleibt wartet_auf_freigabe');\nreturn [{ json: {\n  workflow_name: k.workflow_name, execution_id: k.execution_id, ausfuehrung_modus: k.ausfuehrung_modus,\n  stelle: 'ende', status: ersatz.length ? 'fallback' : 'ok',\n  dauer_ms: Math.round(Date.now() - new Date(k.startTime).getTime()),\n  modell: p.modell_genutzt, kunde_kuerzel: (p.kunde || {}).kuerzel, post_id: p.post_id,\n  fehler_text: hinweise.join('; ').slice(0, 300)\n} }];"
-      }
+        5392,
+        2096
+      ]
     },
     {
+      "parameters": {
+        "content": "",
+        "height": 320,
+        "width": 2156
+      },
       "id": "b1a0e5a1-0100-4a5e-9c01-000000000004",
       "name": "Rahmen Kopf",
       "type": "n8n-nodes-base.stickyNote",
@@ -1891,125 +1896,126 @@
       "position": [
         0,
         0
-      ],
+      ]
+    },
+    {
       "parameters": {
         "content": "",
         "height": 320,
-        "width": 2156
-      }
-    },
-    {
+        "width": 840
+      },
       "id": "b1a0e5a1-0100-4a5e-9c01-000000000006",
       "name": "Rahmen Testfaelle",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        2252,
+        2256,
         0
-      ],
-      "parameters": {
-        "content": "",
-        "height": 320,
-        "width": 840
-      }
+      ]
     },
     {
+      "parameters": {
+        "content": "# 01 · Eingang\nAuftrag annehmen, Eingabe prüfen, Kunde und Post.",
+        "height": 632,
+        "width": 2174,
+        "color": 4
+      },
       "id": "b1a0e5a1-0100-4a5e-9c01-000000000007",
       "name": "Fläche 01",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
         0,
-        464
-      ],
-      "parameters": {
-        "content": "# 01 · Eingang\nAuftrag annehmen, Eingabe prüfen, Kunde und Post.",
-        "height": 1400,
-        "width": 2174,
-        "color": 4
-      }
+        368
+      ]
     },
     {
+      "parameters": {
+        "content": "# 02 · Quelle holen\nJede Quellenart wird zu einem Quelltext.",
+        "height": 928,
+        "width": 2494,
+        "color": 5
+      },
       "id": "b1a0e5a1-0100-4a5e-9c01-000000000008",
       "name": "Fläche 02",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        2270,
-        464
-      ],
-      "parameters": {
-        "content": "# 02 · Quelle holen\nJede Quellenart wird zu einem Quelltext.",
-        "height": 1120,
-        "width": 2494,
-        "color": 5
-      }
+        2272,
+        368
+      ]
     },
     {
+      "parameters": {
+        "content": "# 03 · KI\nPaket schreiben und prüfen.",
+        "height": 1024,
+        "width": 1038,
+        "color": 6
+      },
       "id": "b1a0e5a1-0100-4a5e-9c01-000000000009",
       "name": "Fläche 03",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        4860,
-        464
-      ],
-      "parameters": {
-        "content": "# 03 · KI\nPaket schreiben und prüfen.",
-        "height": 1400,
-        "width": 1310,
-        "color": 6
-      }
+        4864,
+        368
+      ]
     },
     {
+      "parameters": {
+        "content": "# 04 · Gestalten\nEinzelbild und Folien rendern.",
+        "height": 716,
+        "width": 1774,
+        "color": 5
+      },
       "id": "b1a0e5a1-0100-4a5e-9c01-000000000010",
       "name": "Fläche 04",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        0,
-        2504
-      ],
-      "parameters": {
-        "content": "# 04 · Gestalten\nEinzelbild und Folien rendern.",
-        "height": 860,
-        "width": 2174,
-        "color": 5
-      }
+        16,
+        1216
+      ]
     },
     {
+      "parameters": {
+        "content": "# 05 · Ablage und Freigabe\nSpeichern, Freigabe in Telegram, Status, Protokoll.",
+        "height": 1032,
+        "width": 2494,
+        "color": 2
+      },
       "id": "b1a0e5a1-0100-4a5e-9c01-000000000011",
       "name": "Fläche 05",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        2656,
-        2504
-      ],
-      "parameters": {
-        "content": "# 05 · Ablage und Freigabe\nSpeichern, Freigabe in Telegram, Status, Protokoll.",
-        "height": 1160,
-        "width": 2494,
-        "color": 2
-      }
+        3408,
+        1408
+      ]
     },
     {
+      "parameters": {
+        "content": "",
+        "height": 184,
+        "width": 960,
+        "color": 5
+      },
       "id": "b1a0e5a1-0100-4a5e-9c01-000000000018",
       "name": "Rahmen Fehlerweg",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        400,
-        1904
-      ],
-      "parameters": {
-        "content": "",
-        "height": 184,
-        "width": 1552,
-        "color": 5
-      }
+        2432,
+        1600
+      ]
     },
     {
+      "parameters": {
+        "content": "# 🧪 AGT-2606 P1 Content-Generator K1\n**Aufgabe:** Ein Dienstleister gibt für einen Kunden ein Thema, einen Artikel-Link, ein YouTube-Video oder eigenen Text ein und bekommt ein Content-Paket im Branding dieses Kunden zur Freigabe in Telegram.\n**Die Idee:** Die Quelle wird zu Text, ein Sprachmodell schreibt ein JSON-Paket, Gotenberg rendert die Bilder, Supabase hält alles, Telegram holt die Freigabe.\n**Warum so?** Supabase ist die einzige Wahrheit für Telegram und das spätere Dashboard, das Branding kommt aus dem Kundenprofil.\n**Hinweis:** Eingaben werden vor dem Sprachmodell geprüft (E5). In den Fehlerweg laufen nur Abbrüche, Ersatzwege stehen in der Protokollzeile am Ende.\nStufe: Durchstich bis 14.10.2026",
+        "height": 288,
+        "width": 1100,
+        "color": 7
+      },
       "id": "b1a0e5a1-0100-4a5e-9c01-000000000001",
       "name": "Kopf",
       "type": "n8n-nodes-base.stickyNote",
@@ -2017,15 +2023,15 @@
       "position": [
         16,
         16
-      ],
-      "parameters": {
-        "content": "# 🧪 AGT-2606 P1 Content-Generator K1\n**Aufgabe:** Ein Dienstleister gibt für einen Kunden ein Thema, einen Artikel-Link, ein YouTube-Video oder eigenen Text ein und bekommt ein Content-Paket im Branding dieses Kunden zur Freigabe in Telegram.\n**Die Idee:** Die Quelle wird zu Text, ein Sprachmodell schreibt ein JSON-Paket, Gotenberg rendert die Bilder, Supabase hält alles, Telegram holt die Freigabe.\n**Warum so?** Supabase ist die einzige Wahrheit für Telegram und das spätere Dashboard, das Branding kommt aus dem Kundenprofil.\n**Hinweis:** Eingaben werden vor dem Sprachmodell geprüft (E5). In den Fehlerweg laufen nur Abbrüche, Ersatzwege stehen in der Protokollzeile am Ende.\nStufe: Durchstich bis 14.10.2026",
-        "height": 288,
-        "width": 1100,
-        "color": 7
-      }
+      ]
     },
     {
+      "parameters": {
+        "content": "## Ablauf\n① Eingang: Auftrag annehmen, Eingabe prüfen, Kundenprofil laden, Post anlegen\n② Quelle holen: Artikel, Video, Thema oder eigener Text wird ein Quelltext\n③ KI: Content-Paket schreiben und prüfen\n④ Gestalten: Einzelbild und Folien rendern und hochladen\n⑤ Ablage und Freigabe: speichern, Telegram-Freigabe, Status, Protokollzeile\n⑥ Fehlerweg: Abbrüche E5, F3, F5, F6 protokollieren, melden, stoppen",
+        "height": 288,
+        "width": 492,
+        "color": 7
+      },
       "id": "b1a0e5a1-0100-4a5e-9c01-000000000002",
       "name": "Ablauf",
       "type": "n8n-nodes-base.stickyNote",
@@ -2033,15 +2039,15 @@
       "position": [
         1136,
         16
-      ],
+      ]
+    },
+    {
       "parameters": {
-        "content": "## Ablauf\n① Eingang: Auftrag annehmen, Eingabe prüfen, Kundenprofil laden, Post anlegen\n② Quelle holen: Artikel, Video, Thema oder eigener Text wird ein Quelltext\n③ KI: Content-Paket schreiben und prüfen\n④ Gestalten: Einzelbild und Folien rendern und hochladen\n⑤ Ablage und Freigabe: speichern, Telegram-Freigabe, Status, Protokollzeile\n⑥ Fehlerweg: Abbrüche E5, F3, F5, F6 protokollieren, melden, stoppen",
+        "content": "## Status\n🟢 Durchstich v05 nachgetestet (Läufe 677 bis 682): E5 ohne Modellaufruf, F6, F5, F1, Freigeben und Ablehnen in Telegram.\n🟡 Der Ablehnungsgrund öffnet noch eine Webseite, die Antwort im Chat kommt mit der Telegram-Steuerung.\n🔴 Kundenschicht (Setup, Hilfe-Spalte, Fehlerbehebung) fehlt bis zum Feinschliff.\n🔵 Testschalter test_kaputtes_json im Konfigurationsknoten, Standard aus.",
         "height": 288,
         "width": 492,
         "color": 7
-      }
-    },
-    {
+      },
       "id": "b1a0e5a1-0100-4a5e-9c01-000000000003",
       "name": "Status",
       "type": "n8n-nodes-base.stickyNote",
@@ -2049,122 +2055,122 @@
       "position": [
         1648,
         16
-      ],
-      "parameters": {
-        "content": "## Status\n🟢 Durchstich v05 nachgetestet (Läufe 677 bis 682): E5 ohne Modellaufruf, F6, F5, F1, Freigeben und Ablehnen in Telegram.\n🟡 Der Ablehnungsgrund öffnet noch eine Webseite, die Antwort im Chat kommt mit der Telegram-Steuerung.\n🔴 Kundenschicht (Setup, Hilfe-Spalte, Fehlerbehebung) fehlt bis zum Feinschliff.\n🔵 Testschalter test_kaputtes_json im Konfigurationsknoten, Standard aus.",
-        "height": 288,
-        "width": 492,
-        "color": 7
-      }
+      ]
     },
     {
-      "id": "b1a0e5a1-0100-4a5e-9c01-000000000005",
-      "name": "Testfälle",
-      "type": "n8n-nodes-base.stickyNote",
-      "typeVersion": 1,
-      "position": [
-        2268,
-        16
-      ],
       "parameters": {
         "content": "## 📊 Testfälle für diesen Ablauf\n| Nr | Eingabe | Erwartung |\n|---|---|---|\n| T01 | Ordwin, Thema | Paket, Freigeben setzt fertig |\n| E5 | Thema leer | kein Modellaufruf, Zeile fehlerweg |\n| F1b | Artikel example.com | F1 in der Protokollzeile |\n| T10c | Render-Adresse falsch | nur_texte, Abbruch F5 |\n| F6 | Kunde unbekannt | Abbruch vor dem Post |",
         "height": 288,
         "width": 808,
         "color": 5
-      }
+      },
+      "id": "b1a0e5a1-0100-4a5e-9c01-000000000005",
+      "name": "Testfälle",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2272,
+        16
+      ]
     },
     {
+      "parameters": {
+        "content": "## ① Eingang\nDas Formular nimmt Kunde, Thema, Quellenart und Quelle an. Eine leere oder zu kurze Eingabe stoppt ohne Modellaufruf (E5), ein unbekannter Kunde ebenso (F6), sonst entsteht der Post in Supabase.\n### 🟢 Eingabeprüfung neu in v05 (Fund E5)",
+        "height": 136,
+        "width": 1390
+      },
       "id": "b1a0e5a1-0100-4a5e-9c01-000000000012",
       "name": "Karte ①",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
         32,
-        640
-      ],
-      "parameters": {
-        "content": "## ① Eingang\nDas Formular nimmt Kunde, Thema, Quellenart und Quelle an. Eine leere oder zu kurze Eingabe stoppt ohne Modellaufruf (E5), ein unbekannter Kunde ebenso (F6), sonst entsteht der Post in Supabase.\n### 🟢 Eingabeprüfung neu in v05 (Fund E5)",
-        "height": 136,
-        "width": 2110
-      }
+        496
+      ]
     },
     {
+      "parameters": {
+        "content": "## ② Quelle holen\nDer Switch verteilt auf Thema, eigenen Text, Artikel (Jina) und YouTube (Supadata). Ist der Artikel nicht lesbar (F1) oder fehlen Untertitel (F2), geht es mit Thema bzw. Videotitel weiter.\n### 🟢 läuft, F1 und F2 stehen in der Protokollzeile",
+        "height": 136,
+        "width": 1278
+      },
       "id": "b1a0e5a1-0100-4a5e-9c01-000000000013",
       "name": "Karte ②",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        2302,
-        640
-      ],
-      "parameters": {
-        "content": "## ② Quelle holen\nDer Switch verteilt auf Thema, eigenen Text, Artikel (Jina) und YouTube (Supadata). Ist der Artikel nicht lesbar (F1) oder fehlen Untertitel (F2), geht es mit Thema bzw. Videotitel weiter.\n### 🟢 läuft, F1 und F2 stehen in der Protokollzeile",
-        "height": 136,
-        "width": 2430
-      }
+        2304,
+        496
+      ]
     },
     {
+      "parameters": {
+        "content": "## ③ KI\nDas Kursmodell schreibt das Paket nach JSON-Schema, fällt es aus, springt NVIDIA ein (F3). Scheitern beide, steht der Post auf fehler und der Lauf bricht ab.\n### 🟢 läuft, die lange Linie führt zu ④ in Reihe 2",
+        "height": 136,
+        "width": 958
+      },
       "id": "b1a0e5a1-0100-4a5e-9c01-000000000014",
       "name": "Karte ③",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        4892,
-        640
-      ],
-      "parameters": {
-        "content": "## ③ KI\nDas Kursmodell schreibt das Paket nach JSON-Schema, fällt es aus, springt NVIDIA ein (F3). Scheitern beide, steht der Post auf fehler und der Lauf bricht ab.\n### 🟢 läuft, die lange Linie führt zu ④ in Reihe 2",
-        "height": 136,
-        "width": 1246
-      }
+        4896,
+        496
+      ]
     },
     {
+      "parameters": {
+        "content": "## ④ Gestalten\nFLUX malt das Einzelbild (ohne Konto-ID oder bei Fehler Farbverlauf, F4), Gotenberg rendert jede Folie als PNG, der Upload legt alles im privaten Bucket ab. Scheitert das Rendern, bleibt der Post bei nur_texte und der Lauf bricht ab (F5).\n### 🟢 läuft, F4 steht in der Protokollzeile",
+        "height": 152,
+        "width": 1268
+      },
       "id": "b1a0e5a1-0100-4a5e-9c01-000000000015",
       "name": "Karte ④",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        32,
-        2616
-      ],
-      "parameters": {
-        "content": "## ④ Gestalten\nFLUX malt das Einzelbild (ohne Konto-ID oder bei Fehler Farbverlauf, F4), Gotenberg rendert jede Folie als PNG, der Upload legt alles im privaten Bucket ab. Scheitert das Rendern, bleibt der Post bei nur_texte und der Lauf bricht ab (F5).\n### 🟢 läuft, F4 steht in der Protokollzeile",
-        "height": 152,
-        "width": 1268
-      }
+        48,
+        1328
+      ]
     },
     {
+      "parameters": {
+        "content": "## ⑤ Ablage und Freigabe\nPost speichern, Vorschau und beide Texte an Telegram, dann Freigeben oder Ablehnen im Chat (Frist 24 Stunden, Grund 2 Stunden, F7). Ein Switch verteilt die Entscheidung, ein Knoten setzt den Status, die Protokollzeile sammelt alle Ersatzwege des Laufs.\n### 🟢 Status setzen und Protokollzeile neu in v05",
+        "height": 136,
+        "width": 1742
+      },
       "id": "b1a0e5a1-0100-4a5e-9c01-000000000016",
       "name": "Karte ⑤",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        2688,
-        2680
-      ],
-      "parameters": {
-        "content": "## ⑤ Ablage und Freigabe\nPost speichern, Vorschau und beide Texte an Telegram, dann Freigeben oder Ablehnen im Chat (Frist 24 Stunden, Grund 2 Stunden, F7). Ein Switch verteilt die Entscheidung, ein Knoten setzt den Status, die Protokollzeile sammelt alle Ersatzwege des Laufs.\n### 🟢 Status setzen und Protokollzeile neu in v05",
-        "height": 136,
-        "width": 2430
-      }
+        3456,
+        1552
+      ]
     },
     {
+      "parameters": {
+        "content": "## ⑥ Fehlerweg\nNur Abbrüche laufen hierher: E5 Eingabe ungültig, F6 Kunde unbekannt, F3 beide Modelle ohne gültiges Paket, F5 Rendern gescheitert. Eine Zeile fehlerweg ins Protokoll, ein Hinweis in Telegram, dann Stop and Error, damit der zentrale Error Workflow den Alert schickt.\n### 🟢 Ersatzwege F1, F2, F4, F7 laufen nicht mehr doppelt hierher (v05)",
+        "height": 152,
+        "width": 928,
+        "color": 3
+      },
       "id": "b1a0e5a1-0100-4a5e-9c01-000000000017",
       "name": "Karte ⑥",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        416,
-        1920
-      ],
-      "parameters": {
-        "content": "## ⑥ Fehlerweg\nNur Abbrüche laufen hierher: E5 Eingabe ungültig, F6 Kunde unbekannt, F3 beide Modelle ohne gültiges Paket, F5 Rendern gescheitert. Eine Zeile fehlerweg ins Protokoll, ein Hinweis in Telegram, dann Stop and Error, damit der zentrale Error Workflow den Alert schickt.\n### 🟢 Ersatzwege F1, F2, F4, F7 laufen nicht mehr doppelt hierher (v05)",
-        "height": 152,
-        "width": 1520,
-        "color": 3
-      }
+        2448,
+        1616
+      ]
     },
     {
+      "parameters": {
+        "content": "# AGT-2606 P1 Content-Generator K1\nContent-Paket aus Thema, Artikel, Video oder eigenem Text, Freigabe in Telegram.",
+        "height": 112,
+        "width": 3098,
+        "color": 5
+      },
       "id": "b1a0e5a1-0100-4a5e-9c01-000000000019",
       "name": "Titel",
       "type": "n8n-nodes-base.stickyNote",
@@ -2172,13 +2178,177 @@
       "position": [
         0,
         -144
+      ]
+    },
+    {
+      "id": "1ec7d8dd-9114-420c-a67d-871180950b1e",
+      "name": "Rahmen Ausbau bis 16.10.",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        0,
+        2560
       ],
       "parameters": {
-        "content": "# AGT-2606 P1 Content-Generator K1\nContent-Paket aus Thema, Artikel, Video oder eigenem Text, Freigabe in Telegram.",
-        "height": 112,
-        "width": 6170,
-        "color": 5
+        "content": "",
+        "width": 2880,
+        "height": 480
       }
+    },
+    {
+      "id": "bffcf7e9-25d6-4ee2-896e-39912d01dd9f",
+      "name": "Ausbau bis 16.10.",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        16,
+        2576
+      ],
+      "parameters": {
+        "content": "# Ausbau bis 16.10.\nGeplante Bausteine, deaktiviert und nicht verbunden.",
+        "width": 2848,
+        "height": 448,
+        "color": 2
+      }
+    },
+    {
+      "id": "2e1823a0-c2dd-4a94-8fb1-a032ff628fcf",
+      "name": "Research virale Posts [HTTP Request]",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        112,
+        2752
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.perplexity.ai/chat/completions",
+        "options": {}
+      },
+      "disabled": true,
+      "notes": "Findet virale englische Posts der letzten 5 bis 7 Tage (Perplexity Sonar oder Mistral) und adaptiert sie als 5. Quellenart ins Deutsche."
+    },
+    {
+      "id": "7f1e734d-0dd6-47f9-95fa-2d62b5a32b4a",
+      "name": "Websuche Faktencheck [HTTP Request]",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        464,
+        2752
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.tavily.com/search",
+        "options": {}
+      },
+      "disabled": true,
+      "notes": "Prüft jeden Post per Tavily-Websuche auf Fakten und gleicht Text, Keywords und Hashtags mit viralen Vorlagen ab (Community Node @tavily/n8n-nodes-tavily nicht installiert)."
+    },
+    {
+      "id": "cada0d2c-613c-4504-893b-012900971026",
+      "name": "Auftrag per Telegram [Telegram Trigger]",
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.5,
+      "position": [
+        816,
+        2752
+      ],
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "disabled": true,
+      "notes": "Nimmt den Auftrag als Text, Sprachnachricht oder Link in Telegram an, das Formular bleibt der zweite Eingang.",
+      "webhookId": "0b30fd57-02a7-4be2-a0da-94acfe895cfc"
+    },
+    {
+      "id": "eb06b409-654a-43b7-897c-5a3fe4ef7e41",
+      "name": "Sprachnachricht umwandeln [HTTP Request]",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1168,
+        2752
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.groq.com/openai/v1/audio/transcriptions",
+        "options": {}
+      },
+      "disabled": true,
+      "notes": "Wandelt eine Telegram-Sprachnachricht über eine Whisper-Schnittstelle in Text um."
+    },
+    {
+      "id": "0a78540d-95a6-4b1e-9a03-6f7de8a9b156",
+      "name": "Branding-Paket laden [Supabase]",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        1520,
+        2752
+      ],
+      "parameters": {
+        "operation": "getAll",
+        "tableId": "k1_branding",
+        "limit": 1
+      },
+      "disabled": true,
+      "notes": "Lädt Logo, Schriften, Farben und Postformen je Format und Plattform des Kunden aus Supabase."
+    },
+    {
+      "id": "2203b144-f4b0-4c83-97d3-4aaafba52232",
+      "name": "Dashboard-Kennzahlen lesen [Supabase]",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        1872,
+        2752
+      ],
+      "parameters": {
+        "operation": "getAll",
+        "tableId": "k1_laufprotokoll",
+        "returnAll": true
+      },
+      "disabled": true,
+      "notes": "Liest Läufe, Kosten und Freigaben aus dem Laufprotokoll für ein Dashboard im Überblick."
+    },
+    {
+      "id": "aec74455-e1b8-42ac-a9e8-4c9d5ff8942a",
+      "name": "Reels erzeugen [HTTP Request]",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2224,
+        2752
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "https://ffmpeg.example.invalid/render",
+        "options": {}
+      },
+      "disabled": true,
+      "notes": "Erzeugt zuletzt kurze Reels aus den Folien über einen FFmpeg-Dienst (Execute Command ist auf der Instanz nicht verfügbar, Community Node n8n-nodes-mediafx nicht installiert)."
+    },
+    {
+      "id": "96f2346e-7ae9-4c7c-955e-80cc59bc5dad",
+      "name": "Paket in Nextcloud ablegen [Nextcloud]",
+      "type": "n8n-nodes-base.nextCloud",
+      "typeVersion": 1,
+      "position": [
+        2576,
+        2752
+      ],
+      "parameters": {
+        "resource": "file",
+        "operation": "upload",
+        "path": "/K1/Pakete/paket.zip",
+        "binaryDataUpload": true
+      },
+      "disabled": true,
+      "notes": "Optional nach dem Serverumzug: legt Bilder und Content-Pakete in Nextcloud ab."
     }
   ],
   "connections": {
@@ -2874,7 +3044,7 @@
     "aiBuilderAssisted": true,
     "builderVariant": "mcp"
   },
-  "versionId": "03002dbb-dae6-4a44-8c72-289635931992",
+  "versionId": "331b8f96-65a9-45e4-9178-065065cf052c",
   "tags": [
     "KI-AGT-2606",
     "woche-4"
