@@ -178,14 +178,14 @@
     },
     {
       "parameters": {
-        "jsCode": "// Zweck: Platzhalter (Mock), bis der Whisper-Knoten n8n-nodes-nvidia-nim-whisper-v2 installiert ist.\n// Schalter: steht in den Testdaten von \"Sprachdatei laden\" ein Feld mock_transkript, kommt es als Transkript zurueck.\n// Fehlt es, nimmt der Knoten den Fehlerweg wie eine echte gescheiterte Transkription (Antwort \"Bitte tippen\").\nconst j = $input.first().json;\nif (!j.mock_transkript) {\n  throw new Error('Spracherkennung noch nicht eingerichtet: Whisper-Knoten fehlt');\n}\nreturn [{ json: { transkript: String(j.mock_transkript) } }];"
+        "jsCode": "// Zweck: Antwort von Cloudflare Whisper pruefen und als Feld transkript weitergeben.\n// Leerer Text (Stille, unverstaendliche Aufnahme) nimmt den Fehlerweg \"Bitte tippen\", damit kein leerer Auftrag an K1 geht.\nconst text = String($input.first().json.result?.text ?? '').trim();\nif (!text) {\n  throw new Error('Cloudflare Whisper lieferte keinen Text');\n}\nreturn [{ json: { transkript: text } }];"
       },
       "id": "92ed7fd5-b6f5-4637-be51-6cb282259960",
-      "name": "Sprache in Text (Mock) [Code]",
+      "name": "Transkript prüfen [Code]",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1712,
+        2704,
         1568
       ],
       "onError": "continueErrorOutput"
@@ -209,7 +209,7 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        2048,
+        3040,
         1568
       ]
     },
@@ -415,7 +415,7 @@
     },
     {
       "parameters": {
-        "content": "## Status\n🟢 Text, Link, Befehl und Kunde: mit Testdaten geprüft, Läufe im Bau-Protokoll\n🟡 Trigger und Sendeknoten auf dem Test-Bot, der Trigger-Filter ist erst mit einer echten Nachricht messbar\n🔴 Sprachzweig ist ein Platzhalter, Spracherkennung wird noch gemessen\n🔵 K1 bekommt den zweiten Trigger erst beim Zusammenführen",
+        "content": "## Status\n🟢 Text, Link, Befehl und Kunde: mit Testdaten geprüft, Läufe im Bau-Protokoll\n🟡 Trigger-Filter und echte Stimme erst mit einer echten Nachricht messbar\n🔴 Kundenkürzel in Sprachnachrichten werden falsch gehört (Ordwin als Kundenort Win), Abgleich offen\n🔵 K1 bekommt den zweiten Trigger erst beim Zusammenführen",
         "height": 424,
         "width": 492,
         "color": 7
@@ -461,9 +461,9 @@
     },
     {
       "parameters": {
-        "content": "## ③ Sprache in Text\nDie Sprachdatei kommt über `getFile`. Bis die Spracherkennung entschieden ist (Cloudflare Whisper oder Nemotron 3 Nano Omni, beide gratis), steht hier ein Platzhalter (Mock): ohne `mock_transkript` nimmt er den Fehlerweg.\n### 🔴 NICHT GEMESSEN, Spracherkennung fehlt\n🩺 **Wenn es hakt:** Den Mock durch den gewählten HTTP Request ersetzen.",
+        "content": "## ③ Sprache in Text\nDie Sprachdatei kommt über `getFile`, wird zu Base64 und geht an Cloudflare Whisper large v3 turbo (gratis, Sprache de). Jeder Fehler und ein leeres Transkript nehmen den Weg „Bitte tippen“.\n### 🟡 mit Testaufnahme gemessen, echte Stimme offen\n🩺 **Wenn es hakt:** `cloudflare_account_id` in `k1_einstellungen` prüfen.",
         "height": 220,
-        "width": 840
+        "width": 1012
       },
       "id": "e1260e6f-70f9-40a3-8822-1ebf9cae9451",
       "name": "Karte ③",
@@ -569,7 +569,7 @@
     },
     {
       "parameters": {
-        "content": "# ✅ Setup-Checkliste\nEinrichtung **in dieser Reihenfolge**, ✅ erledigt, ⏳ offen, 🟡 Hinweis.\n\n✅ **1 Test-Bot:** bei @BotFather einen eigenen Bot angelegt, Token als Credential `Telegram API | Test-Bot K1-Eingang`.\n\n✅ **2 Trigger einsetzen:** `Telegram-Nachricht empfangen [Telegram Trigger]` mit Update message und Restrict to User IDs, Credential Test-Bot.\n\n✅ **3 Credential tauschen:** `Sprachdatei laden`, `Auftrag bestätigen`, `Hilfe senden`, `Bitte tippen` und `Start fehlgeschlagen melden` nutzen den Test-Bot, nie `Telegram API | Content-Generator`.\n\n✅ **4 Nutzer-ID:** die eigene Telegram-ID im Trigger und in `Einstellungen setzen` (`erlaubte_nutzer_ids`).\n\n⏳ **5 Spracherkennung:** Cloudflare Whisper oder Nemotron 3 Nano Omni per HTTP Request statt des Mocks, Ergebnis im Bau-Protokoll.\n\n⏳ **6 K1-ID:** nach dem Zusammenführen `k1_workflow_id` eintragen.\n\n🟡 Getestet wird nur mit dem Test-Bot über „Execute workflow“, nicht veröffentlichen.",
+        "content": "# ✅ Setup-Checkliste\nEinrichtung **in dieser Reihenfolge**, ✅ erledigt, ⏳ offen, 🟡 Hinweis.\n\n✅ **1 Test-Bot:** bei @BotFather einen eigenen Bot angelegt, Token als Credential `Telegram API | Test-Bot K1-Eingang`.\n\n✅ **2 Trigger einsetzen:** `Telegram-Nachricht empfangen [Telegram Trigger]` mit Update message und Restrict to User IDs, Credential Test-Bot.\n\n✅ **3 Credential tauschen:** `Sprachdatei laden`, `Auftrag bestätigen`, `Hilfe senden`, `Bitte tippen` und `Start fehlgeschlagen melden` nutzen den Test-Bot, nie `Telegram API | Content-Generator`.\n\n✅ **4 Nutzer-ID:** die eigene Telegram-ID im Trigger und in `Einstellungen setzen` (`erlaubte_nutzer_ids`).\n\n✅ **5 Spracherkennung:** Cloudflare Whisper large v3 turbo mit `Cloudflare Workers AI | Content-Generator`, Konto-ID aus `k1_einstellungen`. ⏳ Groq als Ersatz, sobald ein Groq-Credential existiert.\n\n⏳ **6 K1-ID:** nach dem Zusammenführen `k1_workflow_id` eintragen.\n\n🟡 Getestet wird nur mit dem Test-Bot über „Execute workflow“, nicht veröffentlichen.",
         "height": 800,
         "width": 552,
         "color": 7
@@ -585,7 +585,7 @@
     },
     {
       "parameters": {
-        "content": "# 🩺 Fehlerbehebung\n### ❓ Keine Antwort im Chat?\n👉 Prüfen, ob die eigene ID in `Einstellungen setzen` und im Trigger steht.\n### ❓ Immer nur „Bitte tippen“?\n👉 Der Mock in `Sprache in Text (Mock)` ist noch nicht durch die Spracherkennung ersetzt.\n### ❓ „K1 ließ sich nicht starten“?\n👉 `k1_workflow_id` ist leer oder K1 hat noch keinen Execute Workflow Trigger.",
+        "content": "# 🩺 Fehlerbehebung\n### ❓ Keine Antwort im Chat?\n👉 Prüfen, ob die eigene ID in `Einstellungen setzen` und im Trigger steht.\n### ❓ Immer nur „Bitte tippen“?\n👉 Ausführung öffnen: welcher Knoten im Sprachzweig ist rot (Datei, Base64, Konto-ID, Cloudflare, leeres Transkript)?\n### ❓ „K1 ließ sich nicht starten“?\n👉 `k1_workflow_id` ist leer oder K1 hat noch keinen Execute Workflow Trigger.",
         "height": 420,
         "width": 552,
         "color": 7
@@ -634,7 +634,8 @@
       "parameters": {
         "resource": "file",
         "fileId": "={{ $json.voice_file_id }}",
-        "additionalFields": {}
+        "additionalFields": {},
+        "download": true
       },
       "id": "701551dd-cb3b-4814-889c-15c7e756632c",
       "name": "Sprachdatei laden [Telegram]",
@@ -773,6 +774,89 @@
           "name": "Telegram API | Test-Bot K1-Eingang"
         }
       }
+    },
+    {
+      "id": "80906a26-ce80-49dd-8be2-bd5ba233ab81",
+      "name": "Audio in Base64 umwandeln [Extract From File]",
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.1,
+      "position": [
+        1696,
+        1568
+      ],
+      "parameters": {
+        "operation": "binaryToPropery",
+        "destinationKey": "audio_b64"
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "id": "7116fe0a-2eeb-4486-946f-18b43f2e6515",
+      "name": "Cloudflare-Konto laden [Supabase]",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        2032,
+        1568
+      ],
+      "parameters": {
+        "resource": "row",
+        "operation": "getAll",
+        "tableId": "k1_einstellungen",
+        "returnAll": true,
+        "filterType": "manual",
+        "matchType": "allFilters",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "schluessel",
+              "condition": "eq",
+              "keyValue": "cloudflare_account_id"
+            }
+          ]
+        }
+      },
+      "onError": "continueErrorOutput",
+      "executeOnce": true,
+      "credentials": {
+        "supabaseApi": {
+          "id": "CREDENTIAL_ID",
+          "name": "Supabase API | KI-AGT-2606"
+        }
+      }
+    },
+    {
+      "id": "77880a94-a8d4-4be6-8eea-33ee0b8cc950",
+      "name": "Cloudflare Whisper [HTTP Request]",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2368,
+        1568
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "=https://api.cloudflare.com/client/v4/accounts/{{ $('Cloudflare-Konto laden [Supabase]').first().json.wert }}/ai/run/@cf/openai/whisper-large-v3-turbo",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ audio: $('Audio in Base64 umwandeln [Extract From File]').first().json.audio_b64, language: 'de' }) }}",
+        "options": {
+          "timeout": 60000
+        }
+      },
+      "onError": "continueErrorOutput",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 2000,
+      "executeOnce": true,
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "CREDENTIAL_ID",
+          "name": "Cloudflare Workers AI | Content-Generator"
+        }
+      }
     }
   ],
   "connections": {
@@ -834,24 +918,6 @@
         ]
       ]
     },
-    "Sprache in Text (Mock) [Code]": {
-      "main": [
-        [
-          {
-            "node": "Text übernehmen [Edit Fields]",
-            "type": "main",
-            "index": 0
-          }
-        ],
-        [
-          {
-            "node": "Bitte tippen [Telegram]",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
     "Text übernehmen [Edit Fields]": {
       "main": [
         [
@@ -896,7 +962,7 @@
       "main": [
         [
           {
-            "node": "Sprache in Text (Mock) [Code]",
+            "node": "Audio in Base64 umwandeln [Extract From File]",
             "type": "main",
             "index": 0
           }
@@ -938,6 +1004,78 @@
           }
         ]
       ]
+    },
+    "Transkript prüfen [Code]": {
+      "main": [
+        [
+          {
+            "node": "Text übernehmen [Edit Fields]",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Bitte tippen [Telegram]",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Audio in Base64 umwandeln [Extract From File]": {
+      "main": [
+        [
+          {
+            "node": "Cloudflare-Konto laden [Supabase]",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Bitte tippen [Telegram]",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Cloudflare-Konto laden [Supabase]": {
+      "main": [
+        [
+          {
+            "node": "Cloudflare Whisper [HTTP Request]",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Bitte tippen [Telegram]",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Cloudflare Whisper [HTTP Request]": {
+      "main": [
+        [
+          {
+            "node": "Transkript prüfen [Code]",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Bitte tippen [Telegram]",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "settings": {
@@ -950,7 +1088,7 @@
     "aiBuilderAssisted": true,
     "builderVariant": "mcp"
   },
-  "versionId": "437bc731-55af-4c09-b34c-3e92e043a5dc",
+  "versionId": "d4632a70-042a-4dfb-9fda-df172e5db231",
   "tags": [
     "KI-AGT-2606",
     "woche-4"
