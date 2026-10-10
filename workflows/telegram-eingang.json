@@ -1,0 +1,971 @@
+{
+  "id": "gcqhN1dEKNBRzk3C",
+  "name": "AGT-2606 P1 K1 Telegram-Eingang",
+  "description": "Projekt 1 Paket 2: nimmt Aufträge für K1 per Telegram an (Text, Link, Befehl, Sprache), ordnet sie per Code ein und startet K1. Ohne Credential bis zum Test-Bot, nicht veröffentlichen.",
+  "nodes": [
+    {
+      "id": "75227fbc-257c-4a1b-92ea-788f2ec1fa25",
+      "name": "Einstellungen setzen [Edit Fields]",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        340,
+        1200
+      ],
+      "parameters": {
+        "mode": "manual",
+        "includeOtherFields": false,
+        "assignments": {
+          "assignments": [
+            {
+              "id": "e01",
+              "name": "erlaubte_nutzer_ids",
+              "value": "111111111",
+              "type": "string"
+            },
+            {
+              "id": "e02",
+              "name": "standard_kunde",
+              "value": "ordwin",
+              "type": "string"
+            },
+            {
+              "id": "e03",
+              "name": "k1_workflow_id",
+              "value": "",
+              "type": "string"
+            },
+            {
+              "id": "e04",
+              "name": "max_text",
+              "value": 12000,
+              "type": "number"
+            },
+            {
+              "id": "e05",
+              "name": "chat_id",
+              "value": "={{ String($json.message?.chat?.id ?? \"\") }}",
+              "type": "string"
+            },
+            {
+              "id": "e06",
+              "name": "user_id",
+              "value": "={{ String($json.message?.from?.id ?? \"\") }}",
+              "type": "string"
+            },
+            {
+              "id": "e07",
+              "name": "text",
+              "value": "={{ $json.message?.text ?? $json.message?.caption ?? \"\" }}",
+              "type": "string"
+            },
+            {
+              "id": "e08",
+              "name": "voice_file_id",
+              "value": "={{ $json.message?.voice?.file_id ?? $json.message?.audio?.file_id ?? \"\" }}",
+              "type": "string"
+            },
+            {
+              "id": "e09",
+              "name": "message_id",
+              "value": "={{ String($json.message?.message_id ?? \"\") }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "13ef6f06-3675-4b10-9fd4-b0c8c0a6b164",
+      "name": "Absender erlaubt? [If]",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        680,
+        1200
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose"
+          },
+          "conditions": [
+            {
+              "id": "a01",
+              "leftValue": "={{ String($json.erlaubte_nutzer_ids).split(\",\").map(s => s.trim()).includes(String($json.user_id)) }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "c760b7a0-e481-46fc-81ea-57e4d3b8de72",
+      "name": "Sprachnachricht? [If]",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1020,
+        1200
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose"
+          },
+          "conditions": [
+            {
+              "id": "s01",
+              "leftValue": "={{ $json.voice_file_id }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "3a9c7c9f-b2bb-435d-8e98-bfc8d08b0547",
+      "name": "Kunden laden [Supabase]",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        2380,
+        1200
+      ],
+      "parameters": {
+        "resource": "row",
+        "operation": "getAll",
+        "tableId": "k1_kunden",
+        "returnAll": true,
+        "filterType": "manual",
+        "matchType": "allFilters",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "aktiv",
+              "condition": "eq",
+              "keyValue": "true"
+            }
+          ]
+        }
+      },
+      "executeOnce": true,
+      "alwaysOutputData": true,
+      "onError": "continueErrorOutput",
+      "credentials": {
+        "supabaseApi": {
+          "id": "CREDENTIAL_ID",
+          "name": "Supabase API | KI-AGT-2606"
+        }
+      }
+    },
+    {
+      "id": "92ed7fd5-b6f5-4637-be51-6cb282259960",
+      "name": "Sprache in Text (Mock) [Code]",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1700,
+        1560
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "// Zweck: Platzhalter (Mock), bis der Whisper-Knoten n8n-nodes-nvidia-nim-whisper-v2 installiert ist.\n// Schalter: steht in den Testdaten von \"Sprachdatei laden\" ein Feld mock_transkript, kommt es als Transkript zurueck.\n// Fehlt es, nimmt der Knoten den Fehlerweg wie eine echte gescheiterte Transkription (Antwort \"Bitte tippen\").\nconst j = $input.first().json;\nif (!j.mock_transkript) {\n  throw new Error('Spracherkennung noch nicht eingerichtet: Whisper-Knoten fehlt');\n}\nreturn [{ json: { transkript: String(j.mock_transkript) } }];"
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "id": "e986ef70-04a7-4977-98a7-2ce7b1fa1a03",
+      "name": "Text übernehmen [Edit Fields]",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        2040,
+        1560
+      ],
+      "parameters": {
+        "mode": "manual",
+        "includeOtherFields": false,
+        "assignments": {
+          "assignments": [
+            {
+              "id": "t01",
+              "name": "text",
+              "value": "={{ $json.transkript ?? $json.text ?? \"\" }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "10e0b7f1-c7e6-4c47-ac3e-63a97c3de1d1",
+      "name": "Nachricht einordnen [Code]",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2720,
+        1200
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "// Zweck: Telegram-Nachricht ohne Sprachmodell einordnen (Kunde, Quellenart, Thema), Regeln laut Planung 10.10.2026.\nconst cfg = $('Einstellungen setzen [Edit Fields]').first().json;\n// Text: aus dem Sprachzweig, wenn er gelaufen ist, sonst aus der Nachricht selbst.\nconst ausSprache = $('Text übernehmen [Edit Fields]').isExecuted;\nconst roh = ausSprache ? $('Text übernehmen [Edit Fields]').first().json.text : cfg.text;\nlet text = String(roh || '').replace(/\\s+/g, ' ').trim();\nconst hinweise = ['Auftrag über Telegram (' + (ausSprache ? 'Sprachnachricht' : 'Text') + ')'];\n// Kundenliste aus Supabase; kommt ein Fehler-Item, gilt nur der Standardkunde (Fallback mit Spur).\nconst zeilen = $input.all().map(i => i.json);\nconst listeFehlt = zeilen.some(z => z.error);\nif (listeFehlt) hinweise.push('Kundenliste nicht lesbar, Standardkunde genommen');\nconst kuerzel = zeilen.filter(z => z.kuerzel).map(z => String(z.kuerzel).toLowerCase());\nconst standard = String(cfg.standard_kunde || '').toLowerCase();\nconst max = Number(cfg.max_text) || 12000;\n// Ausgabe mit denselben Feldern wie das K1-Formular, dazu Steuerfelder fuer die Weiche.\nconst aus = { gueltig: false, fehler_grund: '', kunde_kuerzel: '', kunde_erkannt: false, thema: '', quelle_art: '', quelle: '', hinweis: '', chat_id: cfg.chat_id, eingang: ausSprache ? 'sprache' : 'text', k1_workflow_id: String(cfg.k1_workflow_id || '') };\nfunction fertig(grund) {\n  aus.fehler_grund = grund;\n  aus.gueltig = !grund;\n  aus.hinweis = hinweise.join('; ');\n  // Telegram sendet mit parse_mode HTML, deshalb das Thema fuer die Anzeige maskieren.\n  aus.thema_anzeige = aus.thema.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');\n  return [{ json: aus }];\n}\n// Regel 1: leer oder Hilfebefehl.\nif (!text) return fertig('leere Nachricht');\nif (/^\\/(start|hilfe|help)\\b/i.test(text)) return fertig('Hilfe angefordert');\n// Zu lange Texte kuerzen wie K1 mit max_quelltext.\nif (text.length > max) { text = text.slice(0, max); hinweise.push('Text auf ' + max + ' Zeichen gekürzt'); }\n// Regel 2: Kundenkuerzel als erstes Wort, sonst Standardkunde.\nconst erstes = text.split(' ')[0].toLowerCase().replace(/[:,;.]+$/, '');\nif (kuerzel.includes(erstes)) {\n  aus.kunde_kuerzel = erstes;\n  aus.kunde_erkannt = true;\n  const leer = text.indexOf(' ');\n  text = leer > 0 ? text.slice(leer + 1).trim() : '';\n} else {\n  aus.kunde_kuerzel = standard;\n}\nif (!aus.kunde_kuerzel) return fertig('kein Standardkunde eingestellt');\nif (!listeFehlt && !kuerzel.includes(aus.kunde_kuerzel)) return fertig('Kunde ' + aus.kunde_kuerzel + ' ist in k1_kunden nicht aktiv');\nif (!text) return fertig('nur ein Kundenkürzel, kein Auftrag');\n// Regel 3: Research-Befehl.\nconst research = text.match(/^(\\/research|recherchier(e|en)?)\\b\\s*:?\\s*(.*)$/i);\nconst url = (text.match(/https?:\\/\\/\\S+/i) || [''])[0];\nconst ohneUrl = url ? text.replace(url, '').trim() : text;\nif (research) {\n  aus.quelle_art = 'Research';\n  aus.thema = research[3].trim();\n} else if (url && /(youtube\\.com\\/(watch|shorts)|youtu\\.be\\/)/i.test(url)) {\n  // Regel 4: YouTube-Link.\n  aus.quelle_art = 'YouTube-Link';\n  aus.quelle = url;\n  aus.thema = ohneUrl || 'Beitrag zum verlinkten Video';\n} else if (url) {\n  // Regel 5: andere Adresse ist ein Artikel-Link.\n  aus.quelle_art = 'Artikel-Link';\n  aus.quelle = url;\n  aus.thema = ohneUrl || 'Beitrag zum verlinkten Artikel';\n} else if (text.length > 300) {\n  // Regel 6: langer Text ist eigener Text, weil K1 als Thema hoechstens 300 Zeichen annimmt.\n  aus.quelle_art = 'Eigener Text';\n  aus.quelle = text;\n  aus.thema = (text.split(/(?<=[.!?])\\s/)[0] || text).slice(0, 120);\n} else {\n  // Regel 7: sonst Thema.\n  aus.quelle_art = 'Thema';\n  aus.thema = text;\n}\naus.thema = aus.thema.slice(0, 300);\n// Pruefung wie vorgesehen: Thema mindestens 3 Zeichen.\nif (aus.thema.length < 3) return fertig('Thema zu kurz');\nreturn fertig('');"
+      }
+    },
+    {
+      "id": "e409c9e1-7d48-4c2a-bc66-62ea443cf58f",
+      "name": "Auftrag gültig? [If]",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        3060,
+        1200
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose"
+          },
+          "conditions": [
+            {
+              "id": "g01",
+              "leftValue": "={{ $json.gueltig }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "002faaa5-078a-403c-afa1-0602a4465351",
+      "name": "K1 starten [Execute Workflow]",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.4,
+      "position": [
+        3400,
+        1200
+      ],
+      "parameters": {
+        "mode": "once",
+        "source": "database",
+        "workflowId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $json.k1_workflow_id }}"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "kunde_kuerzel": "={{ $json.kunde_kuerzel }}",
+            "thema": "={{ $json.thema }}",
+            "quelle_art": "={{ $json.quelle_art }}",
+            "quelle": "={{ $json.quelle }}",
+            "hinweis": "={{ $json.hinweis }}",
+            "telegram_chat_id": "={{ $json.chat_id }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "kunde_kuerzel",
+              "displayName": "kunde_kuerzel",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "thema",
+              "displayName": "thema",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "quelle_art",
+              "displayName": "quelle_art",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "quelle",
+              "displayName": "quelle",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "hinweis",
+              "displayName": "hinweis",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "telegram_chat_id",
+              "displayName": "telegram_chat_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            }
+          ],
+          "attemptToConvertTypes": false
+        },
+        "options": {
+          "waitForSubWorkflow": false
+        }
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "id": "ac852117-470d-492d-8b63-f0071545dc82",
+      "name": "Titel",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "parameters": {
+        "content": "# AGT-2606 P1 K1 Telegram-Eingang\nNimmt Aufträge für den Content-Generator K1 per Telegram an (Text, Link, Befehl, Sprachnachricht), ordnet sie ohne Sprachmodell ein und startet K1.",
+        "color": 5,
+        "width": 2160,
+        "height": 110
+      }
+    },
+    {
+      "id": "0f29a895-0389-40bd-ade9-8a42135563ce",
+      "name": "Rahmen Kopf",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        0,
+        144
+      ],
+      "parameters": {
+        "content": " ",
+        "width": 2160,
+        "height": 456
+      }
+    },
+    {
+      "id": "dd499daf-e9f2-4132-a581-ae972d9fc25c",
+      "name": "Kopf",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        16,
+        160
+      ],
+      "parameters": {
+        "content": "# 🧪 Telegram als Eingang für K1\n**Aufgabe:** Ein Auftrag an K1 soll ohne Formular direkt aus Telegram kommen, als Text, Link, Befehl oder Sprachnachricht.\n\n**Die Idee:** Ein Code-Knoten ordnet die Nachricht nach festen Regeln ein und gibt K1 dieselben Felder wie das Formular.\n\n**Warum so?** Was sich mit ein paar Zeilen Code lösen lässt, braucht kein Sprachmodell, das spart Tokens und lässt sich testen.\n\n**Hinweis:** n8n setzt das einzige Telegram-Credential (Freigabe-Bot von K1) von selbst an jeden Telegram-Knoten. Deshalb startet der Workflow bis zum Test-Bot mit einem Platzhalter statt mit dem Telegram Trigger, getestet wird nur mit angepinnten Daten.\n\nStufe: Durchstich bis 14.10.2026",
+        "color": 7,
+        "width": 1100,
+        "height": 424
+      }
+    },
+    {
+      "id": "38f0cb32-6a40-42c6-a8ab-98fe32f15453",
+      "name": "Ablauf",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1136,
+        160
+      ],
+      "parameters": {
+        "content": "## Ablauf\n① Nachricht empfangen und vereinheitlichen\n② Absender prüfen, Sprache oder Text\n③ Sprachnachricht in Text umwandeln\n④ Kunden laden und Nachricht einordnen\n⑤ Auftrag prüfen und K1 starten\n⑥ Auftrag im Chat bestätigen\n⑦ Fehlerweg: Hilfe, Bitte tippen, Startfehler",
+        "color": 7,
+        "width": 492,
+        "height": 424
+      }
+    },
+    {
+      "id": "bc6892a9-ebb6-4907-ab36-d534298bfc8d",
+      "name": "Status",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1652,
+        160
+      ],
+      "parameters": {
+        "content": "## Status\n🟢 Text, Link, Befehl und Kunde: mit Testdaten geprüft, Läufe im Bau-Protokoll\n🟡 Platzhalter statt Telegram Trigger, Sendeknoten brauchen das Test-Bot-Credential\n🔴 Sprachzweig ist ein Platzhalter, Whisper-Knoten nicht installiert\n🔵 K1 bekommt den zweiten Trigger erst beim Zusammenführen",
+        "color": 7,
+        "width": 492,
+        "height": 424
+      }
+    },
+    {
+      "id": "946fd8f0-2f1d-4eaa-966e-1c6a40c82486",
+      "name": "Karte ①",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -40,
+        860
+      ],
+      "parameters": {
+        "content": "## ① Nachricht empfangen\nBis zum Test-Bot liefert ein Platzhalter (Mock) eine angepinnte Telegram-Nachricht. Ein Set-Knoten legt Chat, Absender, Text und Sprachdatei in feste Felder und hält die Einstellungen an einer Stelle.\n### 🟡 Telegram Trigger folgt\n🩺 **Wenn es hakt:** In `Einstellungen setzen` Nutzer-ID und Standardkunde prüfen.",
+        "color": 1,
+        "width": 480,
+        "height": 300
+      }
+    },
+    {
+      "id": "575bda1b-f596-4359-b53f-904f47107a56",
+      "name": "Karte ②",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        640,
+        860
+      ],
+      "parameters": {
+        "content": "## ② Absender und Art prüfen\nNur eingetragene Nutzer-IDs bekommen eine Antwort, fremde Absender laufen still ins Leere. Danach trennt eine Weiche Sprachnachrichten von Text.\n### 🟢 Logik mit Testdaten geprüft\n🩺 **Wenn es hakt:** `erlaubte_nutzer_ids` mit der eigenen ID vergleichen.",
+        "color": 1,
+        "width": 480,
+        "height": 300
+      }
+    },
+    {
+      "id": "e1260e6f-70f9-40a3-8822-1ebf9cae9451",
+      "name": "Karte ③",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1320,
+        1300
+      ],
+      "parameters": {
+        "content": "## ③ Sprache in Text\nDie Sprachdatei kommt über `getFile`. Bis der Whisper-Knoten installiert ist, steht hier ein Platzhalter (Mock): ohne `mock_transkript` in den Testdaten nimmt er den Fehlerweg.\n### 🔴 NICHT GEMESSEN, Whisper-Knoten fehlt\n🩺 **Wenn es hakt:** Community Node `n8n-nodes-nvidia-nim-whisper-v2` installieren und den Mock ersetzen.",
+        "color": 1,
+        "width": 840,
+        "height": 220
+      }
+    },
+    {
+      "id": "f9ddf0ba-7514-4081-8990-3f39e563707f",
+      "name": "Karte ④",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2340,
+        860
+      ],
+      "parameters": {
+        "content": "## ④ Kunde und Absicht\nDie aktiven Kunden kommen aus `k1_kunden`. Der Code erkennt Kürzel, Research-Befehl, YouTube- und Artikel-Link, langen Text und Thema, ganz ohne Sprachmodell.\n### 🟢 Regeln mit Testdaten geprüft\n🩺 **Wenn es hakt:** Die Ausgabe von `Nachricht einordnen` zeigt `fehler_grund`.",
+        "color": 1,
+        "width": 480,
+        "height": 300
+      }
+    },
+    {
+      "id": "0a62aa96-12be-4488-a79a-9cd2dddfdfb5",
+      "name": "Karte ⑤",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        3020,
+        860
+      ],
+      "parameters": {
+        "content": "## ⑤ Prüfen und K1 starten\nNur gültige Aufträge starten K1, ohne auf das Ende zu warten. Scheitert der Start, meldet der Fehlerausgang das im Chat.\n### 🟡 K1-ID fehlt bis zum Zusammenführen\n🩺 **Wenn es hakt:** `k1_workflow_id` in `Einstellungen setzen` eintragen.",
+        "color": 1,
+        "width": 480,
+        "height": 300
+      }
+    },
+    {
+      "id": "b001729b-2d95-404a-a481-23121e9b348d",
+      "name": "Karte ⑥",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        3700,
+        860
+      ],
+      "parameters": {
+        "content": "## ⑥ Bestätigen\nDer Chat bekommt Kunde, Quellenart und Thema zurück, damit ein Fehlgriff sofort auffällt.\n### 🟡 wartet auf Test-Bot\n🩺 **Wenn es hakt:** Credential am Knoten prüfen.",
+        "color": 1,
+        "width": 300,
+        "height": 300
+      }
+    },
+    {
+      "id": "ba155715-2d20-4d45-97ac-b1a9a153600b",
+      "name": "Rahmen Fehlerweg",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        4084,
+        1824
+      ],
+      "parameters": {
+        "content": " ",
+        "color": 5,
+        "width": 332,
+        "height": 392
+      }
+    },
+    {
+      "id": "6466744f-6d38-4581-8ef7-6619e48c9746",
+      "name": "Karte ⑦",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        4100,
+        1840
+      ],
+      "parameters": {
+        "content": "## ⑦ Fehlerweg\nKein Fehler bleibt still: Datei oder Transkript fehlt, dann „Bitte tippen“. Ungültiger Auftrag, dann Hilfetext. K1-Start scheitert, dann eine Meldung. Die Kundenliste fällt auf den Standardkunden zurück.\n### 🟢 Wege mit Testdaten geprüft\n🩺 **Wenn es hakt:** Ausführung öffnen, roten Knoten ansehen.",
+        "color": 3,
+        "width": 300,
+        "height": 360
+      }
+    },
+    {
+      "id": "649c4c65-1ba6-4ee9-b108-7ba1d9f159fd",
+      "name": "Rahmen Hilfe-Spalte",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        4480,
+        144
+      ],
+      "parameters": {
+        "content": " ",
+        "color": 5,
+        "width": 584,
+        "height": 1268
+      }
+    },
+    {
+      "id": "54c9aec5-8bc3-4d04-ace7-b223fddb2a8d",
+      "name": "Setup-Checkliste",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        4496,
+        160
+      ],
+      "parameters": {
+        "content": "# ✅ Setup-Checkliste\nEinrichtung **in dieser Reihenfolge**, ✅ erledigt, ⏳ offen, 🟡 Hinweis.\n\n⏳ **1 Test-Bot:** bei @BotFather einen eigenen Bot anlegen und den Token als neues Credential vom Typ Telegram API anlegen.\n\n⏳ **2 Trigger einsetzen:** `Telegram-Nachricht (Mock)` durch einen Telegram Trigger ersetzen (Update message, Restrict to User IDs) und den Test-Bot wählen.\n\n⏳ **3 Credential tauschen:** an `Sprachdatei laden`, `Auftrag bestätigen`, `Hilfe senden`, `Bitte tippen` und `Start fehlgeschlagen melden` den Test-Bot statt `Telegram API | Content-Generator` wählen.\n\n⏳ **4 Nutzer-ID:** die eigene Telegram-ID im Trigger und in `Einstellungen setzen` (`erlaubte_nutzer_ids`) statt 111111111 eintragen.\n\n⏳ **5 Whisper:** Community Node `n8n-nodes-nvidia-nim-whisper-v2` installieren, NVIDIA-Credential setzen, den Mock ersetzen.\n\n⏳ **6 K1-ID:** nach dem Zusammenführen `k1_workflow_id` eintragen.\n\n🟡 Getestet wird nur mit dem Test-Bot über „Execute workflow“, nicht veröffentlichen.",
+        "color": 7,
+        "width": 552,
+        "height": 800
+      }
+    },
+    {
+      "id": "014df0dd-5cb4-4dce-b4a6-da17f56fd0a8",
+      "name": "Fehlerbehebung",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        4496,
+        976
+      ],
+      "parameters": {
+        "content": "# 🩺 Fehlerbehebung\n### ❓ Keine Antwort im Chat?\n👉 Prüfen, ob die eigene ID in `Einstellungen setzen` und im Trigger steht.\n### ❓ Immer nur „Bitte tippen“?\n👉 Der Mock in `Sprache in Text (Mock)` ist noch nicht durch den Whisper-Knoten ersetzt.\n### ❓ „K1 ließ sich nicht starten“?\n👉 `k1_workflow_id` ist leer oder K1 hat noch keinen Execute Workflow Trigger.",
+        "color": 7,
+        "width": 552,
+        "height": 420
+      }
+    },
+    {
+      "id": "53e2768e-ecec-435c-8175-b24c2475ffbc",
+      "name": "Rahmen Testfaelle",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -16,
+        1960
+      ],
+      "parameters": {
+        "content": " ",
+        "width": 1632,
+        "height": 432
+      }
+    },
+    {
+      "id": "23703de4-2e39-415a-96d9-f905473a5632",
+      "name": "Testfälle",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        0,
+        1976
+      ],
+      "parameters": {
+        "content": "## 📊 Testfälle für diesen Ablauf\n| Nr | Eingabe | Erwartung |\n|---|---|---|\n| E1 | ✅ „Fehlerbehandlung in n8n“ | Thema, Kunde ordwin, K1 startet |\n| E2 | ✅ YouTube-Link | YouTube-Link, Adresse als Quelle |\n| E3 | ✅ Artikel-Link | Artikel-Link |\n| E4 | ⚠️ Artikeltext 1.500 Zeichen | Eigener Text |\n| E5 | ✅ /research KI-Agenten | Research |\n| E6 | ⚠️ cafe-kontrast Herbstkarte | Kunde cafe-kontrast erkannt |\n| E7 | ✅ Sprachnachricht mit Thema | Transkript, Thema (NICHT GEMESSEN, Mock) |\n| E8 | ❌ Transkription fällt aus | „Bitte tippen“, kein K1-Start |\n| E9 | ❌ fremde Nutzer-ID | keine Reaktion |\n| E10 | ✅ Freigeben und Ablehnen im Chat nach Telegram-Auftrag | wartet auf Test-Bot und Zusammenführen |\n| E11 | ✅ Formular-Auftrag | K1 unverändert (Regression beim Zusammenführen) |",
+        "color": 5,
+        "width": 1600,
+        "height": 400
+      }
+    },
+    {
+      "id": "701551dd-cb3b-4814-889c-15c7e756632c",
+      "name": "Sprachdatei laden [Telegram]",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1360,
+        1560
+      ],
+      "parameters": {
+        "resource": "file",
+        "operation": "get",
+        "fileId": "={{ $json.voice_file_id }}",
+        "download": true,
+        "additionalFields": {}
+      },
+      "onError": "continueErrorOutput",
+      "webhookId": "4e71c7f4-90d9-46bb-8253-791cae860652",
+      "credentials": {
+        "telegramApi": {
+          "id": "CREDENTIAL_ID",
+          "name": "Telegram API | Content-Generator"
+        }
+      }
+    },
+    {
+      "id": "cdac05e7-a20a-4fd4-8364-932ea61eeaae",
+      "name": "Bitte tippen [Telegram]",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        2040,
+        1860
+      ],
+      "parameters": {
+        "resource": "message",
+        "operation": "sendMessage",
+        "chatId": "={{ $('Einstellungen setzen [Edit Fields]').first().json.chat_id }}",
+        "text": "Die Sprachnachricht konnte ich nicht in Text umwandeln. Bitte schick den Auftrag kurz als Text.",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "webhookId": "02526af2-4745-4ca6-9636-c596c9440cab",
+      "credentials": {
+        "telegramApi": {
+          "id": "CREDENTIAL_ID",
+          "name": "Telegram API | Content-Generator"
+        }
+      }
+    },
+    {
+      "id": "9da7d686-4bf2-41ee-acc9-980900be0a77",
+      "name": "Hilfe senden [Telegram]",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        3400,
+        1860
+      ],
+      "parameters": {
+        "resource": "message",
+        "operation": "sendMessage",
+        "chatId": "={{ $json.chat_id }}",
+        "text": "=Das habe ich nicht als Auftrag verstanden ({{ $json.fehler_grund }}).\n\nSo geht es:\n• Thema: Fehlerbehandlung in n8n\n• Kunde vorne: cafe-kontrast Herbstkarte\n• Link: einfach die Adresse schicken\n• Recherche: /research KI-Agenten\n• oder eine Sprachnachricht",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "webhookId": "bc13da82-5a97-4c04-a7e0-2940343674e1",
+      "credentials": {
+        "telegramApi": {
+          "id": "CREDENTIAL_ID",
+          "name": "Telegram API | Content-Generator"
+        }
+      }
+    },
+    {
+      "id": "3797964e-c65b-4385-9952-b8e1d8c8c9f4",
+      "name": "Auftrag bestätigen [Telegram]",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        3740,
+        1200
+      ],
+      "parameters": {
+        "resource": "message",
+        "operation": "sendMessage",
+        "chatId": "={{ $('Nachricht einordnen [Code]').first().json.chat_id }}",
+        "text": "=Angenommen: {{ $('Nachricht einordnen [Code]').first().json.kunde_kuerzel }}, {{ $('Nachricht einordnen [Code]').first().json.quelle_art }}, „{{ $('Nachricht einordnen [Code]').first().json.thema_anzeige }}“. Die Vorschau kommt zur Freigabe.",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "webhookId": "2e747d9b-ccaa-42c6-9aa0-d93b084ca034",
+      "credentials": {
+        "telegramApi": {
+          "id": "CREDENTIAL_ID",
+          "name": "Telegram API | Content-Generator"
+        }
+      }
+    },
+    {
+      "id": "3bbfa693-4a71-44a2-a268-939260c01201",
+      "name": "Start fehlgeschlagen melden [Telegram]",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        3740,
+        1860
+      ],
+      "parameters": {
+        "resource": "message",
+        "operation": "sendMessage",
+        "chatId": "={{ $('Nachricht einordnen [Code]').first().json.chat_id }}",
+        "text": "=Der Auftrag kam an, aber K1 ließ sich nicht starten ({{ ($json.error && ($json.error.message || $json.error)) || \"unbekannter Fehler\" }}). Bitte später noch einmal schicken oder das Formular nutzen.",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "webhookId": "a4c77d5b-fb4c-4957-8600-31dffa21cf3c",
+      "credentials": {
+        "telegramApi": {
+          "id": "CREDENTIAL_ID",
+          "name": "Telegram API | Content-Generator"
+        }
+      }
+    },
+    {
+      "id": "8322e609-5178-454e-9cbe-c5217ba549f1",
+      "name": "Telegram-Nachricht (Mock) [Manual Trigger]",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        1200
+      ],
+      "parameters": {}
+    }
+  ],
+  "connections": {
+    "Einstellungen setzen [Edit Fields]": {
+      "main": [
+        [
+          {
+            "node": "Absender erlaubt? [If]",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Absender erlaubt? [If]": {
+      "main": [
+        [
+          {
+            "node": "Sprachnachricht? [If]",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Sprachnachricht? [If]": {
+      "main": [
+        [
+          {
+            "node": "Sprachdatei laden [Telegram]",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Kunden laden [Supabase]",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Kunden laden [Supabase]": {
+      "main": [
+        [
+          {
+            "node": "Nachricht einordnen [Code]",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Nachricht einordnen [Code]",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Sprache in Text (Mock) [Code]": {
+      "main": [
+        [
+          {
+            "node": "Text übernehmen [Edit Fields]",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Bitte tippen [Telegram]",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Text übernehmen [Edit Fields]": {
+      "main": [
+        [
+          {
+            "node": "Kunden laden [Supabase]",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Nachricht einordnen [Code]": {
+      "main": [
+        [
+          {
+            "node": "Auftrag gültig? [If]",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Auftrag gültig? [If]": {
+      "main": [
+        [
+          {
+            "node": "K1 starten [Execute Workflow]",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Hilfe senden [Telegram]",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Sprachdatei laden [Telegram]": {
+      "main": [
+        [
+          {
+            "node": "Sprache in Text (Mock) [Code]",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Bitte tippen [Telegram]",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "K1 starten [Execute Workflow]": {
+      "main": [
+        [
+          {
+            "node": "Auftrag bestätigen [Telegram]",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Start fehlgeschlagen melden [Telegram]",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Telegram-Nachricht (Mock) [Manual Trigger]": {
+      "main": [
+        [
+          {
+            "node": "Einstellungen setzen [Edit Fields]",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": true,
+    "errorWorkflow": "vdWjTLYejCK2YrMP"
+  },
+  "meta": {
+    "aiBuilderAssisted": true,
+    "builderVariant": "mcp"
+  },
+  "versionId": "b14ded9b-289f-46a0-b7a8-bd2c56c80513",
+  "tags": [
+    "KI-AGT-2606",
+    "woche-4"
+  ],
+  "nodeGroups": [],
+  "pinData": {},
+  "staticData": null
+}
