@@ -22,7 +22,7 @@
             {
               "id": "e03",
               "name": "k1_workflow_id",
-              "value": "",
+              "value": "Bk8PXBGm3gXMATK1",
               "type": "string"
             },
             {
@@ -215,7 +215,7 @@
     },
     {
       "parameters": {
-        "jsCode": "// Zweck: Telegram-Nachricht ohne Sprachmodell einordnen (Kunde, Quellenart, Thema), Regeln laut Planung 10.10.2026.\nconst cfg = $('Einstellungen setzen [Edit Fields]').first().json;\n// Text: aus dem Sprachzweig, wenn er gelaufen ist, sonst aus der Nachricht selbst.\nconst ausSprache = $('Text übernehmen [Edit Fields]').isExecuted;\nconst roh = ausSprache ? $('Text übernehmen [Edit Fields]').first().json.text : cfg.text;\nlet text = String(roh || '').replace(/\\s+/g, ' ').trim();\nconst hinweise = ['Auftrag über Telegram (' + (ausSprache ? 'Sprachnachricht' : 'Text') + ')'];\n// Kundenliste aus Supabase; kommt ein Fehler-Item, gilt nur der Standardkunde (Fallback mit Spur).\nconst zeilen = $input.all().map(i => i.json);\nconst listeFehlt = zeilen.some(z => z.error);\nif (listeFehlt) hinweise.push('Kundenliste nicht lesbar, Standardkunde genommen');\nconst kuerzel = zeilen.filter(z => z.kuerzel).map(z => String(z.kuerzel).toLowerCase());\nconst standard = String(cfg.standard_kunde || '').toLowerCase();\nconst max = Number(cfg.max_text) || 12000;\n// Ausgabe mit denselben Feldern wie das K1-Formular, dazu Steuerfelder fuer die Weiche.\nconst aus = { gueltig: false, fehler_grund: '', kunde_kuerzel: '', kunde_erkannt: false, thema: '', quelle_art: '', quelle: '', hinweis: '', chat_id: cfg.chat_id, eingang: ausSprache ? 'sprache' : 'text', k1_workflow_id: String(cfg.k1_workflow_id || '') };\nfunction fertig(grund) {\n  aus.fehler_grund = grund;\n  aus.gueltig = !grund;\n  aus.hinweis = hinweise.join('; ');\n  // Telegram sendet mit parse_mode HTML, deshalb das Thema fuer die Anzeige maskieren.\n  aus.thema_anzeige = aus.thema.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');\n  return [{ json: aus }];\n}\n// Regel 1: leer oder Hilfebefehl.\nif (!text) return fertig('leere Nachricht');\nif (/^\\/(start|hilfe|help)\\b/i.test(text)) return fertig('Hilfe angefordert');\n// Zu lange Texte kuerzen wie K1 mit max_quelltext.\nif (text.length > max) { text = text.slice(0, max); hinweise.push('Text auf ' + max + ' Zeichen gekürzt'); }\n// Regel 2: Kundenkuerzel als erstes Wort, sonst Standardkunde.\nconst erstes = text.split(' ')[0].toLowerCase().replace(/[:,;.]+$/, '');\nif (kuerzel.includes(erstes)) {\n  aus.kunde_kuerzel = erstes;\n  aus.kunde_erkannt = true;\n  const leer = text.indexOf(' ');\n  text = leer > 0 ? text.slice(leer + 1).trim() : '';\n} else {\n  aus.kunde_kuerzel = standard;\n}\nif (!aus.kunde_kuerzel) return fertig('kein Standardkunde eingestellt');\nif (!listeFehlt && !kuerzel.includes(aus.kunde_kuerzel)) return fertig('Kunde ' + aus.kunde_kuerzel + ' ist in k1_kunden nicht aktiv');\nif (!text) return fertig('nur ein Kundenkürzel, kein Auftrag');\n// Regel 3: Research-Befehl.\nconst research = text.match(/^(\\/research|recherchier(e|en)?)\\b\\s*:?\\s*(.*)$/i);\nconst url = (text.match(/https?:\\/\\/\\S+/i) || [''])[0];\nconst ohneUrl = url ? text.replace(url, '').trim() : text;\nif (research) {\n  aus.quelle_art = 'Research';\n  aus.thema = research[3].trim();\n} else if (url && /(youtube\\.com\\/(watch|shorts)|youtu\\.be\\/)/i.test(url)) {\n  // Regel 4: YouTube-Link.\n  aus.quelle_art = 'YouTube-Link';\n  aus.quelle = url;\n  aus.thema = ohneUrl || 'Beitrag zum verlinkten Video';\n} else if (url) {\n  // Regel 5: andere Adresse ist ein Artikel-Link.\n  aus.quelle_art = 'Artikel-Link';\n  aus.quelle = url;\n  aus.thema = ohneUrl || 'Beitrag zum verlinkten Artikel';\n} else if (text.length > 300) {\n  // Regel 6: langer Text ist eigener Text, weil K1 als Thema hoechstens 300 Zeichen annimmt.\n  aus.quelle_art = 'Eigener Text';\n  aus.quelle = text;\n  aus.thema = (text.split(/(?<=[.!?])\\s/)[0] || text).slice(0, 120);\n} else {\n  // Regel 7: sonst Thema.\n  aus.quelle_art = 'Thema';\n  aus.thema = text;\n}\naus.thema = aus.thema.slice(0, 300);\n// Pruefung wie vorgesehen: Thema mindestens 3 Zeichen.\nif (aus.thema.length < 3) return fertig('Thema zu kurz');\nreturn fertig('');"
+        "jsCode": "// Zweck: Telegram-Nachricht ohne Sprachmodell einordnen (Kunde, Quellenart, Thema), Regeln laut Planung 10.10.2026.\nconst cfg = $('Einstellungen setzen [Edit Fields]').first().json;\n// Text: aus dem Sprachzweig, wenn er gelaufen ist, sonst aus der Nachricht selbst.\nconst ausSprache = $('Text übernehmen [Edit Fields]').isExecuted;\nconst roh = ausSprache ? $('Text übernehmen [Edit Fields]').first().json.text : cfg.text;\nlet text = String(roh || '').replace(/\\s+/g, ' ').trim();\nconst hinweise = ['Auftrag über Telegram (' + (ausSprache ? 'Sprachnachricht' : 'Text') + ')'];\n// Kundenliste aus Supabase; kommt ein Fehler-Item, gilt nur der Standardkunde (Fallback mit Spur).\nconst zeilen = $input.all().map(i => i.json);\nconst listeFehlt = zeilen.some(z => z.error);\nif (listeFehlt) hinweise.push('Kundenliste nicht lesbar, Standardkunde genommen');\nconst kuerzel = zeilen.filter(z => z.kuerzel).map(z => String(z.kuerzel).toLowerCase());\nconst standard = String(cfg.standard_kunde || '').toLowerCase();\nconst max = Number(cfg.max_text) || 12000;\n// Ausgabe mit denselben Feldern wie das K1-Formular, dazu Steuerfelder fuer die Weiche.\n// Warum englisch (12.10.2026, Ae7): K1 Bk8PXBGm3gXMATK1 erwartet seit v09 customer_code, topic, source_type, source, note; der Eingang sendet sie jetzt direkt.\nconst aus = { valid: false, error_reason: '', customer_code: '', customer_recognized: false, topic: '', source_type: '', source: '', note: '', chat_id: cfg.chat_id, channel: ausSprache ? 'sprache' : 'text', k1_workflow_id: String(cfg.k1_workflow_id || '') };\nfunction fertig(grund) {\n  aus.error_reason = grund;\n  aus.valid = !grund;\n  aus.note = hinweise.join('; ');\n  // Telegram sendet mit parse_mode HTML, deshalb das Thema fuer die Anzeige maskieren.\n  aus.topic_display = aus.topic.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');\n  return [{ json: aus }];\n}\n// Regel 1: leer oder Hilfebefehl.\nif (!text) return fertig('leere Nachricht');\nif (/^\\/(start|hilfe|help)\\b/i.test(text)) return fertig('Hilfe angefordert');\n// Zu lange Texte kuerzen wie K1 mit max_quelltext.\nif (text.length > max) { text = text.slice(0, max); hinweise.push('Text auf ' + max + ' Zeichen gekürzt'); }\n// Regel 2: Kundenkuerzel als erstes Wort, sonst Standardkunde.\nconst erstes = text.split(' ')[0].toLowerCase().replace(/[:,;.]+$/, '');\nif (kuerzel.includes(erstes)) {\n  aus.customer_code = erstes;\n  aus.customer_recognized = true;\n  const leer = text.indexOf(' ');\n  text = leer > 0 ? text.slice(leer + 1).trim() : '';\n} else {\n  aus.customer_code = standard;\n}\nif (!aus.customer_code) return fertig('kein Standardkunde eingestellt');\nif (!listeFehlt && !kuerzel.includes(aus.customer_code)) return fertig('Kunde ' + aus.customer_code + ' ist in k1_kunden nicht aktiv');\nif (!text) return fertig('nur ein Kundenkürzel, kein Auftrag');\n// Regel 3: Research-Befehl.\nconst research = text.match(/^(\\/research|recherchier(e|en)?)\\b\\s*:?\\s*(.*)$/i);\nconst url = (text.match(/https?:\\/\\/\\S+/i) || [''])[0];\nconst ohneUrl = url ? text.replace(url, '').trim() : text;\nif (research) {\n  aus.source_type = 'Research';\n  aus.topic = research[3].trim();\n} else if (url && /(youtube\\.com\\/(watch|shorts)|youtu\\.be\\/)/i.test(url)) {\n  // Regel 4: YouTube-Link.\n  aus.source_type = 'YouTube-Link';\n  aus.source = url;\n  aus.topic = ohneUrl || 'Beitrag zum verlinkten Video';\n} else if (url) {\n  // Regel 5: andere Adresse ist ein Artikel-Link.\n  aus.source_type = 'Artikel-Link';\n  aus.source = url;\n  aus.topic = ohneUrl || 'Beitrag zum verlinkten Artikel';\n} else if (text.length > 300) {\n  // Regel 6: langer Text ist eigener Text, weil K1 als Thema hoechstens 300 Zeichen annimmt.\n  aus.source_type = 'Eigener Text';\n  aus.source = text;\n  aus.topic = (text.split(/(?<=[.!?])\\s/)[0] || text).slice(0, 120);\n} else {\n  // Regel 7: sonst Thema.\n  aus.source_type = 'Thema';\n  aus.topic = text;\n}\naus.topic = aus.topic.slice(0, 300);\n// Pruefung wie vorgesehen: Thema mindestens 3 Zeichen.\nif (aus.topic.length < 3) return fertig('Thema zu kurz');\nreturn fertig('');"
       },
       "id": "10e0b7f1-c7e6-4c47-ac3e-63a97c3de1d1",
       "name": "Nachricht einordnen [Code]",
@@ -238,7 +238,7 @@
           "conditions": [
             {
               "id": "g01",
-              "leftValue": "={{ $json.gueltig }}",
+              "leftValue": "={{ $json.valid }}",
               "rightValue": "",
               "operator": {
                 "type": "boolean",
@@ -270,18 +270,18 @@
         "workflowInputs": {
           "mappingMode": "defineBelow",
           "value": {
-            "kunde_kuerzel": "={{ $json.kunde_kuerzel }}",
-            "thema": "={{ $json.thema }}",
-            "quelle_art": "={{ $json.quelle_art }}",
-            "quelle": "={{ $json.quelle }}",
-            "hinweis": "={{ $json.hinweis }}",
+            "customer_code": "={{ $json.customer_code }}",
+            "topic": "={{ $json.topic }}",
+            "source_type": "={{ $json.source_type }}",
+            "source": "={{ $json.source }}",
+            "note": "={{ $json.note }}",
             "telegram_chat_id": "={{ $json.chat_id }}"
           },
           "matchingColumns": [],
           "schema": [
             {
-              "id": "kunde_kuerzel",
-              "displayName": "kunde_kuerzel",
+              "id": "customer_code",
+              "displayName": "customer_code",
               "required": false,
               "defaultMatch": false,
               "display": true,
@@ -289,8 +289,8 @@
               "type": "string"
             },
             {
-              "id": "thema",
-              "displayName": "thema",
+              "id": "topic",
+              "displayName": "topic",
               "required": false,
               "defaultMatch": false,
               "display": true,
@@ -298,8 +298,8 @@
               "type": "string"
             },
             {
-              "id": "quelle_art",
-              "displayName": "quelle_art",
+              "id": "source_type",
+              "displayName": "source_type",
               "required": false,
               "defaultMatch": false,
               "display": true,
@@ -307,8 +307,8 @@
               "type": "string"
             },
             {
-              "id": "quelle",
-              "displayName": "quelle",
+              "id": "source",
+              "displayName": "source",
               "required": false,
               "defaultMatch": false,
               "display": true,
@@ -316,8 +316,8 @@
               "type": "string"
             },
             {
-              "id": "hinweis",
-              "displayName": "hinweis",
+              "id": "note",
+              "displayName": "note",
               "required": false,
               "defaultMatch": false,
               "display": true,
@@ -415,7 +415,7 @@
     },
     {
       "parameters": {
-        "content": "## Status\n🟢 Text, Link, Befehl und Kunde: mit Testdaten geprüft, Läufe im Bau-Protokoll\n🟡 Trigger-Filter und echte Stimme erst mit einer echten Nachricht messbar\n🔴 Kundenkürzel in Sprachnachrichten werden falsch gehört (Ordwin als Kundenort Win), Abgleich offen\n🔵 K1 bekommt den zweiten Trigger erst beim Zusammenführen",
+        "content": "## Status\n🟢 Text, Link, Befehl und Kunde: mit Testdaten geprüft, Läufe im Bau-Protokoll\n🟡 Trigger-Filter und echte Stimme erst mit einer echten Nachricht messbar\n🔴 Kundenkürzel in Sprachnachrichten werden falsch gehört (Ordwin als Kundenort Win), Abgleich offen\n🔵 Seit 12.10.2026 englische Feldnamen an K1, K1-ID gesetzt; echter Lauf mit K1 erst beim Tausch (T2)",
         "height": 424,
         "width": 492,
         "color": 7
@@ -461,7 +461,7 @@
     },
     {
       "parameters": {
-        "content": "## ③ Sprache in Text\nDie Sprachdatei kommt über `getFile`, wird zu Base64 und geht an Cloudflare Whisper large v3 turbo (gratis, Sprache de). Jeder Fehler und ein leeres Transkript nehmen den Weg „Bitte tippen“.\n### 🟡 mit Testaufnahme gemessen, echte Stimme offen\n🩺 **Wenn es hakt:** `cloudflare_account_id` in `k1_einstellungen` prüfen.",
+        "content": "## ③ Sprache in Text\nDie Sprachdatei kommt über `getFile`, wird zu Base64 und geht an Cloudflare Whisper large v3 turbo (gratis, Sprache de). Jeder Fehler und ein leeres Transkript nehmen den Weg „Bitte tippen“.\n### 🟡 mit Testaufnahme gemessen, echte Stimme offen\n🩺 **Wenn es hakt:** `cloudflare_account_id` in `k1_einstellungen` prüfen (Spalten `setting_key`, `setting_value` seit Ä7).",
         "height": 220,
         "width": 1012
       },
@@ -476,7 +476,7 @@
     },
     {
       "parameters": {
-        "content": "## ④ Kunde und Absicht\nDie aktiven Kunden kommen aus `k1_kunden`. Der Code erkennt Kürzel, Research-Befehl, YouTube- und Artikel-Link, langen Text und Thema, ganz ohne Sprachmodell.\n### 🟢 Regeln mit Testdaten geprüft\n🩺 **Wenn es hakt:** Die Ausgabe von `Nachricht einordnen` zeigt `fehler_grund`.",
+        "content": "## ④ Kunde und Absicht\nDie aktiven Kunden kommen aus `k1_kunden`. Der Code erkennt Kürzel, Research-Befehl, YouTube- und Artikel-Link, langen Text und Thema, ganz ohne Sprachmodell.\n### 🟢 Regeln mit Testdaten geprüft\n🩺 **Wenn es hakt:** Die Ausgabe von `Nachricht einordnen` zeigt `error_reason`.",
         "height": 300,
         "width": 480
       },
@@ -491,7 +491,7 @@
     },
     {
       "parameters": {
-        "content": "## ⑤ Prüfen und K1 starten\nNur gültige Aufträge starten K1, ohne auf das Ende zu warten. Scheitert der Start, meldet der Fehlerausgang das im Chat.\n### 🟡 K1-ID fehlt bis zum Zusammenführen\n🩺 **Wenn es hakt:** `k1_workflow_id` in `Einstellungen setzen` eintragen.",
+        "content": "## ⑤ Prüfen und K1 starten\nNur gültige Aufträge starten K1, ohne auf das Ende zu warten. Scheitert der Start, meldet der Fehlerausgang das im Chat.\n### 🟢 K1-ID Bk8PXBGm3gXMATK1, Felder englisch (customer_code, topic, source_type, source, note)\n🩺 **Wenn es hakt:** `k1_workflow_id` in `Einstellungen setzen` eintragen.",
         "height": 300,
         "width": 480
       },
@@ -569,7 +569,7 @@
     },
     {
       "parameters": {
-        "content": "# ✅ Setup-Checkliste\nEinrichtung **in dieser Reihenfolge**, ✅ erledigt, ⏳ offen, 🟡 Hinweis.\n\n✅ **1 Test-Bot:** bei @BotFather einen eigenen Bot angelegt, Token als Credential `Telegram API | Test-Bot K1-Eingang`.\n\n✅ **2 Trigger einsetzen:** `Telegram-Nachricht empfangen [Telegram Trigger]` mit Update message und Restrict to User IDs, Credential Test-Bot.\n\n✅ **3 Credential tauschen:** `Sprachdatei laden`, `Auftrag bestätigen`, `Hilfe senden`, `Bitte tippen` und `Start fehlgeschlagen melden` nutzen den Test-Bot, nie `Telegram API | Content-Generator`.\n\n✅ **4 Nutzer-ID:** die eigene Telegram-ID im Trigger und in `Einstellungen setzen` (`erlaubte_nutzer_ids`).\n\n✅ **5 Spracherkennung:** Cloudflare Whisper large v3 turbo mit `Cloudflare Workers AI | Content-Generator`, Konto-ID aus `k1_einstellungen`. ⏳ Groq als Ersatz, sobald ein Groq-Credential existiert.\n\n⏳ **6 K1-ID:** nach dem Zusammenführen `k1_workflow_id` eintragen.\n\n🟡 Getestet wird nur mit dem Test-Bot über „Execute workflow“, nicht veröffentlichen.",
+        "content": "# ✅ Setup-Checkliste\nEinrichtung **in dieser Reihenfolge**, ✅ erledigt, ⏳ offen, 🟡 Hinweis.\n\n✅ **1 Test-Bot:** bei @BotFather einen eigenen Bot angelegt, Token als Credential `Telegram API | Test-Bot K1-Eingang`.\n\n✅ **2 Trigger einsetzen:** `Telegram-Nachricht empfangen [Telegram Trigger]` mit Update message und Restrict to User IDs, Credential Test-Bot.\n\n✅ **3 Credential tauschen:** `Sprachdatei laden`, `Auftrag bestätigen`, `Hilfe senden`, `Bitte tippen` und `Start fehlgeschlagen melden` nutzen den Test-Bot, nie `Telegram API | Content-Generator`.\n\n✅ **4 Nutzer-ID:** die eigene Telegram-ID im Trigger und in `Einstellungen setzen` (`erlaubte_nutzer_ids`).\n\n✅ **5 Spracherkennung:** Cloudflare Whisper large v3 turbo mit `Cloudflare Workers AI | Content-Generator`, Konto-ID aus `k1_einstellungen`. ⏳ Groq als Ersatz, sobald ein Groq-Credential existiert.\n\n✅ **6 K1-ID:** `k1_workflow_id` ist `Bk8PXBGm3gXMATK1` (bleibt beim Tausch der Hauptversion gleich).\n\n🟡 Getestet wird nur mit dem Test-Bot über „Execute workflow“, nicht veröffentlichen.",
         "height": 800,
         "width": 552,
         "color": 7
@@ -616,7 +616,7 @@
     },
     {
       "parameters": {
-        "content": "## 📊 Testfälle für diesen Ablauf\n| Nr | Eingabe | Erwartung |\n|---|---|---|\n| E1 | ✅ „Fehlerbehandlung in n8n“ | Thema, Kunde ordwin, K1 startet |\n| E2 | ✅ YouTube-Link | YouTube-Link, Adresse als Quelle |\n| E3 | ✅ Artikel-Link | Artikel-Link |\n| E4 | ⚠️ Artikeltext 1.500 Zeichen | Eigener Text |\n| E5 | ✅ /research KI-Agenten | Research |\n| E6 | ⚠️ cafe-kontrast Herbstkarte | Kunde cafe-kontrast erkannt |\n| E7 | ✅ Sprachnachricht mit Thema | Transkript, Thema (NICHT GEMESSEN, Mock) |\n| E8 | ❌ Transkription fällt aus | „Bitte tippen“, kein K1-Start |\n| E9 | ❌ fremde Nutzer-ID | keine Reaktion |\n| E10 | ✅ Freigeben und Ablehnen im Chat nach Telegram-Auftrag | wartet auf Test-Bot und Zusammenführen |\n| E11 | ✅ Formular-Auftrag | K1 unverändert (Regression beim Zusammenführen) |",
+        "content": "## 📊 Testfälle für diesen Ablauf\n| Nr | Eingabe | Erwartung |\n|---|---|---|\n| E1 | ✅ „Fehlerbehandlung in n8n“ | Thema, Kunde ordwin, K1 startet |\n| E2 | ✅ YouTube-Link | YouTube-Link, Adresse als Quelle |\n| E3 | ✅ Artikel-Link | Artikel-Link |\n| E4 | ⚠️ Artikeltext 1.500 Zeichen | Eigener Text |\n| E5 | ✅ /research KI-Agenten | Research |\n| E6 | ⚠️ cafe-kontrast Herbstkarte | Kunde cafe-kontrast erkannt |\n| E7 | ✅ Sprachnachricht mit Thema | Transkript von Cloudflare Whisper, Thema (echte Stimme offen) |\n| E8 | ❌ Transkription leer oder Fehler | „Bitte tippen“, kein K1-Start |\n| E9 | ❌ fremde Nutzer-ID | keine Reaktion |\n| E10 | ✅ Freigeben und Ablehnen im Chat nach Telegram-Auftrag | wartet auf Zusammenführen |\n| E11 | ✅ Formular-Auftrag | K1 unverändert (Regression beim Zusammenführen) |",
         "height": 560,
         "width": 1600,
         "color": 5
@@ -681,7 +681,7 @@
     {
       "parameters": {
         "chatId": "={{ $json.chat_id }}",
-        "text": "=Das habe ich nicht als Auftrag verstanden ({{ $json.fehler_grund }}).\n\nSo geht es:\n• Thema: Fehlerbehandlung in n8n\n• Kunde vorne: cafe-kontrast Herbstkarte\n• Link: einfach die Adresse schicken\n• Recherche: /research KI-Agenten\n• oder eine Sprachnachricht",
+        "text": "=Das habe ich nicht als Auftrag verstanden ({{ $json.error_reason }}).\n\nSo geht es:\n• Thema: Fehlerbehandlung in n8n\n• Kunde vorne: cafe-kontrast Herbstkarte\n• Link: einfach die Adresse schicken\n• Recherche: /research KI-Agenten\n• oder eine Sprachnachricht",
         "additionalFields": {
           "appendAttribution": false
         }
@@ -705,7 +705,7 @@
     {
       "parameters": {
         "chatId": "={{ $('Nachricht einordnen [Code]').first().json.chat_id }}",
-        "text": "=Angenommen: {{ $('Nachricht einordnen [Code]').first().json.kunde_kuerzel }}, {{ $('Nachricht einordnen [Code]').first().json.quelle_art }}, „{{ $('Nachricht einordnen [Code]').first().json.thema_anzeige }}“. Die Vorschau kommt zur Freigabe.",
+        "text": "=Angenommen: {{ $('Nachricht einordnen [Code]').first().json.customer_code }}, {{ $('Nachricht einordnen [Code]').first().json.source_type }}, „{{ $('Nachricht einordnen [Code]').first().json.topic_display }}“. Die Vorschau kommt zur Freigabe.",
         "additionalFields": {
           "appendAttribution": false
         }
@@ -809,7 +809,7 @@
         "filters": {
           "conditions": [
             {
-              "keyName": "schluessel",
+              "keyName": "setting_key",
               "condition": "eq",
               "keyValue": "cloudflare_account_id"
             }
@@ -836,7 +836,7 @@
       ],
       "parameters": {
         "method": "POST",
-        "url": "=https://api.cloudflare.com/client/v4/accounts/{{ $('Cloudflare-Konto laden [Supabase]').first().json.wert }}/ai/run/@cf/openai/whisper-large-v3-turbo",
+        "url": "=https://api.cloudflare.com/client/v4/accounts/{{ $('Cloudflare-Konto laden [Supabase]').first().json.setting_value }}/ai/run/@cf/openai/whisper-large-v3-turbo",
         "authentication": "genericCredentialType",
         "genericAuthType": "httpHeaderAuth",
         "sendBody": true,
@@ -1086,9 +1086,10 @@
   },
   "meta": {
     "aiBuilderAssisted": true,
-    "builderVariant": "mcp"
+    "builderVariant": "mcp",
+    "export_hinweis": "Sicherung af760cfd plus die 13 Operationen von v04 (ops_t4), Live-Stand ist Version 17262ff2 der n8n-Historie"
   },
-  "versionId": "d4632a70-042a-4dfb-9fda-df172e5db231",
+  "versionId": "17262ff2-36f1-4b74-9209-94b9f5984eaa",
   "tags": [
     "KI-AGT-2606",
     "woche-4"
