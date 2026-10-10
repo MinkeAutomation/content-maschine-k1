@@ -2591,7 +2591,10 @@
           }
         }
       },
-      "onError": "continueErrorOutput"
+      "onError": "continueErrorOutput",
+      "retryOnFail": true,
+      "maxTries": 2,
+      "waitBetweenTries": 2000
     },
     {
       "id": "8d784ed8-f8a5-4f59-9dc4-48c3e524f5b2",
@@ -3610,7 +3613,7 @@
     "aiBuilderAssisted": true,
     "builderVariant": "mcp"
   },
-  "versionId": "ef3c0702-5666-451a-bc04-9ec3cab348dc",
+  "versionId": "b635f02b-77ea-46c6-8e9f-5247efd5a905",
   "tags": [
     "KI-AGT-2606",
     "woche-4"
