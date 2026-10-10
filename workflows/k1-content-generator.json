@@ -1954,7 +1954,7 @@
     },
     {
       "parameters": {
-        "content": "## Ablauf\n① Eingang: Auftrag annehmen, Eingabe prüfen, Kundenprofil laden, Post anlegen\n② Quelle holen: Artikel, Video, Thema oder eigener Text wird ein Quelltext\n③ KI: Paket per HTTP schreiben, Tokens und Kosten erfassen, prüfen\n④ Gestalten: Einzelbild und Folien rendern und hochladen\n⑤ Ablage und Freigabe: speichern, Telegram-Freigabe, Status, Protokollzeile\n⑥ Fehlerweg: Abbrüche E5, F3, F5, F6, F8 protokollieren, melden, stoppen",
+        "content": "## Ablauf\n① Eingang: Formular oder Telegram-Eingang, Eingabe prüfen, Kundenprofil laden, Post anlegen\n② Quelle holen: Artikel, Video, Thema oder eigener Text wird ein Quelltext\n③ KI: Paket per HTTP schreiben, Tokens und Kosten erfassen, prüfen\n④ Gestalten: Einzelbild und Folien rendern und hochladen\n⑤ Ablage und Freigabe: speichern, Telegram-Freigabe, Status, Protokollzeile\n⑥ Fehlerweg: Abbrüche E5, F3, F5, F6, F8 protokollieren, melden, stoppen",
         "height": 288,
         "width": 492,
         "color": 7
@@ -1970,7 +1970,7 @@
     },
     {
       "parameters": {
-        "content": "## Status\n🟢 Kopie von K1 v05: Token-Logging im eigenen Kostenknoten (token_prompt, token_antwort, token_gesamt, kosten_usd), Läufe im Bau-Protokoll.\n🟡 Der Ablehnungsgrund öffnet noch eine Webseite, die Antwort im Chat kommt mit der Telegram-Steuerung.\n🔴 Kundenschicht (Setup, Hilfe-Spalte, Fehlerbehebung) fehlt bis zum Feinschliff.\n🔵 Testschalter test_kaputtes_json (Standard false) und test_folien_kuerzen (Standard aus) im Konfigurationsknoten.",
+        "content": "## Status\n🟢 Kopie von K1 v05: Token-Logging im eigenen Kostenknoten (token_prompt, token_antwort, token_gesamt, kosten_usd), Läufe im Bau-Protokoll.\n🟡 Der Ablehnungsgrund öffnet noch eine Webseite, die Antwort im Chat kommt mit der Telegram-Steuerung.\n🟡 Telegram-Eingang ruft K1 ohne Warten auf, Fehler in K1 meldet K1 selbst.\n🔴 Kundenschicht (Setup, Hilfe-Spalte, Fehlerbehebung) fehlt bis zum Feinschliff.\n🔵 Testschalter test_kaputtes_json (Standard false) und test_folien_kuerzen (Standard aus) im Konfigurationsknoten.",
         "height": 288,
         "width": 492,
         "color": 7
@@ -2002,7 +2002,7 @@
     },
     {
       "parameters": {
-        "content": "## ① Eingang\nDas Formular nimmt Kunde, Thema, Quellenart und Quelle an. Eine leere oder zu kurze Eingabe stoppt ohne Modellaufruf (E5), ein unbekannter Kunde ebenso (F6), sonst entsteht der Post in Supabase.\n### 🟢 Eingabeprüfung neu in v05 (Fund E5)",
+        "content": "## ① Eingang\nDas Formular oder der Telegram-Eingang (nur `gcqhN1dEKNBRzk3C` darf aufrufen) liefert Kunde, Thema, Quellenart und Quelle. Eine leere oder zu kurze Eingabe stoppt ohne Modellaufruf (E5), ein unbekannter Kunde ebenso (F6), sonst entsteht der Post in Supabase.\n### 🟢 Eingabeprüfung neu in v05 (Fund E5)",
         "height": 136,
         "width": 1358
       },
@@ -2604,6 +2604,47 @@
         "jsCode": "// Fehlerausgaenge koennen den Prompt verlieren. Validierten Kontext gezielt wiederherstellen.\nconst basis = $('Branding-Variante wählen [Code]').first().json;\nconst fehler = $input.first().json;\nreturn [{json: {...basis, foto_ok: false, foto_url: '', foto_data_uri: '', foto_credit: null,\n  foto_hinweis: 'Pexels-Fotopfad gescheitert, Kontext wiederhergestellt, weiter mit FLUX.',\n  foto_fehler: String(fehler.error?.message || fehler.message || 'Foto konnte nicht verarbeitet werden.').slice(0, 240)}, pairedItem: {item: 0}}];\n"
       },
       "onError": "continueErrorOutput"
+    },
+    {
+      "id": "21d1488d-b760-4f8e-8c51-43b66944cba5",
+      "name": "Auftrag vom Telegram-Eingang [Execute Workflow Trigger]",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        64,
+        1184
+      ],
+      "parameters": {
+        "inputSource": "workflowInputs",
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "kunde_kuerzel",
+              "type": "string"
+            },
+            {
+              "name": "thema",
+              "type": "string"
+            },
+            {
+              "name": "quelle_art",
+              "type": "string"
+            },
+            {
+              "name": "quelle",
+              "type": "string"
+            },
+            {
+              "name": "hinweis",
+              "type": "string"
+            },
+            {
+              "name": "telegram_chat_id",
+              "type": "string"
+            }
+          ]
+        }
+      }
     }
   ],
   "connections": {
@@ -3522,6 +3563,17 @@
           }
         ]
       ]
+    },
+    "Auftrag vom Telegram-Eingang [Execute Workflow Trigger]": {
+      "main": [
+        [
+          {
+            "node": "Konfiguration und Startzeit [Edit Fields]",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "settings": {
@@ -3532,13 +3584,15 @@
     "saveManualExecutions": true,
     "saveDataErrorExecution": "all",
     "saveDataSuccessExecution": "all",
-    "binaryMode": "separate"
+    "binaryMode": "separate",
+    "callerPolicy": "workflowsFromAList",
+    "callerIds": "gcqhN1dEKNBRzk3C"
   },
   "meta": {
     "aiBuilderAssisted": true,
     "builderVariant": "mcp"
   },
-  "versionId": "bf95268a-d236-415b-a83f-f27fbb01b8da",
+  "versionId": "5cfed4d3-3889-4e84-8091-c0429362e2bd",
   "tags": [
     "KI-AGT-2606",
     "woche-4"
