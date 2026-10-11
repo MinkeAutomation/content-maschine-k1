@@ -2023,7 +2023,7 @@
     },
     {
       "parameters": {
-        "content": "## Status\n🟢 v09 Feldnamen englisch; v10 Sonar; v11 Beitragsqualität; v12 Vorlagen-Recherche (k1-p4); v13 Layout 4 mit Rückfall.\n🟡 Telegram-Eingang sendet noch kunde_kuerzel, thema, quelle_art, quelle, hinweis; K1 nimmt alte und neue Namen an.\n🟡 Der Ablehnungsgrund öffnet noch eine Webseite, die Antwort im Chat kommt mit der Telegram-Steuerung.\n🔴 Kundenschicht (Setup, Hilfe-Spalte, Fehlerbehebung) fehlt bis zum Feinschliff.\n🔵 Testschalter test_broken_json (Standard false) und test_truncate_slides (Standard aus) im Konfigurationsknoten.",
+        "content": "## Status\n🟢 v09 Feldnamen englisch; v10 Sonar; v11 Beitragsqualität; v12 Vorlagen-Recherche (k1-p4); v13 Layout 4 mit Rückfall.\n🟢 v14 Telegram-Eingang sendet customer_code, topic, source_type, source, note; Konfiguration nimmt alte Namen weiter an.\n🟡 Der Ablehnungsgrund öffnet noch eine Webseite, die Antwort im Chat kommt mit der Telegram-Steuerung.\n🔴 Kundenschicht (Setup, Hilfe-Spalte, Fehlerbehebung) fehlt bis zum Feinschliff.\n🔵 Testschalter test_broken_json (Standard false) und test_truncate_slides (Standard aus) im Konfigurationsknoten.",
         "height": 288,
         "width": 492,
         "color": 7
@@ -2697,23 +2697,23 @@
         "workflowInputs": {
           "values": [
             {
-              "name": "kunde_kuerzel",
+              "name": "customer_code",
               "type": "string"
             },
             {
-              "name": "thema",
+              "name": "topic",
               "type": "string"
             },
             {
-              "name": "quelle_art",
+              "name": "source_type",
               "type": "string"
             },
             {
-              "name": "quelle",
+              "name": "source",
               "type": "string"
             },
             {
-              "name": "hinweis",
+              "name": "note",
               "type": "string"
             },
             {
@@ -4241,7 +4241,7 @@
     "aiBuilderAssisted": true,
     "builderVariant": "mcp"
   },
-  "versionId": "e94d7c10-3baf-44d7-969e-387ae197d068",
+  "versionId": "480ca618-25a9-46d5-8755-c412d061961b",
   "tags": [
     "KI-AGT-2606",
     "woche-4"
