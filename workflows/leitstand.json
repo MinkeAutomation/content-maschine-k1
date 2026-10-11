@@ -1,0 +1,1485 @@
+{
+  "id": "xVnV4s2yVnkdGXeH",
+  "name": "AGT-2606 P1 K1 Dashboard",
+  "nodes": [
+    {
+      "id": "3ed12485-aaf8-4d09-a6be-4aa028c82386",
+      "name": "Seite angefragt [Webhook]",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        0
+      ],
+      "parameters": {
+        "httpMethod": "GET",
+        "path": "k1-dashboard",
+        "responseMode": "responseNode",
+        "options": {
+          "ignoreBots": true
+        }
+      },
+      "webhookId": "8a2e9d17-3826-4902-a87d-563384643257"
+    },
+    {
+      "id": "09f480bd-0e41-4a44-b075-0e604ed27dd3",
+      "name": "Konfiguration [Edit Fields]",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        350,
+        180
+      ],
+      "parameters": {
+        "mode": "manual",
+        "includeOtherFields": true,
+        "assignments": {
+          "assignments": [
+            {
+              "id": "c1",
+              "name": "supabase_url",
+              "value": "https://SUPABASE_URL",
+              "type": "string"
+            },
+            {
+              "id": "c2",
+              "name": "bucket",
+              "value": "k1-medien",
+              "type": "string"
+            },
+            {
+              "id": "c3",
+              "name": "k1_workflow_id",
+              "value": "Bk8PXBGm3gXMATK1",
+              "type": "string"
+            },
+            {
+              "id": "c4",
+              "name": "dispatch_enabled",
+              "value": false,
+              "type": "boolean"
+            },
+            {
+              "id": "c5",
+              "name": "branding_allowlist",
+              "value": "test-dashboard",
+              "type": "string"
+            },
+            {
+              "id": "c6",
+              "name": "runs_limit",
+              "value": 60,
+              "type": "number"
+            },
+            {
+              "id": "c7",
+              "name": "chart_days",
+              "value": 14,
+              "type": "number"
+            },
+            {
+              "id": "c8",
+              "name": "start_time",
+              "value": "={{ $now.toISO() }}",
+              "type": "string"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "8b33b84e-2393-48b8-9883-28f2deef8cf5",
+      "name": "Aktion empfangen [Webhook]",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        360
+      ],
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "k1-dashboard",
+        "responseMode": "responseNode",
+        "options": {
+          "ignoreBots": true
+        }
+      },
+      "webhookId": "4e5a74f2-64bd-4db5-8d99-0c44355b31fa"
+    },
+    {
+      "id": "ffd1e0df-4675-4117-af44-7bd573188181",
+      "name": "Anfrage verteilen [Switch]",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        700,
+        180
+      ],
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "outputKey": "seite",
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "loose"
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.body?.action ?? \"\" }}",
+                    "operator": {
+                      "type": "string",
+                      "operation": "empty",
+                      "singleValue": true
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "outputKey": "auftrag",
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "loose"
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.body?.action }}",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "rightValue": "auftrag"
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "outputKey": "branding",
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "loose"
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.body?.action }}",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "rightValue": "branding"
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        },
+        "options": {
+          "fallbackOutput": "extra",
+          "renameFallbackOutput": "unbekannt"
+        }
+      }
+    },
+    {
+      "id": "04a3ea9f-56a2-4ad6-b6c9-6d1b2668da36",
+      "name": "Läufe laden [HTTP Request]",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1050,
+        0
+      ],
+      "parameters": {
+        "url": "={{ $(\"Konfiguration [Edit Fields]\").first().json.supabase_url }}/rest/v1/k1_dashboard_runs",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "supabaseApi",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "select",
+              "value": "logged_at,execution_id,stage,status,customer_code,topic,cost_usd,duration_ms,generation_ms,error_short"
+            },
+            {
+              "name": "order",
+              "value": "logged_at.desc"
+            },
+            {
+              "name": "limit",
+              "value": "={{ $(\"Konfiguration [Edit Fields]\").first().json.runs_limit }}"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 15000
+        }
+      },
+      "credentials": {
+        "supabaseApi": {
+          "id": "CREDENTIAL_ID",
+          "name": "Supabase API | KI-AGT-2606"
+        }
+      },
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 2000,
+      "alwaysOutputData": true,
+      "onError": "continueErrorOutput"
+    },
+    {
+      "id": "68ce984f-398f-413b-93e9-d1478850c8c3",
+      "name": "Auftrag prüfen [Code]",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1050,
+        700
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "// Zweck: prüft einen Auftrag aus dem Dashboard, bevor K1 startet. Gleiche Grenzen wie im Formular von K1.\nconst cfg = $('Konfiguration [Edit Fields]').first().json;\nconst b = $input.first().json.body || {};\nconst s = v => (typeof v === 'string' ? v.trim() : '');\nconst types = ['Thema', 'Artikel-Link', 'YouTube-Link', 'Eigener Text'];\nconst job = {\n  customer_code: s(b.customer_code).toLowerCase(),\n  source_type: s(b.source_type),\n  topic: s(b.topic),\n  source: s(b.source),\n  note: s(b.note),\n};\nconst errors = [];\n// Warum hier und nicht erst in K1: ein ungültiger Auftrag kostet so keinen Modellaufruf.\nif (!/^[a-z0-9-]{2,40}$/.test(job.customer_code)) errors.push('Kunde fehlt oder ist ungültig.');\nif (!types.includes(job.source_type)) errors.push('Quellenart ist unbekannt.');\nif (job.topic.length < 3 || job.topic.length > 200) errors.push('Das Thema braucht 3 bis 200 Zeichen.');\nif (job.source_type !== 'Thema' && !job.source) errors.push('Für diese Quellenart fehlt die Quelle.');\nif ((job.source_type === 'Artikel-Link' || job.source_type === 'YouTube-Link') && job.source && !/^https:\\/\\/\\S+$/.test(job.source)) errors.push('Die Quelle muss eine vollständige Adresse mit https:// sein.');\nif (job.source.length > 20000) errors.push('Die Quelle ist länger als 20.000 Zeichen.');\nif (job.note.length > 1000) errors.push('Der Hinweis ist länger als 1.000 Zeichen.');\n\nconst ok = errors.length === 0;\n// Warum ein Schalter: vor dem Aktivieren (Basic Auth, Aufrufrecht in K1) soll das Dashboard keinen echten Lauf auslösen.\nconst dispatch = cfg.dispatch_enabled === true;\nlet status_code = 200;\nlet response;\nif (!ok) {\n  status_code = 400;\n  response = { ok: false, started: false, message: 'Auftrag nicht gestartet.', errors };\n} else if (!dispatch) {\n  response = { ok: true, started: false, message: `Probebetrieb: Der Auftrag für ${job.customer_code} ist gültig, wurde aber nicht an K1 übergeben. Zum Starten in der Konfiguration dispatch_enabled auf true setzen.` };\n} else {\n  status_code = 202;\n  response = { ok: true, started: true, message: `Auftrag an K1 übergeben (${job.source_type}: ${job.topic}). Die Vorschau kommt zur Freigabe in Telegram.` };\n}\nreturn [{ json: { ...job, start_k1: ok && dispatch, status_code, response } }];\n"
+      }
+    },
+    {
+      "id": "7e3b43ee-51e2-4062-8719-f4f8f01f3756",
+      "name": "Kunde laden [HTTP Request]",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1050,
+        1400
+      ],
+      "parameters": {
+        "url": "={{ $(\"Konfiguration [Edit Fields]\").first().json.supabase_url }}/rest/v1/k1_kunden",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "supabaseApi",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "kuerzel",
+              "value": "=eq.{{ String($(\"Konfiguration [Edit Fields]\").first().json.body?.customer_code || '').toLowerCase().replace(/[^a-z0-9-]/g, '') }}"
+            },
+            {
+              "name": "select",
+              "value": "kuerzel,name,aktiv,branding_pack"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 15000
+        }
+      },
+      "credentials": {
+        "supabaseApi": {
+          "id": "CREDENTIAL_ID",
+          "name": "Supabase API | KI-AGT-2606"
+        }
+      },
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 2000,
+      "alwaysOutputData": true,
+      "onError": "continueErrorOutput"
+    },
+    {
+      "id": "bff195b4-9a42-447a-a42f-70779db1faf2",
+      "name": "Unbekannte Anfrage ablehnen [Respond to Webhook]",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        1050,
+        1680
+      ],
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "{\"ok\":false,\"message\":\"Unbekannte Aktion. Erlaubt sind auftrag und branding.\"}",
+        "options": {
+          "responseCode": 400
+        }
+      }
+    },
+    {
+      "id": "f59ba74f-c774-4367-881a-c8c9d8a3843c",
+      "name": "Tageswerte laden [HTTP Request]",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1400,
+        0
+      ],
+      "parameters": {
+        "url": "={{ $(\"Konfiguration [Edit Fields]\").first().json.supabase_url }}/rest/v1/k1_dashboard_daily",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "supabaseApi",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "order",
+              "value": "day.desc"
+            },
+            {
+              "name": "limit",
+              "value": "={{ $(\"Konfiguration [Edit Fields]\").first().json.chart_days }}"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 15000
+        }
+      },
+      "credentials": {
+        "supabaseApi": {
+          "id": "CREDENTIAL_ID",
+          "name": "Supabase API | KI-AGT-2606"
+        }
+      },
+      "executeOnce": true,
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 2000,
+      "alwaysOutputData": true,
+      "onError": "continueErrorOutput"
+    },
+    {
+      "id": "341fdcf2-9130-4d90-afac-d5defd205ead",
+      "name": "Kunden laden [HTTP Request]",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1750,
+        0
+      ],
+      "parameters": {
+        "url": "={{ $(\"Konfiguration [Edit Fields]\").first().json.supabase_url }}/rest/v1/k1_kunden",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "supabaseApi",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "select",
+              "value": "kuerzel,name,aktiv,branding_pack"
+            },
+            {
+              "name": "order",
+              "value": "kuerzel.asc"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 15000
+        }
+      },
+      "credentials": {
+        "supabaseApi": {
+          "id": "CREDENTIAL_ID",
+          "name": "Supabase API | KI-AGT-2606"
+        }
+      },
+      "executeOnce": true,
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 2000,
+      "alwaysOutputData": true,
+      "onError": "continueErrorOutput"
+    },
+    {
+      "id": "d5628b7d-1e85-40fd-b382-55218b28d55e",
+      "name": "Seite bauen [Code]",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2450,
+        0
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "// Zweck: baut die Dashboard-Seite aus Vorlage, Läufen, Tageswerten und Kunden. Alle Abfragen liefen serverseitig, im HTML steht kein Schlüssel.\nconst cfg = $('Konfiguration [Edit Fields]').first().json;\n// Warum Vorlage aus Supabase: die Seite (rund 50 KB) liegt als nur lesende Funktion k1_dashboard_template() in der Datenbank und wird dort versioniert.\nconst raw = $('Vorlage laden [HTTP Request]').first().json.data;\nlet TEMPLATE = typeof raw === 'string' ? raw : '';\ntry { const p = JSON.parse(TEMPLATE); if (typeof p === 'string') TEMPLATE = p; } catch (e) { /* Antwort war schon reiner Text */ }\nif (!TEMPLATE.includes('/*__DATA__*/null')) {\n  throw new Error('Vorlage ohne Platzhalter erhalten (' + TEMPLATE.length + ' Zeichen), Seite nicht baubar.');\n}\n// Warum filtern: die Ladeknoten geben bei leerer Tabelle ein leeres Element weiter (alwaysOutputData), das darf nicht als Lauf zählen.\nconst runs = $('Läufe laden [HTTP Request]').all().map(i => i.json).filter(r => r && r.logged_at);\nconst dailyRaw = $('Tageswerte laden [HTTP Request]').all().map(i => i.json).filter(d => d && d.day);\nconst customers = $('Kunden laden [HTTP Request]').all().map(i => i.json).filter(c => c && c.kuerzel).map(c => ({\n  code: c.kuerzel,\n  name: c.name,\n  active: c.aktiv === true,\n  branding: {\n    markenname: c.branding_pack?.markenname ?? null,\n    farben: c.branding_pack?.farben ?? null,\n    schriften: c.branding_pack?.schriften ?? null,\n  },\n}));\n\n// Warum Lücken füllen: ein Tag ohne Lauf soll als leere Spalte sichtbar sein, sonst wirkt die Zeitachse gestaucht.\nconst chartDays = Math.min(Math.max(Number(cfg.chart_days) || 14, 3), 60);\nconst today = $now.setZone('Europe/Berlin').startOf('day');\nconst byDay = Object.fromEntries(dailyRaw.map(d => [String(d.day).slice(0, 10), d]));\nconst known = Object.keys(byDay).sort();\nlet start = today.minus({ days: chartDays - 1 });\nif (known.length) {\n  const first = DateTime.fromISO(known[0], { zone: 'Europe/Berlin' });\n  if (first > start) start = first;\n}\nconst daily = [];\nfor (let d = start; d <= today; d = d.plus({ days: 1 })) {\n  const key = d.toISODate();\n  const v = byDay[key] || {};\n  daily.push({\n    day: key,\n    runs: Number(v.runs) || 0,\n    ok_count: Number(v.ok_count) || 0,\n    fallback_count: Number(v.fallback_count) || 0,\n    error_count: Number(v.error_count) || 0,\n    cost_usd: Number(v.cost_usd) || 0,\n  });\n}\n\nconst data = {\n  generated_at: new Date().toISOString(),\n  config: {\n    dispatch_enabled: cfg.dispatch_enabled === true,\n    branding_allowlist: String(cfg.branding_allowlist || '').split(',').map(s => s.trim()).filter(Boolean),\n  },\n  runs,\n  daily,\n  customers,\n};\n\n// Warum maskieren: ein \"<\" im JSON könnte ein </script> in einem Thema schließen (Testlauf 673 enthält genau so einen Text).\nconst BS = String.fromCharCode(92);\nconst json = JSON.stringify(data).split('<').join(BS + 'u003c').split(String.fromCharCode(0x2028)).join(BS + 'u2028').split(String.fromCharCode(0x2029)).join(BS + 'u2029');\nconst html = TEMPLATE.replace('/*__DATA__*/null', () => json);\nreturn [{ json: { html, run_count: runs.length, day_count: daily.length, customer_count: customers.length, template_chars: TEMPLATE.length } }];\n"
+      },
+      "executeOnce": true,
+      "onError": "continueErrorOutput"
+    },
+    {
+      "id": "c219ab5b-451e-4060-a1fd-d51bbdd645c5",
+      "name": "Seite ausliefern [Respond to Webhook]",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        2800,
+        0
+      ],
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "={{ $json.html }}",
+        "options": {
+          "responseCode": 200,
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Content-Type",
+                "value": "text/html; charset=utf-8"
+              },
+              {
+                "name": "Cache-Control",
+                "value": "no-store"
+              },
+              {
+                "name": "X-Robots-Tag",
+                "value": "noindex, nofollow"
+              },
+              {
+                "name": "X-Frame-Options",
+                "value": "DENY"
+              },
+              {
+                "name": "Referrer-Policy",
+                "value": "same-origin"
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": "1f48304b-1172-4670-a955-caf5ec881da3",
+      "name": "Seite nicht ladbar melden [Respond to Webhook]",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        2800,
+        200
+      ],
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({ ok: false, message: \"Technischer Fehler: \" + (typeof $json.error === \"string\" ? $json.error : ($json.error?.message || $json.message || \"unbekannt\")) + \". Bitte später erneut versuchen.\" }) }}",
+        "options": {
+          "responseCode": 502
+        }
+      }
+    },
+    {
+      "id": "a6162de5-7109-420e-b4c3-20b0a03ff9e1",
+      "name": "K1 starten? [If]",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1400,
+        700
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $json.start_k1 }}",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        }
+      }
+    },
+    {
+      "id": "324a865b-525f-4b8d-93f1-d72be18c61e1",
+      "name": "K1 starten [Execute Workflow]",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2,
+      "position": [
+        1750,
+        560
+      ],
+      "parameters": {
+        "source": "database",
+        "workflowId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "Bk8PXBGm3gXMATK1"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "kunde_kuerzel": "={{ $json.customer_code }}",
+            "thema": "={{ $json.topic }}",
+            "quelle_art": "={{ $json.source_type }}",
+            "quelle": "={{ $json.source }}",
+            "hinweis": "={{ $json.note }}",
+            "telegram_chat_id": ""
+          },
+          "matchingColumns": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true,
+          "schema": [
+            {
+              "id": "kunde_kuerzel",
+              "displayName": "kunde_kuerzel",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "thema",
+              "displayName": "thema",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "quelle_art",
+              "displayName": "quelle_art",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "quelle",
+              "displayName": "quelle",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "hinweis",
+              "displayName": "hinweis",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "telegram_chat_id",
+              "displayName": "telegram_chat_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            }
+          ]
+        },
+        "options": {
+          "waitForSubWorkflow": false
+        }
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "id": "849b47cc-afbb-4f10-b7a3-a878d7609c5f",
+      "name": "Antwort senden [Respond to Webhook]",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        3500,
+        700
+      ],
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify($json.response) }}",
+        "options": {
+          "responseCode": "={{ $json.status_code }}"
+        }
+      }
+    },
+    {
+      "id": "2e82b27b-48b4-4cfe-abd1-d37b2b263a69",
+      "name": "Antwort nach Start [Edit Fields]",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        2100,
+        560
+      ],
+      "parameters": {
+        "mode": "manual",
+        "includeOtherFields": false,
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a1",
+              "name": "status_code",
+              "value": "={{ $('Auftrag prüfen [Code]').first().json.status_code }}",
+              "type": "number"
+            },
+            {
+              "id": "a2",
+              "name": "response",
+              "value": "={{ $('Auftrag prüfen [Code]').first().json.response }}",
+              "type": "object"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "964d17e1-a733-4244-9cc6-c8c1bafd8445",
+      "name": "Start nicht möglich melden [Respond to Webhook]",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        2100,
+        880
+      ],
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({ ok: false, message: \"Technischer Fehler: \" + (typeof $json.error === \"string\" ? $json.error : ($json.error?.message || $json.message || \"unbekannt\")) + \". Bitte später erneut versuchen.\" }) }}",
+        "options": {
+          "responseCode": 502
+        }
+      }
+    },
+    {
+      "id": "4b51675a-2873-4b07-af85-1c3dc6098e55",
+      "name": "Branding prüfen [Code]",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1400,
+        1400
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "// Zweck: prüft ein eingereichtes Branding-Paket und baut das neue branding_pack. Gespeichert wird erst danach und nur bei grüner Prüfung.\nconst cfg = $('Konfiguration [Edit Fields]').first().json;\nconst b = cfg.body || {};\nconst s = v => (typeof v === 'string' ? v.trim() : '');\nconst code = s(b.customer_code).toLowerCase();\n// Warum filtern: bei unbekanntem Kunden liefert der Ladeknoten nur ein leeres Element (alwaysOutputData).\nconst rows = $input.all().map(i => i.json).filter(r => r && r.kuerzel);\nconst kunde = rows.find(r => r.kuerzel === code) || null;\nconst allow = String(cfg.branding_allowlist || '').split(',').map(x => x.trim()).filter(Boolean);\nconst errors = [];\n\nif (b.confirmed !== true) errors.push('Die Bestätigung fehlt, nichts wurde gespeichert.');\nif (!/^[a-z0-9-]{2,40}$/.test(code) || !kunde) errors.push(`Kunde ${code || '(leer)'} ist unbekannt.`);\n// Warum eine Freigabeliste: echte Kunden werden erst nach Patricks Entscheidung über das Dashboard geändert.\nif (!(allow.includes('*') || allow.includes(code))) errors.push(`Speichern für ${code || '(leer)'} ist nicht freigegeben (branding_allowlist).`);\n\nconst markenname = s(b.markenname);\nif (markenname.length < 2 || markenname.length > 80) errors.push('Der Markenname braucht 2 bis 80 Zeichen.');\nconst keys = ['primaer', 'sekundaer', 'akzent', 'hintergrund', 'text'];\nconst farbenIn = b.farben || {};\nconst farben = {};\nconst badColors = [];\nfor (const k of keys) {\n  const v = s(farbenIn[k]).toUpperCase();\n  if (/^#[0-9A-F]{6}$/.test(v)) farben[k] = v; else badColors.push(k);\n}\nif (badColors.length) errors.push(`Kein gültiger Hex-Wert bei: ${badColors.join(', ')}.`);\n// Warum nur diese Zeichen: der Name landet später in einer Google-Fonts-Adresse und in CSS.\nconst fontOk = v => /^[A-Za-z0-9 -]{2,60}$/.test(v);\nconst titel = s(b.schriften?.titel);\nconst textFont = s(b.schriften?.text);\nif (!fontOk(titel)) errors.push('Schrift für Titel fehlt oder enthält unerlaubte Zeichen.');\nif (!fontOk(textFont)) errors.push('Schrift für Text fehlt oder enthält unerlaubte Zeichen.');\n\nlet logo = null;\nif (b.logo_data_url) {\n  const m = /^data:(image\\/(png|jpeg|webp));base64,([A-Za-z0-9+/=]+)$/.exec(String(b.logo_data_url));\n  if (!m) {\n    errors.push('Das Logo ist kein PNG, JPG oder WEBP.');\n  } else {\n    const buf = Buffer.from(m[3], 'base64');\n    // Warum Dateikopf prüfen: die Angabe im Data-URL kommt vom Browser und kann falsch sein.\n    const sig = buf.subarray(0, 12).toString('hex');\n    const real = sig.startsWith('89504e47') ? 'png' : sig.startsWith('ffd8ff') ? 'jpeg' : (sig.startsWith('52494646') && sig.slice(16, 24) === '57454250') ? 'webp' : null;\n    if (buf.length > 1000000) errors.push(`Das Logo ist ${(buf.length / 1e6).toFixed(1)} MB groß, erlaubt ist 1 MB.`);\n    else if (real !== m[2]) errors.push('Der Dateiinhalt passt nicht zum Bildformat.');\n    else {\n      const ext = real === 'jpeg' ? 'jpg' : real;\n      logo = { b64: m[3], mime: m[1], path: `logos/${code}.${ext}`, size: buf.length, file_name: `${code}.${ext}` };\n    }\n  }\n}\n\nconst ok = errors.length === 0;\nconst alt = kunde?.branding_pack || {};\nconst stamp = $now.setZone('Europe/Berlin');\nconst branding_pack = ok ? {\n  ...alt,\n  markenname,\n  farben,\n  schriften: { ...(alt.schriften || {}), titel, text: textFont },\n  logo: logo ? { ...(alt.logo || {}), modus: 'datei', pfad: logo.path, text: markenname } : (alt.logo || null),\n  status: 'eingereicht',\n  eingereicht_am: stamp.toISO(),\n  quelle: `K1 Dashboard, eingereicht ${stamp.toFormat('dd.MM.yyyy HH:mm')}`,\n  version: (Number(alt.version) || 0) + 1,\n} : null;\n\nconst out = {\n  ok,\n  customer_code: code,\n  has_logo: ok && !!logo,\n  logo_path: logo?.path || null,\n  logo_size: logo?.size || null,\n  branding_pack,\n  status_code: ok ? 200 : 400,\n  response: ok ? null : { ok: false, message: 'Branding nicht gespeichert.', errors },\n};\nconst item = { json: out };\nif (ok && logo) item.binary = { logo: { data: logo.b64, mimeType: logo.mime, fileName: logo.file_name } };\nreturn [item];\n"
+      }
+    },
+    {
+      "id": "d77e4ac5-1c1d-46a1-90fc-d277c6f7e3af",
+      "name": "Branding gültig? [If]",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1750,
+        1400
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $json.ok }}",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        }
+      }
+    },
+    {
+      "id": "6d81be1d-2491-4ecd-8f1e-160f0d928f47",
+      "name": "Logo dabei? [If]",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        2100,
+        1400
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $json.has_logo }}",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        }
+      }
+    },
+    {
+      "id": "fef846dd-5c0b-4ace-93d6-999a261a4e4e",
+      "name": "Logo hochladen [HTTP Request]",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2450,
+        1290
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $(\"Konfiguration [Edit Fields]\").first().json.supabase_url }}/storage/v1/object/{{ $(\"Konfiguration [Edit Fields]\").first().json.bucket }}/{{ $json.logo_path }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "supabaseApi",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-upsert",
+              "value": "true"
+            },
+            {
+              "name": "Content-Type",
+              "value": "={{ $binary.logo.mimeType }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "binaryData",
+        "inputDataFieldName": "logo",
+        "options": {
+          "timeout": 15000
+        }
+      },
+      "credentials": {
+        "supabaseApi": {
+          "id": "CREDENTIAL_ID",
+          "name": "Supabase API | KI-AGT-2606"
+        }
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "id": "78571ec6-9aa6-4273-986a-e9f498c64459",
+      "name": "Branding speichern [HTTP Request]",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2800,
+        1400
+      ],
+      "parameters": {
+        "method": "PATCH",
+        "url": "={{ $(\"Konfiguration [Edit Fields]\").first().json.supabase_url }}/rest/v1/k1_kunden?kuerzel=eq.{{ $('Branding prüfen [Code]').first().json.customer_code }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "supabaseApi",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Prefer",
+              "value": "return=representation"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify(Object.assign({ branding_pack: $('Branding prüfen [Code]').first().json.branding_pack }, $('Branding prüfen [Code]').first().json.has_logo ? { logo_url: $('Branding prüfen [Code]').first().json.logo_path } : {})) }}",
+        "options": {
+          "timeout": 15000
+        }
+      },
+      "credentials": {
+        "supabaseApi": {
+          "id": "CREDENTIAL_ID",
+          "name": "Supabase API | KI-AGT-2606"
+        }
+      },
+      "alwaysOutputData": true,
+      "onError": "continueErrorOutput"
+    },
+    {
+      "id": "cf86550d-d7e2-4169-b79a-68e55f721947",
+      "name": "Speichern bestätigen [Code]",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3150,
+        1400
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "// Zweck: prüft, ob Supabase die Zeile wirklich geändert hat, und baut die Antwort an die Seite.\nconst pruef = $('Branding prüfen [Code]').first().json;\n// Warum zählen: PATCH mit Filter liefert bei 0 Treffern trotzdem 200, dann wäre \"gespeichert\" gelogen.\nconst rows = $input.all().map(i => i.json).filter(r => r && r.kuerzel === pruef.customer_code);\nif (rows.length !== 1) {\n  return [{ json: { status_code: 409, response: { ok: false, message: `Supabase hat ${rows.length} Zeilen geändert statt 1. Bitte Kunde prüfen.` } } }];\n}\nconst bp = rows[0].branding_pack || {};\nconst logoText = pruef.has_logo ? ` Logo gespeichert unter ${pruef.logo_path}.` : ' Logo unverändert.';\nreturn [{ json: {\n  status_code: 200,\n  response: { ok: true, message: `Branding für ${pruef.customer_code} gespeichert (Version ${bp.version}).${logoText}`, version: bp.version },\n} }];\n"
+      }
+    },
+    {
+      "id": "4e24639a-f0a8-47c6-a86d-ba576b0804be",
+      "name": "Branding-Fehler melden [Respond to Webhook]",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        2800,
+        1680
+      ],
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({ ok: false, message: \"Technischer Fehler: \" + (typeof $json.error === \"string\" ? $json.error : ($json.error?.message || $json.message || \"unbekannt\")) + \". Bitte später erneut versuchen.\" }) }}",
+        "options": {
+          "responseCode": 502
+        }
+      }
+    },
+    {
+      "id": "dbb9d176-af92-44f2-bf4e-22ca01d44045",
+      "name": "Sticky Note 75c576b4",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -40,
+        -720
+      ],
+      "parameters": {
+        "content": "# AGT-2606 P1 K1 Dashboard\nLeitstand für K1: Verlauf der Läufe, Auftrag starten und Branding einreichen auf einer Seite.",
+        "color": 5,
+        "width": 2156,
+        "height": 110
+      }
+    },
+    {
+      "id": "d20d0dc2-a46e-478a-af6b-83be138ade1d",
+      "name": "Sticky Note daa1b43e",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -40,
+        -576
+      ],
+      "parameters": {
+        "content": "# 🧪 K1 Dashboard\n**Aufgabe:** Eine Webseite zeigt die letzten Läufe von K1, startet neue Aufträge und nimmt Branding-Pakete an.\n**Die Idee:** Ein Webhook liefert die Seite, ein zweiter auf derselben Adresse nimmt Auftrag und Branding an.\n**Warum so?** Alle Supabase-Abfragen laufen serverseitig in n8n, im HTML steht kein Schlüssel.\n**Hinweis:** Vor dem Aktivieren an beiden Webhooks Basic Auth setzen.\nStufe: Durchstich bis 14.10.2026",
+        "color": 2,
+        "width": 1100,
+        "height": 260
+      }
+    },
+    {
+      "id": "7b2efc8f-3fed-4b2e-9d51-b5c325987a8a",
+      "name": "Sticky Note 71b2531d",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1080,
+        -576
+      ],
+      "parameters": {
+        "content": "## Ablauf\n① Anfrage annehmen und verteilen\n② Läufe, Tageswerte, Kunden laden\n③ Vorlage laden, Seite bauen\n④ Auftrag prüfen\n⑤ K1 starten, nur wenn freigeschaltet\n⑥ Antwort an die Seite\n⑦ Branding prüfen\n⑧ Logo hochladen, Branding speichern\n⑨ Fehlerweg",
+        "color": 2,
+        "width": 508,
+        "height": 260
+      }
+    },
+    {
+      "id": "df6666fa-0d09-4ded-87e8-2419765a4335",
+      "name": "Sticky Note 074f55ee",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1608,
+        -576
+      ],
+      "parameters": {
+        "content": "## Status\n🟢 Verlauf liest echte Daten aus Supabase\n🟡 Probebetrieb: Aufträge werden nur geprüft\n🔴 Basic Auth fehlt, nicht aktivieren\n🔵 Branding nur für test-dashboard frei",
+        "color": 2,
+        "width": 508,
+        "height": 260
+      }
+    },
+    {
+      "id": "cc485a5a-c15b-4d8f-ab32-87e575175cd9",
+      "name": "Sticky Note 22840293",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -30,
+        -276
+      ],
+      "parameters": {
+        "content": "## ① Anfrage annehmen\nGET liefert die Seite, POST nimmt Auftrag oder Branding an. Die Weiche verteilt nach dem Feld action, Unbekanntes bekommt 400.\n\n### 🔴 Basic Auth vor dem Aktivieren",
+        "color": 1,
+        "width": 960,
+        "height": 200
+      }
+    },
+    {
+      "id": "02989aec-cb1d-48f0-a153-69bcd6fa0a18",
+      "name": "Sticky Note 7fc74674",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1020,
+        -276
+      ],
+      "parameters": {
+        "content": "## ② Daten laden\nZwei Views (je Lauf, je Tag) und die Kunden aus Supabase, mit dem vorhandenen Supabase-Zugang. Leere Tabellen laufen trotzdem durch.\n\n### 🟢 Echte Daten",
+        "color": 1,
+        "width": 1010,
+        "height": 200
+      }
+    },
+    {
+      "id": "64c693d4-0319-4660-9328-cafb0e68a655",
+      "name": "Sticky Note 84ed8113",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2070,
+        -276
+      ],
+      "parameters": {
+        "content": "## ③ Seite bauen\nDie Vorlage kommt aus der nur lesenden Supabase-Funktion k1_dashboard_template(). Der Code setzt die Daten ein, maskiert < und antwortet als HTML.\n\n### 🟢 Hell und Dunkel",
+        "color": 1,
+        "width": 910,
+        "height": 200
+      }
+    },
+    {
+      "id": "2dc73a10-74aa-4a5c-878d-4cc87fccc424",
+      "name": "Sticky Note e50f9a54",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1020,
+        300
+      ],
+      "parameters": {
+        "content": "## ④ Auftrag prüfen\nGleiche Grenzen wie im Formular von K1. Ungültiges geht ohne Modellaufruf mit 400 zurück.\n\n### 🟢 Prüfung aktiv",
+        "color": 1,
+        "width": 640,
+        "height": 200
+      }
+    },
+    {
+      "id": "dbfa399a-1a32-4240-a2fe-dc647d84b844",
+      "name": "Sticky Note b3c27096",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1720,
+        300
+      ],
+      "parameters": {
+        "content": "## ⑤ K1 starten\nRuft Bk8 über den Sub-Workflow-Eingang auf, ohne zu warten. Nur wenn dispatch_enabled an ist.\n\n### 🟡 Aufrufrecht in Bk8 fehlt noch",
+        "color": 1,
+        "width": 640,
+        "height": 200
+      }
+    },
+    {
+      "id": "c94803da-a740-4ea2-9868-c4a0150a3686",
+      "name": "Sticky Note 5e2535b7",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        3470,
+        300
+      ],
+      "parameters": {
+        "content": "## ⑥ Antwort\nEine Antwort für Auftrag und Branding: Status und Text aus dem Feld response.\n\n### 🟢 JSON an die Seite",
+        "color": 1,
+        "width": 300,
+        "height": 200
+      }
+    },
+    {
+      "id": "831caf66-7a9e-4e0f-b09d-9a60a2606ea0",
+      "name": "Sticky Note 71e461b9",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1020,
+        1040
+      ],
+      "parameters": {
+        "content": "## ⑦ Branding prüfen\nPflichtfelder, Hex-Farben, Schriftnamen, Logo höchstens 1 MB mit echtem Dateikopf, Freigabeliste und Bestätigung.\n\n### 🔵 Nur test-dashboard frei",
+        "color": 1,
+        "width": 1010,
+        "height": 200
+      }
+    },
+    {
+      "id": "659ee477-201d-4313-90e0-4bbf74f794fd",
+      "name": "Sticky Note 4aa50b68",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2070,
+        1040
+      ],
+      "parameters": {
+        "content": "## ⑧ Logo und Speichern\nLogo nach k1-medien/logos, dann branding_pack per PATCH. Danach zählt der Code, ob genau 1 Zeile geändert wurde.\n\n### 🟢 Rückmeldung mit Version",
+        "color": 1,
+        "width": 1260,
+        "height": 200
+      }
+    },
+    {
+      "id": "f5f8a179-d3d1-44b7-b553-dd80495127e6",
+      "name": "Rahmen Fehlerweg",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        3100,
+        1600
+      ],
+      "parameters": {
+        "content": "",
+        "color": 5,
+        "width": 440,
+        "height": 280
+      }
+    },
+    {
+      "id": "206d5f8c-a052-4bb1-a945-b4346d54f3e0",
+      "name": "Sticky Note 159b1b25",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        3120,
+        1620
+      ],
+      "parameters": {
+        "content": "## ⑨ Fehlerweg\nFällt Supabase, Storage oder der Aufruf von K1 aus, antwortet der Workflow mit 502 und Klartext. Scheitert das Speichern nach dem Logo, bleibt das alte Branding stehen.\n\n### 🔴 Meldet und stoppt",
+        "color": 3,
+        "width": 400,
+        "height": 240
+      }
+    },
+    {
+      "id": "5a6572db-4fea-4794-8a6e-439cc618a48f",
+      "name": "Vorlage laden [HTTP Request]",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2100,
+        0
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $(\"Konfiguration [Edit Fields]\").first().json.supabase_url }}/rest/v1/rpc/k1_dashboard_template",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "supabaseApi",
+        "sendBody": true,
+        "contentType": "json",
+        "specifyBody": "json",
+        "jsonBody": "{}",
+        "options": {
+          "timeout": 15000,
+          "response": {
+            "response": {
+              "responseFormat": "text",
+              "outputPropertyName": "data"
+            }
+          }
+        }
+      },
+      "credentials": {
+        "supabaseApi": {
+          "id": "CREDENTIAL_ID",
+          "name": "Supabase API | KI-AGT-2606"
+        }
+      },
+      "onError": "continueErrorOutput",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 2000,
+      "executeOnce": true
+    },
+    {
+      "id": "d773eaca-3c78-47e0-aa17-439dad04d80e",
+      "name": "Branding ablehnen [Respond to Webhook]",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        2100,
+        1680
+      ],
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify($json.response) }}",
+        "options": {
+          "responseCode": "={{ $json.status_code }}"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Seite angefragt [Webhook]": {
+      "main": [
+        [
+          {
+            "node": "Konfiguration [Edit Fields]",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Konfiguration [Edit Fields]": {
+      "main": [
+        [
+          {
+            "node": "Anfrage verteilen [Switch]",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aktion empfangen [Webhook]": {
+      "main": [
+        [
+          {
+            "node": "Konfiguration [Edit Fields]",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Anfrage verteilen [Switch]": {
+      "main": [
+        [
+          {
+            "node": "Läufe laden [HTTP Request]",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Auftrag prüfen [Code]",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Kunde laden [HTTP Request]",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Unbekannte Anfrage ablehnen [Respond to Webhook]",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Läufe laden [HTTP Request]": {
+      "main": [
+        [
+          {
+            "node": "Tageswerte laden [HTTP Request]",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Seite nicht ladbar melden [Respond to Webhook]",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Auftrag prüfen [Code]": {
+      "main": [
+        [
+          {
+            "node": "K1 starten? [If]",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Kunde laden [HTTP Request]": {
+      "main": [
+        [
+          {
+            "node": "Branding prüfen [Code]",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Branding-Fehler melden [Respond to Webhook]",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tageswerte laden [HTTP Request]": {
+      "main": [
+        [
+          {
+            "node": "Kunden laden [HTTP Request]",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Seite nicht ladbar melden [Respond to Webhook]",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Kunden laden [HTTP Request]": {
+      "main": [
+        [
+          {
+            "node": "Vorlage laden [HTTP Request]",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Seite nicht ladbar melden [Respond to Webhook]",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Seite bauen [Code]": {
+      "main": [
+        [
+          {
+            "node": "Seite ausliefern [Respond to Webhook]",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Seite nicht ladbar melden [Respond to Webhook]",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "K1 starten? [If]": {
+      "main": [
+        [
+          {
+            "node": "K1 starten [Execute Workflow]",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Antwort senden [Respond to Webhook]",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "K1 starten [Execute Workflow]": {
+      "main": [
+        [
+          {
+            "node": "Antwort nach Start [Edit Fields]",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Start nicht möglich melden [Respond to Webhook]",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Antwort nach Start [Edit Fields]": {
+      "main": [
+        [
+          {
+            "node": "Antwort senden [Respond to Webhook]",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Branding prüfen [Code]": {
+      "main": [
+        [
+          {
+            "node": "Branding gültig? [If]",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Branding gültig? [If]": {
+      "main": [
+        [
+          {
+            "node": "Logo dabei? [If]",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Branding ablehnen [Respond to Webhook]",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Logo dabei? [If]": {
+      "main": [
+        [
+          {
+            "node": "Logo hochladen [HTTP Request]",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Branding speichern [HTTP Request]",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Logo hochladen [HTTP Request]": {
+      "main": [
+        [
+          {
+            "node": "Branding speichern [HTTP Request]",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Branding-Fehler melden [Respond to Webhook]",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Branding speichern [HTTP Request]": {
+      "main": [
+        [
+          {
+            "node": "Speichern bestätigen [Code]",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Branding-Fehler melden [Respond to Webhook]",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Speichern bestätigen [Code]": {
+      "main": [
+        [
+          {
+            "node": "Antwort senden [Respond to Webhook]",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Vorlage laden [HTTP Request]": {
+      "main": [
+        [
+          {
+            "node": "Seite bauen [Code]",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Seite nicht ladbar melden [Respond to Webhook]",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": true,
+    "errorWorkflow": "vdWjTLYejCK2YrMP",
+    "timezone": "Europe/Berlin",
+    "saveManualExecutions": true,
+    "saveDataErrorExecution": "all",
+    "saveDataSuccessExecution": "all",
+    "callerPolicy": "none"
+  },
+  "meta": {
+    "aiBuilderAssisted": true,
+    "builderVariant": "mcp"
+  },
+  "versionId": "296ae67b-ca93-42ed-99a3-6f0e66802e2d",
+  "tags": [
+    "KI-AGT-2606",
+    "schulung",
+    "woche-5"
+  ],
+  "staticData": null
+}
