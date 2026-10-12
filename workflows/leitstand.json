@@ -1,7 +1,7 @@
 {
   "id": "xVnV4s2yVnkdGXeH",
   "name": "AGT-2606 P1 K1 Dashboard",
-  "description": "Projekt 1: Leitstand für K1 (Verlauf aus k1_laufprotokoll, Auftrag starten, Branding einreichen). Inaktiv, Basic Auth an beiden Webhooks eingeschaltet, vor dem Aktivieren das Credential wählen.",
+  "description": "Projekt 1: Leitstand für K1 (Verlauf aus k1_laufprotokoll, Auftrag starten, Branding einreichen). Inaktiv, Basic Auth mit Credential an beiden Webhooks, 401-Test über HTTP vor dem Aktivieren.",
   "nodes": [
     {
       "id": "3ed12485-aaf8-4d09-a6be-4aa028c82386",
@@ -21,7 +21,13 @@
         },
         "authentication": "basicAuth"
       },
-      "webhookId": "8a2e9d17-3826-4902-a87d-563384643257"
+      "webhookId": "8a2e9d17-3826-4902-a87d-563384643257",
+      "credentials": {
+        "httpBasicAuth": {
+          "id": "CREDENTIAL_ID",
+          "name": "Basic Auth | K1 Dashboard"
+        }
+      }
     },
     {
       "id": "09f480bd-0e41-4a44-b075-0e604ed27dd3",
@@ -107,7 +113,13 @@
         },
         "authentication": "basicAuth"
       },
-      "webhookId": "4e5a74f2-64bd-4db5-8d99-0c44355b31fa"
+      "webhookId": "4e5a74f2-64bd-4db5-8d99-0c44355b31fa",
+      "credentials": {
+        "httpBasicAuth": {
+          "id": "CREDENTIAL_ID",
+          "name": "Basic Auth | K1 Dashboard"
+        }
+      }
     },
     {
       "id": "ffd1e0df-4675-4117-af44-7bd573188181",
@@ -874,7 +886,7 @@
         -576
       ],
       "parameters": {
-        "content": "# 🧪 K1 Dashboard\n**Aufgabe:** Eine Webseite zeigt die letzten Läufe von K1, startet neue Aufträge und nimmt Branding-Pakete an.\n**Die Idee:** Ein Webhook liefert die Seite, ein zweiter auf derselben Adresse nimmt Auftrag und Branding an.\n**Warum so?** Alle Supabase-Abfragen laufen serverseitig in n8n, im HTML steht kein Schlüssel.\n**Hinweis:** Basic Auth ist an beiden Webhooks eingeschaltet, vor dem Aktivieren das Credential wählen.\nStufe: Durchstich bis 14.10.2026",
+        "content": "# 🧪 K1 Dashboard\n**Aufgabe:** Eine Webseite zeigt die letzten Läufe von K1, startet neue Aufträge und nimmt Branding-Pakete an.\n**Die Idee:** Ein Webhook liefert die Seite, ein zweiter auf derselben Adresse nimmt Auftrag und Branding an.\n**Warum so?** Alle Supabase-Abfragen laufen serverseitig in n8n, im HTML steht kein Schlüssel.\n**Hinweis:** Beide Webhooks prüfen Basic Auth (Credential Basic Auth | K1 Dashboard).\nStufe: Durchstich bis 14.10.2026",
         "color": 2,
         "width": 1100,
         "height": 280
@@ -906,7 +918,7 @@
         -576
       ],
       "parameters": {
-        "content": "## Status\n🟢 Verlauf liest echte Daten aus Supabase\n🟡 Probebetrieb: Aufträge werden nur geprüft\n🔴 Basic Auth an, Credential fehlt: nicht aktivieren\n🔵 Branding nur für test-dashboard frei",
+        "content": "## Status\n🟢 Verlauf liest echte Daten aus Supabase\n🟡 Probebetrieb: Aufträge werden nur geprüft\n🟡 Basic Auth mit Credential, 401-Test über HTTP offen\n🔵 Branding nur für test-dashboard frei",
         "color": 2,
         "width": 508,
         "height": 280
@@ -922,7 +934,7 @@
         -276
       ],
       "parameters": {
-        "content": "## ① Anfrage annehmen\nGET liefert die Seite, POST nimmt Auftrag oder Branding an. Die Weiche verteilt nach dem Feld action, Unbekanntes bekommt 400.\n\n### 🔴 Basic Auth an, Credential wählen",
+        "content": "## ① Anfrage annehmen\nGET liefert die Seite, POST nimmt Auftrag oder Branding an. Die Weiche verteilt nach dem Feld action, Unbekanntes bekommt 400.\n\n### 🟢 Basic Auth mit Credential",
         "color": 1,
         "width": 960,
         "height": 200
@@ -1694,7 +1706,7 @@
     "aiBuilderAssisted": true,
     "builderVariant": "mcp"
   },
-  "versionId": "7fce7865-cae1-42e8-8ce8-03e93ab90581",
+  "versionId": "ec683d1c-fb1e-4f8c-8809-53a75f1fc8d8",
   "tags": [
     "KI-AGT-2606",
     "schulung",
