@@ -1,0 +1,1170 @@
+{
+  "id": "NeI0sZaS2gXKFkGL",
+  "name": "AGT-2606 P1 SUB Nextcloud-Ablage",
+  "description": "Unter-Workflow Nextcloud-Ablage: legt einen freigegebenen Beitrag mit Text und Bildern geordnet ab und erzeugt einen Freigabelink (nur lesen, 30 Tage).",
+  "nodes": [
+    {
+      "id": "5525876f-f06d-4fc5-8ca6-04114fc79791",
+      "name": "Titelleiste",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -30,
+        -324
+      ],
+      "parameters": {
+        "content": "# AGT-2606 P1 SUB Nextcloud-Ablage\nLegt einen freigegebenen Beitrag mit Text und Bildern geordnet in Nextcloud ab.",
+        "color": 5,
+        "width": 5200,
+        "height": 110
+      }
+    },
+    {
+      "id": "3c013fe0-7e1d-4461-b04d-08ee864fe576",
+      "name": "Rahmen Kopf",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -50,
+        -200
+      ],
+      "parameters": {
+        "content": "",
+        "width": 2200,
+        "height": 240
+      }
+    },
+    {
+      "id": "9266cdc9-89e8-4e21-bcdc-2a21c9d7b7b2",
+      "name": "Kopf",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -30,
+        -180
+      ],
+      "parameters": {
+        "content": "# 🧪 SUB Nextcloud-Ablage\n\n**Aufgabe:** Ein freigegebener Beitrag der Haupt-K1 wird mit Text und Bildern im Ordner des Kunden in Nextcloud abgelegt.\n\n**Die Idee:** Ordner /K1/Kunde/Datum_Beitrag_Thema anlegen, beitrag.md und die Folien hineinlegen, am Ende ok, Ordnerpfad und Dateizahl zurückgeben.\n\n**Warum so?** Die Ablage steckt in einem Sub, damit die Haupt-K1 klein bleibt und ein Fehler hier den Aufrufer nicht abbricht.\n\n**Hinweis:** Stufe: Durchstich bis 14.10.2026",
+        "color": 7,
+        "width": 1100,
+        "height": 200
+      }
+    },
+    {
+      "id": "c7efd730-bcdd-4342-bcf3-61ec57fca783",
+      "name": "Ablauf",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1090,
+        -180
+      ],
+      "parameters": {
+        "content": "## Ablauf\n① Eingabe prüfen\n② Eingabe gültig?\n③ Ordner anlegen\n④ Beitragstext ablegen\n⑤ Bilder ablegen\n⑥ Ergebnis melden",
+        "color": 7,
+        "width": 508,
+        "height": 200
+      }
+    },
+    {
+      "id": "a8f2be86-2722-4d95-a35b-a28693e5e13a",
+      "name": "Status",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1618,
+        -180
+      ],
+      "parameters": {
+        "content": "## Status\n🟢 Getestet am 12.10.2026, Läufe 916 bis 919\n🟡 Anzeigefehler bei Bild-Upload, Ergebnis stimmt\n🔴 Nicht aktiv, nur als Sub aufrufbar\n🔵 Andocken an die Haupt-K1 offen",
+        "color": 7,
+        "width": 508,
+        "height": 200
+      }
+    },
+    {
+      "id": "f3514b23-3c1a-472a-92d5-62f2f726def0",
+      "name": "Schritt 1",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -30,
+        60
+      ],
+      "parameters": {
+        "content": "## ① Eingabe prüfen\nDer Sub prüft Kunde, Beitrags-ID, Thema und Dateinamen und baut alle Pfade.\n\n### 🟢 getestet, Lauf 916",
+        "color": 1,
+        "width": 600,
+        "height": 190
+      }
+    },
+    {
+      "id": "6a8d84c0-4758-4286-8a86-77ab82071cce",
+      "name": "Schritt 2",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        610,
+        60
+      ],
+      "parameters": {
+        "content": "## ② Eingabe gültig?\nUngültige Eingabe geht ohne Nextcloud-Aufruf in den Fehlerweg.\n\n### 🟢 getestet, Lauf 918",
+        "color": 1,
+        "width": 300,
+        "height": 190
+      }
+    },
+    {
+      "id": "64646526-1a3c-41b7-bd66-e9deed5f3c03",
+      "name": "Schritt 3",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        930,
+        60
+      ],
+      "parameters": {
+        "content": "## ③ Ordner anlegen\nK1, Kundenordner und Beitragsordner nacheinander. Meldet Nextcloud 405 (Ordner existiert schon), geht es weiter.\n\n### 🟢 getestet, Lauf 917",
+        "color": 1,
+        "width": 940,
+        "height": 190
+      }
+    },
+    {
+      "id": "4e0ab010-d838-4638-bab4-fb8a89019b87",
+      "name": "Schritt 4",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1890,
+        60
+      ],
+      "parameters": {
+        "content": "## ④ Beitragstext\nbeitrag.md mit Text, Thema, Datum und trace_id.\n\n### 🟢 getestet, Lauf 917",
+        "color": 1,
+        "width": 320,
+        "height": 190
+      }
+    },
+    {
+      "id": "6d8a5adb-1953-4d29-960b-148f7d9b990b",
+      "name": "Schritt 5",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2230,
+        60
+      ],
+      "parameters": {
+        "content": "## ⑤ Bilder ablegen\nJede Folie als eigene Datei, mit eigenem Fehlerausgang. \n🟡 n8n zeigt bei Bildern einen Anzeigefehler (TypeError), das Ergebnis stimmt, ⑥ prüft es in der Dateiliste.\n\n### 🟢 getestet, Lauf 917",
+        "color": 1,
+        "width": 930,
+        "height": 190
+      }
+    },
+    {
+      "id": "a76bd4cb-4a19-4c2d-a8f0-1814c6d89c76",
+      "name": "Schritt 6",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        3180,
+        60
+      ],
+      "parameters": {
+        "content": "## ⑥ Ergebnis melden\nDateiliste des Ordners lesen, Soll gegen Ist zählen, dann ok, Ordnerpfad und Dateizahl zurückgeben.\n\n### 🟢 getestet, Lauf 917 und 919",
+        "color": 1,
+        "width": 1380,
+        "height": 190
+      }
+    },
+    {
+      "id": "cd6e5898-3a2e-4a9c-80b1-62113dfd2bb7",
+      "name": "Rahmen Fehlerweg",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        4780,
+        500
+      ],
+      "parameters": {
+        "content": "",
+        "color": 5,
+        "width": 340,
+        "height": 224
+      }
+    },
+    {
+      "id": "9c4e4d5e-1638-4f12-8ccf-c7ff8ce8ae95",
+      "name": "Schritt 7 Fehlerweg",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        4800,
+        520
+      ],
+      "parameters": {
+        "content": "## ⑦ Fehlerweg\nJeder Fehler wird zu ok:false mit Grund. Der Aufrufer bricht nie ab.\n\n### 🟢 getestet, Lauf 918 und 919",
+        "color": 3,
+        "width": 300,
+        "height": 184
+      }
+    },
+    {
+      "id": "351e5267-6785-4312-9d67-f04ce4704d94",
+      "name": "Beitrag von der Haupt-K1 [Execute Workflow Trigger]",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        300
+      ],
+      "parameters": {
+        "inputSource": "workflowInputs",
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "customer_code",
+              "type": "string"
+            },
+            {
+              "name": "post_id",
+              "type": "string"
+            },
+            {
+              "name": "topic",
+              "type": "string"
+            },
+            {
+              "name": "trace_id",
+              "type": "string"
+            },
+            {
+              "name": "caption_instagram",
+              "type": "string"
+            },
+            {
+              "name": "hashtags",
+              "type": "any"
+            },
+            {
+              "name": "linkedin_post",
+              "type": "string"
+            },
+            {
+              "name": "file_name",
+              "type": "string"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "43faa672-780a-4bed-8dd8-ac164e4f9a60",
+      "name": "Eingabe prüfen und Pfade bauen [Code]",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        320,
+        300
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "// Zweck: Eingabe des Aufrufers pruefen und alle Pfade genau einmal bauen.\n// Warum: bei ungueltiger Eingabe darf nichts in Nextcloud entstehen, der Aufrufer bekommt ok:false statt eines Absturzes.\n// Warum ohne Binaerdaten: die Bilder holt 'Bilder bereitstellen' direkt vom Trigger, so tragen die Ordner-Knoten keine Binaerdaten mit.\nconst alle = $input.all();\nconst m = alle.length ? alle[0].json : {};\nconst t = function (s) { return String(s == null ? '' : s).trim(); };\nconst slug = function (s, max) {\n  let x = t(s).toLowerCase();\n  const umlaute = [[228, 'ae'], [246, 'oe'], [252, 'ue'], [223, 'ss']];\n  for (const u of umlaute) { x = x.split(String.fromCharCode(u[0])).join(u[1]); }\n  return x.replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, max).replace(/-+$/g, '');\n};\nconst kunde = t(m.customer_code);\nconst postId = t(m.post_id);\nconst kurz = postId.replace(/[^A-Za-z0-9]/g, '').slice(0, 8);\nconst thema = t(m.topic);\nconst trace = t(m.trace_id) || 'ohne-trace-id';\nlet grund = '';\nif (!/^[A-Za-z0-9_-]{1,40}$/.test(kunde)) grund = 'customer_code fehlt oder enthaelt unerlaubte Zeichen';\nelse if (!kurz) grund = 'post_id fehlt';\nelse if (!thema) grund = 'topic fehlt';\nlet anzahl = 0;\nfor (const it of alle) {\n  const f = t(it.json.file_name);\n  if (!f) continue;\n  anzahl++;\n  // Warum Whitelist: der Dateiname wird Teil des Nextcloud-Pfads, Unterordner oder Punkte-Tricks sind nicht erlaubt.\n  if (!grund && !/^[A-Za-z0-9_-]{1,60}[.](png|jpg|jpeg|webp)$/i.test(f)) grund = 'Dateiname ungueltig: ' + f.slice(0, 60);\n}\nif (grund) {\n  return [{ json: { eingabe_ok: false, grund: grund, trace_id: trace, post_id: postId } }];\n}\nconst datum = new Date().toLocaleDateString('sv-SE', { timeZone: 'Europe/Berlin' });\nconst ordnerName = datum + '_' + kurz + '_' + (slug(thema, 40) || 'beitrag');\nconst wurzel = '/K1';\nconst kundeOrdner = wurzel + '/' + kunde;\nconst ordner = kundeOrdner + '/' + ordnerName;\nlet tags = m.hashtags;\nif (Array.isArray(tags)) {\n  tags = tags.map(function (x) { return String(x).trim(); }).filter(Boolean).map(function (x) { return x.startsWith('#') ? x : '#' + x; }).join(' ');\n}\ntags = t(tags);\nconst zeilen = ['# ' + thema, '', '- Kunde: ' + kunde, '- Beitrag: ' + postId, '- Thema: ' + thema, '- Datum: ' + datum, '- trace_id: ' + trace, '', '## Instagram-Text', '', t(m.caption_instagram), '', '## Hashtags', '', tags, '', '## LinkedIn-Text', '', t(m.linkedin_post), ''];\nconst text = zeilen.join(String.fromCharCode(10));\nreturn alle.map(function (it) {\n  const f = t(it.json.file_name);\n  return { json: { eingabe_ok: true, ordner: ordner, ordner_kunde: kundeOrdner, ordner_wurzel: wurzel, beitrag_pfad: ordner + '/beitrag.md', beitrag_text: text, bilder_anzahl: anzahl, trace_id: trace, post_id: postId, file_name: f, datei_pfad: f ? ordner + '/' + f : '' } };\n});"
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "id": "0e804286-b9bd-4b08-9f29-63e8c8b459ff",
+      "name": "Eingabe gültig? [If]",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        640,
+        300
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose"
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $json.eingabe_ok === true }}",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        }
+      }
+    },
+    {
+      "id": "8de6cd39-483b-4265-95a7-544601e84403",
+      "name": "Ordner K1 anlegen [Nextcloud]",
+      "type": "n8n-nodes-base.nextCloud",
+      "typeVersion": 1,
+      "position": [
+        960,
+        300
+      ],
+      "parameters": {
+        "authentication": "accessToken",
+        "resource": "folder",
+        "operation": "create",
+        "path": "={{ $('Eingabe prüfen und Pfade bauen [Code]').first().json.ordner_wurzel }}"
+      },
+      "executeOnce": true,
+      "onError": "continueErrorOutput",
+      "credentials": {
+        "nextCloudApi": {
+          "id": "CREDENTIAL_ID",
+          "name": "Nextcloud | n8n-k1 K1-Ablage"
+        }
+      }
+    },
+    {
+      "id": "780de2f4-2ee1-483a-aedd-20f7af866597",
+      "name": "Fehler melden [Code]",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        4480,
+        620
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "// Zweck: jeden Fehlerweg (Eingabe, Ordner, Beitragstext, Bilder) in dieselbe Antwort ok:false verwandeln.\n// Warum: der Aufrufer (Haupt-K1) soll nie abbrechen, er wertet nur das Feld ok aus.\nconst j = $input.first().json;\nlet plan = {};\ntry { plan = $('Eingabe prüfen und Pfade bauen [Code]').first().json || {}; } catch (e) { plan = {}; }\nlet grund = j.grund || '';\nif (!grund && j.error) grund = typeof j.error === 'string' ? j.error : JSON.stringify(j.error);\nif (!grund) grund = 'unbekannter Fehler';\nreturn [{ json: { ok: false, ordner: j.ordner || plan.ordner || '', dateien: j.dateien || 0, grund: String(grund).slice(0, 300), trace_id: j.trace_id || plan.trace_id || '', post_id: j.post_id || plan.post_id || '' } }];"
+      }
+    },
+    {
+      "id": "4d0c6a35-d3c5-4c33-83e3-462999f0b401",
+      "name": "Kundenordner anlegen [Nextcloud]",
+      "type": "n8n-nodes-base.nextCloud",
+      "typeVersion": 1,
+      "position": [
+        1280,
+        300
+      ],
+      "parameters": {
+        "authentication": "accessToken",
+        "resource": "folder",
+        "operation": "create",
+        "path": "={{ $('Eingabe prüfen und Pfade bauen [Code]').first().json.ordner_kunde }}"
+      },
+      "executeOnce": true,
+      "onError": "continueErrorOutput",
+      "credentials": {
+        "nextCloudApi": {
+          "id": "CREDENTIAL_ID",
+          "name": "Nextcloud | n8n-k1 K1-Ablage"
+        }
+      }
+    },
+    {
+      "id": "485c1430-ed5a-4874-8dc5-2bec05eae8fc",
+      "name": "K1 schon vorhanden? [If]",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        960,
+        620
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose"
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ /405|Method Not Allowed|already exist/i.test(JSON.stringify($json)) }}",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        }
+      }
+    },
+    {
+      "id": "5a0f1821-f9a4-468f-827d-d5c82f25a1f5",
+      "name": "Beitragsordner anlegen [Nextcloud]",
+      "type": "n8n-nodes-base.nextCloud",
+      "typeVersion": 1,
+      "position": [
+        1600,
+        300
+      ],
+      "parameters": {
+        "authentication": "accessToken",
+        "resource": "folder",
+        "operation": "create",
+        "path": "={{ $('Eingabe prüfen und Pfade bauen [Code]').first().json.ordner }}"
+      },
+      "executeOnce": true,
+      "onError": "continueErrorOutput",
+      "credentials": {
+        "nextCloudApi": {
+          "id": "CREDENTIAL_ID",
+          "name": "Nextcloud | n8n-k1 K1-Ablage"
+        }
+      }
+    },
+    {
+      "id": "3f4f7e3c-8cbe-49c6-a911-e47f1147b241",
+      "name": "Kundenordner schon vorhanden? [If]",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1280,
+        620
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose"
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ /405|Method Not Allowed|already exist/i.test(JSON.stringify($json)) }}",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        }
+      }
+    },
+    {
+      "id": "43133e20-cdef-4352-9d2b-83726af64ff0",
+      "name": "Beitragstext ablegen [Nextcloud]",
+      "type": "n8n-nodes-base.nextCloud",
+      "typeVersion": 1,
+      "position": [
+        1920,
+        300
+      ],
+      "parameters": {
+        "authentication": "accessToken",
+        "resource": "file",
+        "operation": "upload",
+        "path": "={{ $('Eingabe prüfen und Pfade bauen [Code]').first().json.beitrag_pfad }}",
+        "binaryDataUpload": false,
+        "fileContent": "={{ $('Eingabe prüfen und Pfade bauen [Code]').first().json.beitrag_text }}"
+      },
+      "executeOnce": true,
+      "onError": "continueErrorOutput",
+      "credentials": {
+        "nextCloudApi": {
+          "id": "CREDENTIAL_ID",
+          "name": "Nextcloud | n8n-k1 K1-Ablage"
+        }
+      }
+    },
+    {
+      "id": "0449816f-8ecb-4223-b7df-9fc9b2cab682",
+      "name": "Beitragsordner schon vorhanden? [If]",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1600,
+        620
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose"
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ /405|Method Not Allowed|already exist/i.test(JSON.stringify($json)) }}",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        }
+      }
+    },
+    {
+      "id": "18e660b6-aa67-4423-bc86-d03eac63a972",
+      "name": "Bilder bereitstellen [Code]",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2240,
+        300
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "// Zweck: die Bild-Elemente MIT Binaerdaten wieder aufnehmen (Pfade aus der Pruefung, Binaerdaten direkt vom Trigger).\n// Warum: ohne Bild bekommt der Upload-Knoten kein Element, deshalb ein Marker keine_bilder.\nconst plan = $('Eingabe prüfen und Pfade bauen [Code]').all();\nconst roh = $('Beitrag von der Haupt-K1 [Execute Workflow Trigger]').all();\nconst bilder = [];\nplan.forEach(function (p, i) {\n  if (!p.json.datei_pfad) return;\n  const o = { json: p.json };\n  if (roh[i] && roh[i].binary) o.binary = roh[i].binary;\n  bilder.push(o);\n});\nif (!bilder.length) return [{ json: { keine_bilder: true } }];\nreturn bilder;"
+      }
+    },
+    {
+      "id": "7b9ea9f8-7c2b-4840-a8c3-2da9d6f06155",
+      "name": "Bilder vorhanden? [If]",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        2560,
+        300
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose"
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ !$json.keine_bilder }}",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        }
+      }
+    },
+    {
+      "id": "dd389cc2-0920-4a3f-974c-3be8fb29baa5",
+      "name": "Bild ablegen [Nextcloud]",
+      "type": "n8n-nodes-base.nextCloud",
+      "typeVersion": 1,
+      "position": [
+        2880,
+        300
+      ],
+      "parameters": {
+        "authentication": "accessToken",
+        "resource": "file",
+        "operation": "upload",
+        "path": "={{ $json.datei_pfad }}",
+        "binaryDataUpload": true,
+        "binaryPropertyName": "data"
+      },
+      "onError": "continueErrorOutput",
+      "credentials": {
+        "nextCloudApi": {
+          "id": "CREDENTIAL_ID",
+          "name": "Nextcloud | n8n-k1 K1-Ablage"
+        }
+      }
+    },
+    {
+      "id": "b7ab2433-59db-4afb-b7b2-b28aea0fd01d",
+      "name": "Ablage auswerten [Code]",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3840,
+        300
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "// Zweck: die Wahrheit aus dem Nextcloud-Ordner lesen (Dateiliste), nicht aus den Antworten der Upload-Knoten.\n// Warum: eine Datei zaehlt nur, wenn sie im Ordner liegt und nicht leer ist; der Aufrufer bekommt genau ein Ergebnis.\nconst plan = $('Eingabe prüfen und Pfade bauen [Code]').first().json;\nconst liste = $input.all().map(function (i) { return i.json; });\nconst da = {};\nfor (const e of liste) {\n  if (e.type === 'file' && e.path) da[String(e.path).split('/').pop()] = Number(e.contentLength || 0);\n}\nconst soll = ['beitrag.md'];\nfor (const p of $('Eingabe prüfen und Pfade bauen [Code]').all()) {\n  if (p.json.file_name) soll.push(p.json.file_name);\n}\nconst fehlt = soll.filter(function (n) { return !(n in da) || da[n] <= 0; });\nlet fehlertext = '';\ntry {\n  for (const it of $('Ablage zusammenführen [Merge]').all()) {\n    if (it.json.error) { fehlertext = typeof it.json.error === 'string' ? it.json.error : JSON.stringify(it.json.error); break; }\n  }\n} catch (e) { fehlertext = ''; }\nconst gut = fehlt.length === 0;\nreturn [{ json: { ablage_ok: gut, ordner: plan.ordner, dateien: soll.length - fehlt.length, dateien_soll: soll.length, trace_id: plan.trace_id, post_id: plan.post_id, grund: gut ? '' : ('Nicht abgelegt: ' + fehlt.join(', ') + (fehlertext ? ' (' + fehlertext.slice(0, 160) + ')' : '')) } }];"
+      }
+    },
+    {
+      "id": "ac93f89c-38f9-43a3-ba3c-baa53fbe451d",
+      "name": "Ablage zusammenführen [Merge]",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        3200,
+        300
+      ],
+      "parameters": {
+        "mode": "append"
+      }
+    },
+    {
+      "id": "0c2f63a3-7c4f-4b0b-bd96-53aeb7deb415",
+      "name": "Alles abgelegt? [If]",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        4160,
+        300
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose"
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $json.ablage_ok === true }}",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        }
+      }
+    },
+    {
+      "id": "3f9c9c44-b7ab-49f9-bf57-aeb40dfccbb4",
+      "name": "Erfolg melden [Edit Fields]",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        5120,
+        60
+      ],
+      "parameters": {
+        "mode": "manual",
+        "includeOtherFields": false,
+        "assignments": {
+          "assignments": [
+            {
+              "id": "e1",
+              "name": "ok",
+              "value": true,
+              "type": "boolean"
+            },
+            {
+              "id": "e2",
+              "name": "ordner",
+              "value": "={{ $('Ablage auswerten [Code]').first().json.ordner }}",
+              "type": "string"
+            },
+            {
+              "id": "e3",
+              "name": "dateien",
+              "value": "={{ $('Ablage auswerten [Code]').first().json.dateien }}",
+              "type": "number"
+            },
+            {
+              "id": "e4",
+              "name": "grund",
+              "value": "",
+              "type": "string"
+            },
+            {
+              "id": "e5",
+              "name": "trace_id",
+              "value": "={{ $('Eingabe prüfen und Pfade bauen [Code]').first().json.trace_id }}",
+              "type": "string"
+            },
+            {
+              "id": "e6",
+              "name": "post_id",
+              "value": "={{ $('Eingabe prüfen und Pfade bauen [Code]').first().json.post_id }}",
+              "type": "string"
+            },
+            {
+              "id": "e7",
+              "name": "freigabe_link",
+              "value": "={{ $json.freigabe_link }}",
+              "type": "string"
+            },
+            {
+              "id": "e8",
+              "name": "freigabe_ablauf",
+              "value": "={{ $json.freigabe_ablauf }}",
+              "type": "string"
+            },
+            {
+              "id": "e9",
+              "name": "grund_link",
+              "value": "={{ $json.grund_link }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "d346deca-42d8-4d5b-87ee-0d13772f1964",
+      "name": "Ablage auflisten [Nextcloud]",
+      "type": "n8n-nodes-base.nextCloud",
+      "typeVersion": 1,
+      "position": [
+        3520,
+        300
+      ],
+      "parameters": {
+        "authentication": "accessToken",
+        "resource": "folder",
+        "operation": "list",
+        "path": "={{ $('Eingabe prüfen und Pfade bauen [Code]').first().json.ordner }}"
+      },
+      "onError": "continueErrorOutput",
+      "executeOnce": true,
+      "credentials": {
+        "nextCloudApi": {
+          "id": "CREDENTIAL_ID",
+          "name": "Nextcloud | n8n-k1 K1-Ablage"
+        }
+      }
+    },
+    {
+      "id": "456d85ed-b6a0-44c6-b642-acc69b562276",
+      "name": "Freigabelink erzeugen [HTTP Request]",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        4480,
+        60
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "https://<NEXTCLOUD-HOST>/ocs/v2.php/apps/files_sharing/api/v1/shares",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "nextCloudApi",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "format",
+              "value": "json"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "OCS-APIRequest",
+              "value": "true"
+            },
+            {
+              "name": "Accept",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "form-urlencoded",
+        "specifyBody": "keypair",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "path",
+              "value": "={{ $('Eingabe prüfen und Pfade bauen [Code]').first().json.ordner }}"
+            },
+            {
+              "name": "shareType",
+              "value": "3"
+            },
+            {
+              "name": "permissions",
+              "value": "1"
+            },
+            {
+              "name": "expireDate",
+              "value": "={{ new Date(Date.now() + 30 * 86400000).toLocaleDateString('sv-SE', { timeZone: 'Europe/Berlin' }) }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "onError": "continueErrorOutput",
+      "executeOnce": true,
+      "credentials": {
+        "nextCloudApi": {
+          "id": "CREDENTIAL_ID",
+          "name": "Nextcloud | n8n-k1 K1-Ablage"
+        }
+      }
+    },
+    {
+      "id": "a9de987c-50df-49b7-8452-60d37d06b673",
+      "name": "Link auswerten [Code]",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        4800,
+        60
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "// Zweck: aus der OCS-Antwort Freigabelink und Ablaufdatum lesen; jeder Fehler wird zu leerem Link plus Grund.\n// Warum: die Ablage selbst darf nie scheitern, nur weil der Link fehlt (ok bleibt unberuehrt).\nconst j = $input.first().json || {};\nconst d = j.ocs && j.ocs.data ? j.ocs.data : null;\nif (d && d.url) {\n  return [{ json: { freigabe_link: String(d.url), freigabe_ablauf: String(d.expiration || '').slice(0, 10), grund_link: '' } }];\n}\n// Warum nur Code und Kurztext: der volle Fehlerblock waere unlesbar lang.\nconst e = j.error && typeof j.error === 'object' ? j.error : {};\nlet g = '';\nif (e.httpCode || e.message) g = (e.httpCode ? 'HTTP ' + e.httpCode + ': ' : '') + String(e.message || '').slice(0, 120);\nelse if (typeof j.error === 'string') g = j.error.slice(0, 120);\nelse if (j.ocs && j.ocs.meta) g = 'OCS ' + j.ocs.meta.statuscode + ' ' + (j.ocs.meta.message || '');\nelse g = 'keine Link-Antwort von Nextcloud';\nreturn [{ json: { freigabe_link: '', freigabe_ablauf: '', grund_link: 'Freigabelink: ' + g } }];"
+      }
+    },
+    {
+      "id": "66768d3d-63e3-423a-ad60-3e3e97609402",
+      "name": "Schritt 6a Freigabelink",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        4460,
+        -200
+      ],
+      "parameters": {
+        "content": "## ⑥a Freigabelink\nNach der Ablage erzeugt Nextcloud einen öffentlichen Link auf den Beitragsordner, nur lesend, gültig 30 Tage, ohne Passwort, damit der Kunde ihn direkt öffnet.\n🟡 Schlägt der Link fehl, bleibt ok unverändert, freigabe_link ist leer und grund_link nennt den Grund.\n🟡 Option später: ein Passwort kann als Feld password im Aufruf mitgegeben werden (Link dann nur mit Passwort offen).\n\n### 🟢 getestet, Lauf 941 und 945",
+        "color": 1,
+        "width": 940,
+        "height": 190
+      }
+    }
+  ],
+  "connections": {
+    "Beitrag von der Haupt-K1 [Execute Workflow Trigger]": {
+      "main": [
+        [
+          {
+            "node": "Eingabe prüfen und Pfade bauen [Code]",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Eingabe prüfen und Pfade bauen [Code]": {
+      "main": [
+        [
+          {
+            "node": "Eingabe gültig? [If]",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Fehler melden [Code]",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Eingabe gültig? [If]": {
+      "main": [
+        [
+          {
+            "node": "Ordner K1 anlegen [Nextcloud]",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Fehler melden [Code]",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ordner K1 anlegen [Nextcloud]": {
+      "main": [
+        [
+          {
+            "node": "Kundenordner anlegen [Nextcloud]",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "K1 schon vorhanden? [If]",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Kundenordner anlegen [Nextcloud]": {
+      "main": [
+        [
+          {
+            "node": "Beitragsordner anlegen [Nextcloud]",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Kundenordner schon vorhanden? [If]",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "K1 schon vorhanden? [If]": {
+      "main": [
+        [
+          {
+            "node": "Kundenordner anlegen [Nextcloud]",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Fehler melden [Code]",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Beitragsordner anlegen [Nextcloud]": {
+      "main": [
+        [
+          {
+            "node": "Beitragstext ablegen [Nextcloud]",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Beitragsordner schon vorhanden? [If]",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Kundenordner schon vorhanden? [If]": {
+      "main": [
+        [
+          {
+            "node": "Beitragsordner anlegen [Nextcloud]",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Fehler melden [Code]",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Beitragstext ablegen [Nextcloud]": {
+      "main": [
+        [
+          {
+            "node": "Bilder bereitstellen [Code]",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Fehler melden [Code]",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Beitragsordner schon vorhanden? [If]": {
+      "main": [
+        [
+          {
+            "node": "Beitragstext ablegen [Nextcloud]",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Fehler melden [Code]",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Bilder bereitstellen [Code]": {
+      "main": [
+        [
+          {
+            "node": "Bilder vorhanden? [If]",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Bilder vorhanden? [If]": {
+      "main": [
+        [
+          {
+            "node": "Bild ablegen [Nextcloud]",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Ablage auflisten [Nextcloud]",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Bild ablegen [Nextcloud]": {
+      "main": [
+        [
+          {
+            "node": "Ablage zusammenführen [Merge]",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Ablage zusammenführen [Merge]",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Ablage auswerten [Code]": {
+      "main": [
+        [
+          {
+            "node": "Alles abgelegt? [If]",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Alles abgelegt? [If]": {
+      "main": [
+        [
+          {
+            "node": "Freigabelink erzeugen [HTTP Request]",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Fehler melden [Code]",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ablage zusammenführen [Merge]": {
+      "main": [
+        [
+          {
+            "node": "Ablage auflisten [Nextcloud]",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ablage auflisten [Nextcloud]": {
+      "main": [
+        [
+          {
+            "node": "Ablage auswerten [Code]",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Fehler melden [Code]",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Freigabelink erzeugen [HTTP Request]": {
+      "main": [
+        [
+          {
+            "node": "Link auswerten [Code]",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Link auswerten [Code]",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Link auswerten [Code]": {
+      "main": [
+        [
+          {
+            "node": "Erfolg melden [Edit Fields]",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": true,
+    "errorWorkflow": "vdWjTLYejCK2YrMP",
+    "timezone": "Europe/Berlin",
+    "saveManualExecutions": true,
+    "saveDataErrorExecution": "all",
+    "saveDataSuccessExecution": "all",
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "meta": {
+    "aiBuilderAssisted": true,
+    "builderVariant": "mcp"
+  },
+  "versionId": "d55262d3-b845-4c8a-9164-5fe02d0f395c",
+  "tags": [
+    "sub-workflow",
+    "KI-AGT-2606",
+    "woche-4"
+  ],
+  "nodeGroups": [],
+  "pinData": {},
+  "staticData": null
+}
