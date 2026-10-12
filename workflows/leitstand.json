@@ -806,7 +806,7 @@
           "timeout": 15000
         }
       },
-      "alwaysOutputData": true,
+      "alwaysOutputData": false,
       "onError": "continueErrorOutput",
       "credentials": {
         "supabaseApi": {
@@ -877,7 +877,7 @@
         "content": "# 🧪 K1 Dashboard\n**Aufgabe:** Eine Webseite zeigt die letzten Läufe von K1, startet neue Aufträge und nimmt Branding-Pakete an.\n**Die Idee:** Ein Webhook liefert die Seite, ein zweiter auf derselben Adresse nimmt Auftrag und Branding an.\n**Warum so?** Alle Supabase-Abfragen laufen serverseitig in n8n, im HTML steht kein Schlüssel.\n**Hinweis:** Basic Auth ist an beiden Webhooks eingeschaltet, vor dem Aktivieren das Credential wählen.\nStufe: Durchstich bis 14.10.2026",
         "color": 2,
         "width": 1100,
-        "height": 260
+        "height": 280
       }
     },
     {
@@ -893,7 +893,7 @@
         "content": "## Ablauf\n① Anfrage annehmen und verteilen\n② Läufe, Tageswerte, Kunden laden\n③ Vorlage laden, Seite bauen\n④ Auftrag prüfen\n⑤ K1 starten, nur wenn freigeschaltet\n⑥ Antwort an die Seite\n⑦ Branding prüfen\n⑧ Logo neu kodieren, hochladen, speichern\n⑨ Fehlerweg\n⑩ Speicherstand nachlesen",
         "color": 2,
         "width": 508,
-        "height": 260
+        "height": 280
       }
     },
     {
@@ -909,7 +909,7 @@
         "content": "## Status\n🟢 Verlauf liest echte Daten aus Supabase\n🟡 Probebetrieb: Aufträge werden nur geprüft\n🔴 Basic Auth an, Credential fehlt: nicht aktivieren\n🔵 Branding nur für test-dashboard frei",
         "color": 2,
         "width": 508,
-        "height": 260
+        "height": 280
       }
     },
     {
@@ -1694,7 +1694,7 @@
     "aiBuilderAssisted": true,
     "builderVariant": "mcp"
   },
-  "versionId": "83c8bf9a-e018-4850-8dd9-19ad5d94581f",
+  "versionId": "7fce7865-cae1-42e8-8ce8-03e93ab90581",
   "tags": [
     "KI-AGT-2606",
     "schulung",
