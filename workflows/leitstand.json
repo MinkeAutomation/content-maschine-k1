@@ -678,7 +678,7 @@
       "parameters": {
         "mode": "runOnceForAllItems",
         "language": "javaScript",
-        "jsCode": "// Zweck: prüft ein eingereichtes Branding-Paket und baut das neue branding_pack. Gespeichert wird erst danach und nur bei grüner Prüfung.\nconst cfg = $('Konfiguration [Edit Fields]').first().json;\n// Warum Typprüfung zuerst: unerwartete JSON-Typen (Objekt statt Text) sollen eine 400 ergeben, keinen Absturz.\nconst isObj = v => v !== null && typeof v === 'object' && !Array.isArray(v);\nconst b = isObj(cfg.body) ? cfg.body : {};\nconst s = v => (typeof v === 'string' ? v.trim() : '');\nconst errors = [];\nconst typeErr = (feld, erwartet) => errors.push(`Feld ${feld} hat den falschen Typ (erwartet ${erwartet}).`);\nif (!isObj(cfg.body)) typeErr('body', 'Objekt');\nif (b.customer_code !== undefined && typeof b.customer_code !== 'string') typeErr('customer_code', 'Text');\nif (b.markenname !== undefined && typeof b.markenname !== 'string') typeErr('markenname', 'Text');\nif (b.farben !== undefined && !isObj(b.farben)) typeErr('farben', 'Objekt');\nif (b.schriften !== undefined && !isObj(b.schriften)) typeErr('schriften', 'Objekt');\nif (b.logo_data_url !== undefined && b.logo_data_url !== null && typeof b.logo_data_url !== 'string') typeErr('logo_data_url', 'Text oder null');\nif (b.expected_version !== undefined && b.expected_version !== null && !(Number.isInteger(b.expected_version) && b.expected_version >= 0)) typeErr('expected_version', 'ganze Zahl ab 0');\n\nconst code = s(b.customer_code).toLowerCase();\n// Warum filtern: bei unbekanntem Kunden liefert der Ladeknoten nur ein leeres Element (alwaysOutputData).\nconst rows = $input.all().map(i => i.json).filter(r => r && r.kuerzel);\nconst kunde = rows.find(r => r.kuerzel === code) || null;\nconst allow = String(cfg.branding_allowlist || '').split(',').map(x => x.trim()).filter(Boolean);\n\nif (b.confirmed !== true) errors.push('Die Bestätigung fehlt, nichts wurde gespeichert.');\nif (!/^[a-z0-9-]{2,40}$/.test(code) || !kunde) errors.push(`Kunde ${code || '(leer)'} ist unbekannt.`);\n// Warum eine Freigabeliste: echte Kunden werden erst nach Patricks Entscheidung über das Dashboard geändert.\nif (!(allow.includes('*') || allow.includes(code))) errors.push(`Speichern für ${code || '(leer)'} ist nicht freigegeben (branding_allowlist).`);\n\nconst markenname = s(b.markenname);\nif (markenname.length < 2 || markenname.length > 80) errors.push('Der Markenname braucht 2 bis 80 Zeichen.');\nconst keys = ['primaer', 'sekundaer', 'akzent', 'hintergrund', 'text'];\nconst farbenIn = isObj(b.farben) ? b.farben : {};\nconst farben = {};\nconst badColors = [];\nfor (const k of keys) {\n  const v = s(farbenIn[k]).toUpperCase();\n  if (/^#[0-9A-F]{6}$/.test(v)) farben[k] = v; else badColors.push(k);\n}\nif (badColors.length) errors.push(`Kein gültiger Hex-Wert bei: ${badColors.join(', ')}.`);\n// Warum nur diese Zeichen: der Name landet später in einer Google-Fonts-Adresse und in CSS.\nconst fontOk = v => /^[A-Za-z0-9 -]{2,60}$/.test(v);\nconst schriftenIn = isObj(b.schriften) ? b.schriften : {};\nconst titel = s(schriftenIn.titel);\nconst textFont = s(schriftenIn.text);\nif (!fontOk(titel)) errors.push('Schrift für Titel fehlt oder enthält unerlaubte Zeichen.');\nif (!fontOk(textFont)) errors.push('Schrift für Text fehlt oder enthält unerlaubte Zeichen.');\n\n// Warum Bildstruktur statt 4 Byte Signatur: eine abgeschnittene Datei mit gültigem Kopf darf nicht als Logo durchgehen.\n// Geprüft wird der Aufbau der Datei samt Maßen; dekodiert oder neu kodiert wird nicht (keine Bildbibliothek im Code-Knoten).\nconst MAX_PX = 4096;\nconst crcTable = (() => { const t = []; for (let n = 0; n < 256; n++) { let c = n; for (let k = 0; k < 8; k++) c = c & 1 ? 0xEDB88320 ^ (c >>> 1) : c >>> 1; t[n] = c >>> 0; } return t; })();\nconst crc32 = (buf, start, end) => { let c = 0xFFFFFFFF; for (let i = start; i < end; i++) c = crcTable[(c ^ buf[i]) & 0xFF] ^ (c >>> 8); return (c ^ 0xFFFFFFFF) >>> 0; };\nfunction checkPng(buf) {\n  if (buf.length < 8 + 25 + 12 + 12) return 'PNG ist zu kurz.';\n  if (buf.subarray(0, 8).toString('hex') !== '89504e470d0a1a0a') return 'PNG-Kennung fehlt.';\n  let pos = 8, w = 0, h = 0, idat = 0, iend = false, first = true;\n  while (pos + 12 <= buf.length) {\n    const len = buf.readUInt32BE(pos);\n    const type = buf.subarray(pos + 4, pos + 8).toString('latin1');\n    if (!/^[A-Za-z]{4}$/.test(type)) return 'PNG-Block mit ungültigem Namen.';\n    if (pos + 12 + len > buf.length) return `PNG-Block ${type} ist abgeschnitten.`;\n    if (crc32(buf, pos + 4, pos + 8 + len) !== buf.readUInt32BE(pos + 8 + len)) return `PNG-Block ${type} hat eine falsche Prüfsumme.`;\n    if (first) {\n      if (type !== 'IHDR' || len !== 13) return 'PNG beginnt nicht mit IHDR.';\n      w = buf.readUInt32BE(pos + 8); h = buf.readUInt32BE(pos + 12);\n      const depth = buf[pos + 16], ctype = buf[pos + 17];\n      if (![1, 2, 4, 8, 16].includes(depth) || ![0, 2, 3, 4, 6].includes(ctype)) return 'PNG mit ungültiger Farbtiefe.';\n      first = false;\n    }\n    if (type === 'IDAT') idat++;\n    pos += 12 + len;\n    if (type === 'IEND') { iend = true; break; }\n  }\n  if (!idat) return 'PNG ohne Bilddaten.';\n  if (!iend || pos !== buf.length) return 'PNG ist unvollständig oder hat Anhängsel nach dem Ende.';\n  return { w, h };\n}\nfunction checkJpeg(buf) {\n  if (buf.length < 4 || buf[0] !== 0xFF || buf[1] !== 0xD8) return 'JPG-Kennung fehlt.';\n  if (buf[buf.length - 2] !== 0xFF || buf[buf.length - 1] !== 0xD9) return 'JPG ist unvollständig (Endmarke fehlt).';\n  let pos = 2, w = 0, h = 0;\n  while (pos + 4 <= buf.length) {\n    if (buf[pos] !== 0xFF) return 'JPG-Aufbau ist beschädigt.';\n    const m = buf[pos + 1];\n    if (m === 0xFF) { pos++; continue; }\n    if (m === 0xD8 || (m >= 0xD0 && m <= 0xD7) || m === 0x01) { pos += 2; continue; }\n    const len = buf.readUInt16BE(pos + 2);\n    if (len < 2 || pos + 2 + len > buf.length) return 'JPG-Segment ist abgeschnitten.';\n    if (m >= 0xC0 && m <= 0xCF && ![0xC4, 0xC8, 0xCC].includes(m)) { if (len < 7) return 'JPG-Bildkopf ist zu kurz.'; h = buf.readUInt16BE(pos + 5); w = buf.readUInt16BE(pos + 7); }\n    if (m === 0xDA) break;\n    pos += 2 + len;\n  }\n  if (!w || !h) return 'JPG ohne Bildmaße.';\n  return { w, h };\n}\nfunction checkWebp(buf) {\n  if (buf.length < 30) return 'WEBP ist zu kurz.';\n  if (buf.subarray(0, 4).toString('latin1') !== 'RIFF' || buf.subarray(8, 12).toString('latin1') !== 'WEBP') return 'WEBP-Kennung fehlt.';\n  if (buf.readUInt32LE(4) + 8 !== buf.length) return 'WEBP ist unvollständig (Längenangabe passt nicht).';\n  const chunk = buf.subarray(12, 16).toString('latin1');\n  if (chunk === 'VP8 ') {\n    if (buf.subarray(23, 26).toString('hex') !== '9d012a') return 'WEBP-Bildkopf ist beschädigt.';\n    return { w: buf.readUInt16LE(26) & 0x3FFF, h: buf.readUInt16LE(28) & 0x3FFF };\n  }\n  if (chunk === 'VP8L') {\n    if (buf[20] !== 0x2F) return 'WEBP-Bildkopf ist beschädigt.';\n    const bits = buf.readUInt32LE(21);\n    return { w: (bits & 0x3FFF) + 1, h: ((bits >>> 14) & 0x3FFF) + 1 };\n  }\n  if (chunk === 'VP8X') return { w: buf.readUIntLE(24, 3) + 1, h: buf.readUIntLE(27, 3) + 1 };\n  return 'WEBP mit unbekanntem Bildformat.';\n}\n\nlet logo = null;\nif (typeof b.logo_data_url === 'string' && b.logo_data_url) {\n  const m = /^data:(image\\/(png|jpeg|webp));base64,([A-Za-z0-9+/=]+)$/.exec(b.logo_data_url);\n  if (!m) {\n    errors.push('Das Logo ist kein PNG, JPG oder WEBP.');\n  } else {\n    const buf = Buffer.from(m[3], 'base64');\n    if (buf.length > 1000000) errors.push(`Das Logo ist ${(buf.length / 1e6).toFixed(1)} MB groß, erlaubt ist 1 MB.`);\n    else {\n      const res = m[2] === 'png' ? checkPng(buf) : m[2] === 'jpeg' ? checkJpeg(buf) : checkWebp(buf);\n      if (typeof res === 'string') errors.push(`Das Logo ist keine gültige Bilddatei: ${res}`);\n      else if (res.w < 1 || res.h < 1 || res.w > MAX_PX || res.h > MAX_PX) errors.push(`Das Logo misst ${res.w} x ${res.h} Pixel, erlaubt sind 1 bis ${MAX_PX}.`);\n      else {\n        const ext = m[2] === 'jpeg' ? 'jpg' : m[2];\n        logo = { b64: m[3], mime: m[1], ext, size: buf.length, width: res.w, height: res.h };\n      }\n    }\n  }\n}\n\n// Warum Versionsvergleich: zwei gleichzeitige Einreichungen dürfen sich nicht still überschreiben.\nconst alt = isObj(kunde?.branding_pack) ? kunde.branding_pack : {};\nconst dbVersion = /^[0-9]{1,9}$/.test(String(alt.version ?? '')) ? Number(alt.version) : 0;\nconst expected = Number.isInteger(b.expected_version) ? b.expected_version : dbVersion;\nlet status_code = 400;\nif (errors.length === 0 && expected !== dbVersion) {\n  status_code = 409;\n  errors.push(`Das Branding wurde inzwischen geändert (gespeichert ist Version ${dbVersion}, die Seite kannte Version ${expected}). Bitte Seite neu laden und erneut einreichen.`);\n}\n\nconst ok = errors.length === 0;\nconst newVersion = dbVersion + 1;\nconst stamp = $now.setZone('Europe/Berlin');\n// Warum eigener Pfad je Version: das bisherige Logo wird nie überschrieben; erst das erfolgreiche Speichern stellt auf den neuen Pfad um.\nconst logoPath = ok && logo ? `logos/${code}/v${newVersion}-${$execution.id}.${logo.ext}` : null;\nconst branding_pack = ok ? {\n  ...alt,\n  markenname,\n  farben,\n  schriften: { ...(isObj(alt.schriften) ? alt.schriften : {}), titel, text: textFont },\n  logo: logo ? { ...(isObj(alt.logo) ? alt.logo : {}), modus: 'datei', pfad: logoPath, text: markenname } : (alt.logo || null),\n  status: 'eingereicht',\n  eingereicht_am: stamp.toISO(),\n  quelle: `K1 Dashboard, eingereicht ${stamp.toFormat('dd.MM.yyyy HH:mm')}`,\n  version: newVersion,\n} : null;\n\nconst out = {\n  ok,\n  customer_code: code,\n  has_logo: ok && !!logo,\n  logo_path: logoPath,\n  logo_size: logo?.size || null,\n  logo_dimensions: logo ? `${logo.width}x${logo.height}` : null,\n  expected_version: ok ? dbVersion : null,\n  branding_pack,\n  status_code: ok ? 200 : status_code,\n  response: ok ? null : { ok: false, message: 'Branding nicht gespeichert.', errors },\n};\nconst item = { json: out };\nif (ok && logo) item.binary = { logo: { data: logo.b64, mimeType: logo.mime, fileName: `v${newVersion}.${logo.ext}` } };\nreturn [item];\n"
+        "jsCode": "// Zweck: prüft ein eingereichtes Branding-Paket und baut das neue branding_pack. Gespeichert wird erst danach und nur bei grüner Prüfung.\nconst cfg = $('Konfiguration [Edit Fields]').first().json;\n// Warum Typprüfung zuerst: unerwartete JSON-Typen (Objekt statt Text) sollen eine 400 ergeben, keinen Absturz.\nconst isObj = v => v !== null && typeof v === 'object' && !Array.isArray(v);\nconst b = isObj(cfg.body) ? cfg.body : {};\nconst s = v => (typeof v === 'string' ? v.trim() : '');\nconst errors = [];\nconst typeErr = (feld, erwartet) => errors.push(`Feld ${feld} hat den falschen Typ (erwartet ${erwartet}).`);\nif (!isObj(cfg.body)) typeErr('body', 'Objekt');\nif (b.customer_code !== undefined && typeof b.customer_code !== 'string') typeErr('customer_code', 'Text');\nif (b.markenname !== undefined && typeof b.markenname !== 'string') typeErr('markenname', 'Text');\nif (b.farben !== undefined && !isObj(b.farben)) typeErr('farben', 'Objekt');\nif (b.schriften !== undefined && !isObj(b.schriften)) typeErr('schriften', 'Objekt');\nif (b.logo_data_url !== undefined && b.logo_data_url !== null && typeof b.logo_data_url !== 'string') typeErr('logo_data_url', 'Text oder null');\n// Warum Pflicht: ohne den Stand der Seite ließe sich eine zwischenzeitliche Änderung still überschreiben.\nif (!(Number.isInteger(b.expected_version) && b.expected_version >= 0)) errors.push('Feld expected_version fehlt oder ist keine ganze Zahl ab 0. Bitte Seite neu laden.');\n\nconst code = s(b.customer_code).toLowerCase();\n// Warum filtern: bei unbekanntem Kunden liefert der Ladeknoten nur ein leeres Element (alwaysOutputData).\nconst rows = $input.all().map(i => i.json).filter(r => r && r.kuerzel);\nconst kunde = rows.find(r => r.kuerzel === code) || null;\nconst allow = String(cfg.branding_allowlist || '').split(',').map(x => x.trim()).filter(Boolean);\n\nif (b.confirmed !== true) errors.push('Die Bestätigung fehlt, nichts wurde gespeichert.');\nif (!/^[a-z0-9-]{2,40}$/.test(code) || !kunde) errors.push(`Kunde ${code || '(leer)'} ist unbekannt.`);\n// Warum eine Freigabeliste: echte Kunden werden erst nach Patricks Entscheidung über das Dashboard geändert.\nif (!(allow.includes('*') || allow.includes(code))) errors.push(`Speichern für ${code || '(leer)'} ist nicht freigegeben (branding_allowlist).`);\n\nconst markenname = s(b.markenname);\nif (markenname.length < 2 || markenname.length > 80) errors.push('Der Markenname braucht 2 bis 80 Zeichen.');\nconst keys = ['primaer', 'sekundaer', 'akzent', 'hintergrund', 'text'];\nconst farbenIn = isObj(b.farben) ? b.farben : {};\nconst farben = {};\nconst badColors = [];\nfor (const k of keys) {\n  const v = s(farbenIn[k]).toUpperCase();\n  if (/^#[0-9A-F]{6}$/.test(v)) farben[k] = v; else badColors.push(k);\n}\nif (badColors.length) errors.push(`Kein gültiger Hex-Wert bei: ${badColors.join(', ')}.`);\n// Warum nur diese Zeichen: der Name landet später in einer Google-Fonts-Adresse und in CSS.\nconst fontOk = v => /^[A-Za-z0-9 -]{2,60}$/.test(v);\nconst schriftenIn = isObj(b.schriften) ? b.schriften : {};\nconst titel = s(schriftenIn.titel);\nconst textFont = s(schriftenIn.text);\nif (!fontOk(titel)) errors.push('Schrift für Titel fehlt oder enthält unerlaubte Zeichen.');\nif (!fontOk(textFont)) errors.push('Schrift für Text fehlt oder enthält unerlaubte Zeichen.');\n\n// Warum Bildstruktur statt 4 Byte Signatur: eine abgeschnittene Datei mit gültigem Kopf darf nicht als Logo durchgehen.\n// Hier wird der Aufbau samt Maßen geprüft, bei PNG zusätzlich der entpackte Bildinhalt; dekodiert und neu kodiert wird danach im Knoten Logo neu kodieren [Edit Image].\nconst MAX_PX = 4096;\n// Warum zlib: damit wird der Bildinhalt eines PNG tatsächlich entpackt und Zeile für Zeile gegen die Maße geprüft.\nlet zlib = null;\ntry { zlib = require('zlib'); } catch (e) { zlib = null; /* nicht freigegeben: dann prüft allein die Neukodierung im Knoten Logo neu kodieren */ }\nconst crcTable = (() => { const t = []; for (let n = 0; n < 256; n++) { let c = n; for (let k = 0; k < 8; k++) c = c & 1 ? 0xEDB88320 ^ (c >>> 1) : c >>> 1; t[n] = c >>> 0; } return t; })();\nconst crc32 = (buf, start, end) => { let c = 0xFFFFFFFF; for (let i = start; i < end; i++) c = crcTable[(c ^ buf[i]) & 0xFF] ^ (c >>> 8); return (c ^ 0xFFFFFFFF) >>> 0; };\nfunction checkPng(buf) {\n  if (buf.length < 8 + 25 + 12 + 12) return 'PNG ist zu kurz.';\n  if (buf.subarray(0, 8).toString('hex') !== '89504e470d0a1a0a') return 'PNG-Kennung fehlt.';\n  let pos = 8, w = 0, h = 0, idat = 0, iend = false, first = true, depth = 0, ctype = 0, interlace = 0;\n  const parts = [];\n  while (pos + 12 <= buf.length) {\n    const len = buf.readUInt32BE(pos);\n    const type = buf.subarray(pos + 4, pos + 8).toString('latin1');\n    if (!/^[A-Za-z]{4}$/.test(type)) return 'PNG-Block mit ungültigem Namen.';\n    if (pos + 12 + len > buf.length) return `PNG-Block ${type} ist abgeschnitten.`;\n    if (crc32(buf, pos + 4, pos + 8 + len) !== buf.readUInt32BE(pos + 8 + len)) return `PNG-Block ${type} hat eine falsche Prüfsumme.`;\n    if (first) {\n      if (type !== 'IHDR' || len !== 13) return 'PNG beginnt nicht mit IHDR.';\n      w = buf.readUInt32BE(pos + 8); h = buf.readUInt32BE(pos + 12);\n      depth = buf[pos + 16]; ctype = buf[pos + 17]; interlace = buf[pos + 20];\n      if (![1, 2, 4, 8, 16].includes(depth) || ![0, 2, 3, 4, 6].includes(ctype)) return 'PNG mit ungültiger Farbtiefe.';\n      first = false;\n    }\n    if (type === 'IDAT') { idat++; parts.push(buf.subarray(pos + 8, pos + 8 + len)); }\n    pos += 12 + len;\n    if (type === 'IEND') { iend = true; break; }\n  }\n  if (!idat) return 'PNG ohne Bilddaten.';\n  if (!iend || pos !== buf.length) return 'PNG ist unvollständig oder hat Anhängsel nach dem Ende.';\n  if (w < 1 || h < 1 || w > MAX_PX || h > MAX_PX) return `PNG misst ${w} x ${h} Pixel, erlaubt sind 1 bis ${MAX_PX}.`;\n  if (zlib) {\n    const ch = { 0: 1, 2: 3, 3: 1, 4: 2, 6: 4 }[ctype];\n    const bits = depth * ch;\n    const passes = interlace === 1 ? [[0, 0, 8, 8], [4, 0, 8, 8], [0, 4, 4, 8], [2, 0, 4, 4], [0, 2, 2, 4], [1, 0, 2, 2], [0, 1, 1, 2]] : [[0, 0, 1, 1]];\n    const rows = [];\n    for (const [xs, ys, dx, dy] of passes) {\n      const pw = Math.ceil((w - xs) / dx), ph = Math.ceil((h - ys) / dy);\n      if (pw > 0 && ph > 0) for (let r = 0; r < ph; r++) rows.push(1 + Math.ceil((pw * bits) / 8));\n    }\n    const expected = rows.reduce((a, n) => a + n, 0);\n    let raw;\n    try { raw = zlib.inflateSync(Buffer.concat(parts), { maxOutputLength: expected + 1 }); } catch (e) { return 'PNG-Bilddaten lassen sich nicht entpacken (' + String(e.code || e.message).slice(0, 40) + ').'; }\n    if (raw.length !== expected) return `PNG-Bilddaten haben ${raw.length} statt ${expected} Byte.`;\n    let off = 0;\n    for (const n of rows) { if (raw[off] > 4) return 'PNG-Bildzeile mit ungültigem Filter.'; off += n; }\n  }\n  return { w, h };\n}\nfunction checkJpeg(buf) {\n  if (buf.length < 4 || buf[0] !== 0xFF || buf[1] !== 0xD8) return 'JPG-Kennung fehlt.';\n  if (buf[buf.length - 2] !== 0xFF || buf[buf.length - 1] !== 0xD9) return 'JPG ist unvollständig (Endmarke fehlt).';\n  let pos = 2, w = 0, h = 0;\n  while (pos + 4 <= buf.length) {\n    if (buf[pos] !== 0xFF) return 'JPG-Aufbau ist beschädigt.';\n    const m = buf[pos + 1];\n    if (m === 0xFF) { pos++; continue; }\n    if (m === 0xD8 || (m >= 0xD0 && m <= 0xD7) || m === 0x01) { pos += 2; continue; }\n    const len = buf.readUInt16BE(pos + 2);\n    if (len < 2 || pos + 2 + len > buf.length) return 'JPG-Segment ist abgeschnitten.';\n    if (m >= 0xC0 && m <= 0xCF && ![0xC4, 0xC8, 0xCC].includes(m)) { if (len < 7) return 'JPG-Bildkopf ist zu kurz.'; h = buf.readUInt16BE(pos + 5); w = buf.readUInt16BE(pos + 7); }\n    if (m === 0xDA) break;\n    pos += 2 + len;\n  }\n  if (!w || !h) return 'JPG ohne Bildmaße.';\n  return { w, h };\n}\nfunction checkWebp(buf) {\n  if (buf.length < 30) return 'WEBP ist zu kurz.';\n  if (buf.subarray(0, 4).toString('latin1') !== 'RIFF' || buf.subarray(8, 12).toString('latin1') !== 'WEBP') return 'WEBP-Kennung fehlt.';\n  if (buf.readUInt32LE(4) + 8 !== buf.length) return 'WEBP ist unvollständig (Längenangabe passt nicht).';\n  const chunk = buf.subarray(12, 16).toString('latin1');\n  if (chunk === 'VP8 ') {\n    if (buf.subarray(23, 26).toString('hex') !== '9d012a') return 'WEBP-Bildkopf ist beschädigt.';\n    return { w: buf.readUInt16LE(26) & 0x3FFF, h: buf.readUInt16LE(28) & 0x3FFF };\n  }\n  if (chunk === 'VP8L') {\n    if (buf[20] !== 0x2F) return 'WEBP-Bildkopf ist beschädigt.';\n    const bits = buf.readUInt32LE(21);\n    return { w: (bits & 0x3FFF) + 1, h: ((bits >>> 14) & 0x3FFF) + 1 };\n  }\n  if (chunk === 'VP8X') return { w: buf.readUIntLE(24, 3) + 1, h: buf.readUIntLE(27, 3) + 1 };\n  return 'WEBP mit unbekanntem Bildformat.';\n}\n\nlet logo = null;\nif (typeof b.logo_data_url === 'string' && b.logo_data_url) {\n  const m = /^data:(image\\/(png|jpeg|webp));base64,([A-Za-z0-9+/=]+)$/.exec(b.logo_data_url);\n  if (!m) {\n    errors.push('Das Logo ist kein PNG, JPG oder WEBP.');\n  } else {\n    const buf = Buffer.from(m[3], 'base64');\n    if (buf.length > 1000000) errors.push(`Das Logo ist ${(buf.length / 1e6).toFixed(1)} MB groß, erlaubt ist 1 MB.`);\n    else {\n      const res = m[2] === 'png' ? checkPng(buf) : m[2] === 'jpeg' ? checkJpeg(buf) : checkWebp(buf);\n      if (typeof res === 'string') errors.push(`Das Logo ist keine gültige Bilddatei: ${res}`);\n      else if (res.w < 1 || res.h < 1 || res.w > MAX_PX || res.h > MAX_PX) errors.push(`Das Logo misst ${res.w} x ${res.h} Pixel, erlaubt sind 1 bis ${MAX_PX}.`);\n      else {\n        const ext = m[2] === 'jpeg' ? 'jpg' : m[2];\n        logo = { b64: m[3], mime: m[1], ext, size: buf.length, width: res.w, height: res.h };\n      }\n    }\n  }\n}\n\n// Warum Versionsvergleich: zwei gleichzeitige Einreichungen dürfen sich nicht still überschreiben.\nconst alt = isObj(kunde?.branding_pack) ? kunde.branding_pack : {};\nconst dbVersion = /^[0-9]{1,9}$/.test(String(alt.version ?? '')) ? Number(alt.version) : 0;\nconst expected = Number.isInteger(b.expected_version) ? b.expected_version : dbVersion;\nlet status_code = 400;\nif (errors.length === 0 && expected !== dbVersion) {\n  status_code = 409;\n  errors.push(`Das Branding wurde inzwischen geändert (gespeichert ist Version ${dbVersion}, die Seite kannte Version ${expected}). Bitte Seite neu laden und erneut einreichen.`);\n}\n\nconst ok = errors.length === 0;\nconst newVersion = dbVersion + 1;\nconst stamp = $now.setZone('Europe/Berlin');\n// Warum eigener Pfad je Version: das bisherige Logo wird nie überschrieben; erst das erfolgreiche Speichern stellt auf den neuen Pfad um.\n// Warum immer .png: das Logo wird im Knoten Logo neu kodieren dekodiert und als PNG neu geschrieben.\nconst logoPath = ok && logo ? `logos/${code}/v${newVersion}-${$execution.id}.png` : null;\nconst branding_pack = ok ? {\n  ...alt,\n  markenname,\n  farben,\n  schriften: { ...(isObj(alt.schriften) ? alt.schriften : {}), titel, text: textFont },\n  logo: logo ? { ...(isObj(alt.logo) ? alt.logo : {}), modus: 'datei', pfad: logoPath, text: markenname } : (alt.logo || null),\n  status: 'eingereicht',\n  eingereicht_am: stamp.toISO(),\n  quelle: `K1 Dashboard, eingereicht ${stamp.toFormat('dd.MM.yyyy HH:mm')}`,\n  version: newVersion,\n} : null;\n\nconst out = {\n  ok,\n  customer_code: code,\n  has_logo: ok && !!logo,\n  logo_path: logoPath,\n  logo_size: logo?.size || null,\n  logo_dimensions: logo ? `${logo.width}x${logo.height}` : null,\n  logo_decode: logo ? (logo.mime === 'image/png' && zlib ? 'png-entpackt-und-neu-kodiert' : 'neu-kodiert') : null,\n  expected_version: ok ? dbVersion : null,\n  branding_pack,\n  status_code: ok ? 200 : status_code,\n  response: ok ? null : { ok: false, message: 'Branding nicht gespeichert.', errors },\n};\nconst item = { json: out };\nif (ok && logo) item.binary = { logo: { data: logo.b64, mimeType: logo.mime, fileName: `v${newVersion}-eingang.${logo.ext}` } };\nreturn [item];\n"
       },
       "onError": "continueErrorOutput"
     },
@@ -748,7 +748,7 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        2450,
+        2800,
         1290
       ],
       "parameters": {
@@ -765,7 +765,7 @@
             },
             {
               "name": "Content-Type",
-              "value": "={{ $binary.logo.mimeType }}"
+              "value": "image/png"
             }
           ]
         },
@@ -790,7 +790,7 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        2800,
+        3150,
         1400
       ],
       "parameters": {
@@ -821,7 +821,7 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        3150,
+        3500,
         1400
       ],
       "parameters": {
@@ -890,7 +890,7 @@
         -576
       ],
       "parameters": {
-        "content": "## Ablauf\n① Anfrage annehmen und verteilen\n② Läufe, Tageswerte, Kunden laden\n③ Vorlage laden, Seite bauen\n④ Auftrag prüfen\n⑤ K1 starten, nur wenn freigeschaltet\n⑥ Antwort an die Seite\n⑦ Branding prüfen\n⑧ Logo hochladen, Branding speichern\n⑨ Fehlerweg",
+        "content": "## Ablauf\n① Anfrage annehmen und verteilen\n② Läufe, Tageswerte, Kunden laden\n③ Vorlage laden, Seite bauen\n④ Auftrag prüfen\n⑤ K1 starten, nur wenn freigeschaltet\n⑥ Antwort an die Seite\n⑦ Branding prüfen\n⑧ Logo neu kodieren, hochladen, speichern\n⑨ Fehlerweg\n⑩ Speicherstand nachlesen",
         "color": 2,
         "width": 508,
         "height": 260
@@ -1034,7 +1034,7 @@
         1040
       ],
       "parameters": {
-        "content": "## ⑧ Logo und Speichern\nLogo unter neuem Pfad je Version, nie überschrieben. Dann branding_pack über k1_dashboard_save_branding mit Versionsvergleich, Konflikt gibt 409.\n\n### 🟢 Rückmeldung mit Version",
+        "content": "## ⑧ Logo und Speichern\nLogo wird dekodiert und als PNG neu kodiert, dann unter neuem Pfad je Version abgelegt. branding_pack über k1_dashboard_save_branding mit Versionsvergleich, Konflikt gibt 409.\n\n### 🟢 Rückmeldung mit Version",
         "color": 1,
         "width": 1260,
         "height": 200
@@ -1066,7 +1066,7 @@
         1620
       ],
       "parameters": {
-        "content": "## ⑨ Fehlerweg\nFällt Supabase, Storage oder der Aufruf von K1 aus, antwortet der Workflow mit 502 und Klartext. Scheitert das Speichern nach dem Logo, bleibt das alte Branding stehen.\n\n### 🔴 Meldet und stoppt",
+        "content": "## ⑨ Fehlerweg\nFällt Supabase, Storage oder K1 vor dem Speichern aus, antwortet der Workflow mit 502 und Klartext. Fehler beim oder nach dem Speichern laufen über ⑩.\n\n### 🔴 Meldet und stoppt",
         "color": 3,
         "width": 400,
         "height": 240
@@ -1127,6 +1127,154 @@
         "options": {
           "responseCode": "={{ $json.status_code }}"
         }
+      }
+    },
+    {
+      "id": "2bbc45ca-68c6-4667-930d-fd7cd1262544",
+      "name": "Logo neu kodieren [Edit Image]",
+      "type": "n8n-nodes-base.editImage",
+      "typeVersion": 1,
+      "position": [
+        2450,
+        1290
+      ],
+      "parameters": {
+        "operation": "resize",
+        "dataPropertyName": "logo",
+        "width": 1024,
+        "height": 1024,
+        "resizeOption": "onlyIfLarger",
+        "options": {
+          "format": "png",
+          "destinationKey": "logo",
+          "fileName": "={{ $json.logo_path.split('/').pop() }}"
+        }
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "id": "7045df8e-24ec-499b-8986-c9259fbe78af",
+      "name": "Logo ablehnen [Respond to Webhook]",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        2450,
+        1680
+      ],
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({ ok: false, message: \"Branding nicht gespeichert.\", errors: [\"Das Logo lässt sich nicht als Bild öffnen (\" + String($json.error?.message || $json.error || $json.message || \"unbekannt\").slice(0, 160) + \").\"] }) }}",
+        "options": {
+          "responseCode": 400
+        }
+      }
+    },
+    {
+      "id": "03611a8d-71a4-4e88-bf7b-06c6f8f84326",
+      "name": "Stand nachlesen [HTTP Request]",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        3850,
+        1600
+      ],
+      "parameters": {
+        "url": "={{ $(\"Konfiguration [Edit Fields]\").first().json.supabase_url }}/rest/v1/k1_kunden",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "supabaseApi",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "kuerzel",
+              "value": "=eq.{{ $('Branding prüfen [Code]').first().json.customer_code }}"
+            },
+            {
+              "name": "select",
+              "value": "kuerzel,branding_pack,logo_url"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 15000
+        }
+      },
+      "onError": "continueErrorOutput",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 2000,
+      "alwaysOutputData": true,
+      "credentials": {
+        "supabaseApi": {
+          "id": "CREDENTIAL_ID",
+          "name": "Supabase API | KI-AGT-2606"
+        }
+      }
+    },
+    {
+      "id": "d29394e5-9948-487f-8755-9bd543173889",
+      "name": "Speicherstand auswerten [Code]",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        4200,
+        1600
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "// Zweck: liest nach einem Fehler beim oder nach dem Speichern den tatsächlichen Stand und meldet ihn ehrlich.\nconst pruef = $('Branding prüfen [Code]').first().json;\nconst want = pruef.branding_pack || {};\nconst row = $input.all().map(i => i.json).find(r => r && r.kuerzel === pruef.customer_code) || null;\nconst bp = row && row.branding_pack && typeof row.branding_pack === 'object' ? row.branding_pack : null;\nconst version = bp ? Number(bp.version) || 0 : null;\n// Warum Zeitstempel und Version: nur das eigene Paket trägt genau diese Einreichungszeit.\nconst saved = !!bp && bp.eingereicht_am === want.eingereicht_am && version === Number(want.version) && (!pruef.has_logo || row.logo_url === pruef.logo_path);\nif (saved) {\n  return [{ json: { status_code: 200, response: { ok: true, message: `Branding für ${pruef.customer_code} gespeichert (Version ${version}, nach einer Störung durch Nachlesen bestätigt).`, version, branding: { markenname: bp.markenname ?? null, farben: bp.farben ?? null, schriften: bp.schriften ?? null, version } } } }];\n}\nif (bp && version === Number(pruef.expected_version)) {\n  return [{ json: { status_code: 502, response: { ok: false, message: `Nicht gespeichert: Nachlesen zeigt weiterhin Version ${version}. Bisheriges Branding und Logo gelten weiter. Bitte später erneut versuchen.` } } }];\n}\nreturn [{ json: { status_code: 409, response: { ok: false, message: `Speicherstand unklar: Nachlesen zeigt ${bp ? 'Version ' + version : 'keinen Kunden'}. Bitte Seite neu laden und den Stand prüfen, bevor Sie erneut einreichen.` } } }];\n"
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "id": "b0b7b5d8-4236-4ac0-a891-4e26b3c2dd02",
+      "name": "Speicherstand unklar melden [Respond to Webhook]",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        4200,
+        1850
+      ],
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({ ok: false, message: \"Speicherstand unklar: Beim Speichern trat ein technischer Fehler auf und der Stand ließ sich nicht nachlesen. Bitte Seite neu laden und prüfen, ob das Branding gespeichert ist, bevor Sie erneut einreichen.\" }) }}",
+        "options": {
+          "responseCode": 502
+        }
+      }
+    },
+    {
+      "id": "bc2859b1-532b-47ba-ab46-86c23dabfe97",
+      "name": "Antwort nach Nachlesen [Respond to Webhook]",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        4550,
+        1600
+      ],
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify($json.response) }}",
+        "options": {
+          "responseCode": "={{ $json.status_code }}"
+        }
+      }
+    },
+    {
+      "id": "d34e59ea-132b-46df-8beb-fed06d643c1e",
+      "name": "Sticky Note 10 Nachlesen",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        3800,
+        1360
+      ],
+      "parameters": {
+        "content": "## ⑩ Speicherstand nachlesen\nScheitert das Speichern oder seine Bestätigung, liest der Workflow den Kunden nach und meldet gespeichert, nicht gespeichert oder unklar.\n\n### 🟢 Keine ungeprüfte Zusicherung",
+        "color": 1,
+        "width": 960,
+        "height": 200
       }
     }
   ],
@@ -1391,7 +1539,7 @@
       "main": [
         [
           {
-            "node": "Logo hochladen [HTTP Request]",
+            "node": "Logo neu kodieren [Edit Image]",
             "type": "main",
             "index": 0
           }
@@ -1434,7 +1582,7 @@
         ],
         [
           {
-            "node": "Branding-Fehler melden [Respond to Webhook]",
+            "node": "Stand nachlesen [HTTP Request]",
             "type": "main",
             "index": 0
           }
@@ -1452,7 +1600,7 @@
         ],
         [
           {
-            "node": "Branding-Fehler melden [Respond to Webhook]",
+            "node": "Stand nachlesen [HTTP Request]",
             "type": "main",
             "index": 0
           }
@@ -1476,6 +1624,60 @@
           }
         ]
       ]
+    },
+    "Logo neu kodieren [Edit Image]": {
+      "main": [
+        [
+          {
+            "node": "Logo hochladen [HTTP Request]",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Logo ablehnen [Respond to Webhook]",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Stand nachlesen [HTTP Request]": {
+      "main": [
+        [
+          {
+            "node": "Speicherstand auswerten [Code]",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Speicherstand unklar melden [Respond to Webhook]",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Speicherstand auswerten [Code]": {
+      "main": [
+        [
+          {
+            "node": "Antwort nach Nachlesen [Respond to Webhook]",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Speicherstand unklar melden [Respond to Webhook]",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "settings": {
@@ -1492,7 +1694,7 @@
     "aiBuilderAssisted": true,
     "builderVariant": "mcp"
   },
-  "versionId": "13d41655-ae02-4500-906a-344363a803a2",
+  "versionId": "83c8bf9a-e018-4850-8dd9-19ad5d94581f",
   "tags": [
     "KI-AGT-2606",
     "schulung",
