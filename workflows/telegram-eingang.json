@@ -185,7 +185,7 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        2704,
+        3040,
         1568
       ],
       "onError": "continueErrorOutput"
@@ -209,7 +209,7 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        3040,
+        3376,
         1568
       ]
     },
@@ -818,6 +818,7 @@
       },
       "onError": "continueErrorOutput",
       "executeOnce": true,
+      "alwaysOutputData": true,
       "credentials": {
         "supabaseApi": {
           "id": "CREDENTIAL_ID",
@@ -831,7 +832,7 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        2368,
+        2704,
         1568
       ],
       "parameters": {
@@ -856,6 +857,40 @@
           "id": "CREDENTIAL_ID",
           "name": "Cloudflare Workers AI | Content-Generator"
         }
+      }
+    },
+    {
+      "id": "8d22c258-f7eb-4d03-8d94-d19b7c1d3428",
+      "name": "Konto-ID vorhanden? [If]",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        2368,
+        1568
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "id": "k01",
+              "leftValue": "={{ String($json.setting_value || '').trim() }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
       }
     }
   ],
@@ -1045,7 +1080,7 @@
       "main": [
         [
           {
-            "node": "Cloudflare Whisper [HTTP Request]",
+            "node": "Konto-ID vorhanden? [If]",
             "type": "main",
             "index": 0
           }
@@ -1076,6 +1111,24 @@
           }
         ]
       ]
+    },
+    "Konto-ID vorhanden? [If]": {
+      "main": [
+        [
+          {
+            "node": "Cloudflare Whisper [HTTP Request]",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Bitte tippen [Telegram]",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "settings": {
@@ -1086,10 +1139,9 @@
   },
   "meta": {
     "aiBuilderAssisted": true,
-    "builderVariant": "mcp",
-    "export_hinweis": "Sicherung af760cfd plus die 13 Operationen von v04 (ops_t4), Live-Stand ist Version 17262ff2 der n8n-Historie"
+    "builderVariant": "mcp"
   },
-  "versionId": "17262ff2-36f1-4b74-9209-94b9f5984eaa",
+  "versionId": "9b37eb7d-0a82-46b5-91c4-b474415b4b75",
   "tags": [
     "KI-AGT-2606",
     "woche-4"
