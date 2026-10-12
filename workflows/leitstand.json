@@ -918,7 +918,7 @@
         -576
       ],
       "parameters": {
-        "content": "## Status\n🟢 Verlauf liest echte Daten aus Supabase\n🟡 Probebetrieb: Aufträge werden nur geprüft\n🟡 Basic Auth mit Credential, 401-Test über HTTP offen\n🔵 Branding nur für test-dashboard frei",
+        "content": "## Status\n🟢 Verlauf liest echte Daten aus Supabase\n🟡 Probebetrieb: Aufträge werden nur geprüft\n🔴 Erst aktivieren, wenn der 401-Test über HTTP bestanden ist\n🔵 Branding nur für test-dashboard frei",
         "color": 2,
         "width": 508,
         "height": 280
@@ -1706,7 +1706,7 @@
     "aiBuilderAssisted": true,
     "builderVariant": "mcp"
   },
-  "versionId": "ec683d1c-fb1e-4f8c-8809-53a75f1fc8d8",
+  "versionId": "349bd919-b50e-4346-87a8-1ea605cf34cb",
   "tags": [
     "KI-AGT-2606",
     "schulung",
