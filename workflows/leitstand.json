@@ -1,6 +1,7 @@
 {
   "id": "xVnV4s2yVnkdGXeH",
   "name": "AGT-2606 P1 K1 Dashboard",
+  "description": "Projekt 1: Leitstand für K1 (Verlauf aus k1_laufprotokoll, Auftrag starten, Branding einreichen). Inaktiv, Basic Auth an beiden Webhooks eingeschaltet, vor dem Aktivieren das Credential wählen.",
   "nodes": [
     {
       "id": "3ed12485-aaf8-4d09-a6be-4aa028c82386",
@@ -17,7 +18,8 @@
         "responseMode": "responseNode",
         "options": {
           "ignoreBots": true
-        }
+        },
+        "authentication": "basicAuth"
       },
       "webhookId": "8a2e9d17-3826-4902-a87d-563384643257"
     },
@@ -102,7 +104,8 @@
         "responseMode": "responseNode",
         "options": {
           "ignoreBots": true
-        }
+        },
+        "authentication": "basicAuth"
       },
       "webhookId": "4e5a74f2-64bd-4db5-8d99-0c44355b31fa"
     },
@@ -223,17 +226,17 @@
           "timeout": 15000
         }
       },
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 2000,
+      "alwaysOutputData": true,
+      "onError": "continueErrorOutput",
       "credentials": {
         "supabaseApi": {
           "id": "CREDENTIAL_ID",
           "name": "Supabase API | KI-AGT-2606"
         }
-      },
-      "retryOnFail": true,
-      "maxTries": 3,
-      "waitBetweenTries": 2000,
-      "alwaysOutputData": true,
-      "onError": "continueErrorOutput"
+      }
     },
     {
       "id": "68ce984f-398f-413b-93e9-d1478850c8c3",
@@ -247,8 +250,9 @@
       "parameters": {
         "mode": "runOnceForAllItems",
         "language": "javaScript",
-        "jsCode": "// Zweck: prüft einen Auftrag aus dem Dashboard, bevor K1 startet. Gleiche Grenzen wie im Formular von K1.\nconst cfg = $('Konfiguration [Edit Fields]').first().json;\nconst b = $input.first().json.body || {};\nconst s = v => (typeof v === 'string' ? v.trim() : '');\nconst types = ['Thema', 'Artikel-Link', 'YouTube-Link', 'Eigener Text'];\nconst job = {\n  customer_code: s(b.customer_code).toLowerCase(),\n  source_type: s(b.source_type),\n  topic: s(b.topic),\n  source: s(b.source),\n  note: s(b.note),\n};\nconst errors = [];\n// Warum hier und nicht erst in K1: ein ungültiger Auftrag kostet so keinen Modellaufruf.\nif (!/^[a-z0-9-]{2,40}$/.test(job.customer_code)) errors.push('Kunde fehlt oder ist ungültig.');\nif (!types.includes(job.source_type)) errors.push('Quellenart ist unbekannt.');\nif (job.topic.length < 3 || job.topic.length > 200) errors.push('Das Thema braucht 3 bis 200 Zeichen.');\nif (job.source_type !== 'Thema' && !job.source) errors.push('Für diese Quellenart fehlt die Quelle.');\nif ((job.source_type === 'Artikel-Link' || job.source_type === 'YouTube-Link') && job.source && !/^https:\\/\\/\\S+$/.test(job.source)) errors.push('Die Quelle muss eine vollständige Adresse mit https:// sein.');\nif (job.source.length > 20000) errors.push('Die Quelle ist länger als 20.000 Zeichen.');\nif (job.note.length > 1000) errors.push('Der Hinweis ist länger als 1.000 Zeichen.');\n\nconst ok = errors.length === 0;\n// Warum ein Schalter: vor dem Aktivieren (Basic Auth, Aufrufrecht in K1) soll das Dashboard keinen echten Lauf auslösen.\nconst dispatch = cfg.dispatch_enabled === true;\nlet status_code = 200;\nlet response;\nif (!ok) {\n  status_code = 400;\n  response = { ok: false, started: false, message: 'Auftrag nicht gestartet.', errors };\n} else if (!dispatch) {\n  response = { ok: true, started: false, message: `Probebetrieb: Der Auftrag für ${job.customer_code} ist gültig, wurde aber nicht an K1 übergeben. Zum Starten in der Konfiguration dispatch_enabled auf true setzen.` };\n} else {\n  status_code = 202;\n  response = { ok: true, started: true, message: `Auftrag an K1 übergeben (${job.source_type}: ${job.topic}). Die Vorschau kommt zur Freigabe in Telegram.` };\n}\nreturn [{ json: { ...job, start_k1: ok && dispatch, status_code, response } }];\n"
-      }
+        "jsCode": "// Zweck: prüft einen Auftrag aus dem Dashboard, bevor K1 startet. Gleiche Grenzen wie im Formular von K1.\nconst cfg = $('Konfiguration [Edit Fields]').first().json;\n// Warum Typprüfung: ein Body, der kein Objekt ist, soll eine 400 ergeben, keinen Absturz.\nconst rawBody = $input.first().json.body;\nconst b = (rawBody && typeof rawBody === 'object' && !Array.isArray(rawBody)) ? rawBody : {};\nconst s = v => (typeof v === 'string' ? v.trim() : '');\nconst types = ['Thema', 'Artikel-Link', 'YouTube-Link', 'Eigener Text'];\nconst job = {\n  customer_code: s(b.customer_code).toLowerCase(),\n  source_type: s(b.source_type),\n  topic: s(b.topic),\n  source: s(b.source),\n  note: s(b.note),\n};\nconst errors = [];\n// Warum hier und nicht erst in K1: ein ungültiger Auftrag kostet so keinen Modellaufruf.\nif (!/^[a-z0-9-]{2,40}$/.test(job.customer_code)) errors.push('Kunde fehlt oder ist ungültig.');\nif (!types.includes(job.source_type)) errors.push('Quellenart ist unbekannt.');\nif (job.topic.length < 3 || job.topic.length > 200) errors.push('Das Thema braucht 3 bis 200 Zeichen.');\nif (job.source_type !== 'Thema' && !job.source) errors.push('Für diese Quellenart fehlt die Quelle.');\nif ((job.source_type === 'Artikel-Link' || job.source_type === 'YouTube-Link') && job.source && !/^https:\\/\\/\\S+$/.test(job.source)) errors.push('Die Quelle muss eine vollständige Adresse mit https:// sein.');\nif (job.source.length > 20000) errors.push('Die Quelle ist länger als 20.000 Zeichen.');\nif (job.note.length > 1000) errors.push('Der Hinweis ist länger als 1.000 Zeichen.');\n\nconst ok = errors.length === 0;\n// Warum ein Schalter: vor dem Aktivieren (Basic Auth, Aufrufrecht in K1) soll das Dashboard keinen echten Lauf auslösen.\nconst dispatch = cfg.dispatch_enabled === true;\nlet status_code = 200;\nlet response;\nif (!ok) {\n  status_code = 400;\n  response = { ok: false, started: false, message: 'Auftrag nicht gestartet.', errors };\n} else if (!dispatch) {\n  response = { ok: true, started: false, message: `Probebetrieb: Der Auftrag für ${job.customer_code} ist gültig, wurde aber nicht an K1 übergeben. Zum Starten in der Konfiguration dispatch_enabled auf true setzen.` };\n} else {\n  status_code = 202;\n  response = { ok: true, started: true, message: `Auftrag an K1 übergeben (${job.source_type}: ${job.topic}). Die Vorschau kommt zur Freigabe in Telegram.` };\n}\nreturn [{ json: { ...job, start_k1: ok && dispatch, status_code, response } }];\n"
+      },
+      "onError": "continueErrorOutput"
     },
     {
       "id": "7e3b43ee-51e2-4062-8719-f4f8f01f3756",
@@ -280,17 +284,17 @@
           "timeout": 15000
         }
       },
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 2000,
+      "alwaysOutputData": true,
+      "onError": "continueErrorOutput",
       "credentials": {
         "supabaseApi": {
           "id": "CREDENTIAL_ID",
           "name": "Supabase API | KI-AGT-2606"
         }
-      },
-      "retryOnFail": true,
-      "maxTries": 3,
-      "waitBetweenTries": 2000,
-      "alwaysOutputData": true,
-      "onError": "continueErrorOutput"
+      }
     },
     {
       "id": "bff195b4-9a42-447a-a42f-70779db1faf2",
@@ -339,18 +343,18 @@
           "timeout": 15000
         }
       },
-      "credentials": {
-        "supabaseApi": {
-          "id": "CREDENTIAL_ID",
-          "name": "Supabase API | KI-AGT-2606"
-        }
-      },
       "executeOnce": true,
       "retryOnFail": true,
       "maxTries": 3,
       "waitBetweenTries": 2000,
       "alwaysOutputData": true,
-      "onError": "continueErrorOutput"
+      "onError": "continueErrorOutput",
+      "credentials": {
+        "supabaseApi": {
+          "id": "CREDENTIAL_ID",
+          "name": "Supabase API | KI-AGT-2606"
+        }
+      }
     },
     {
       "id": "341fdcf2-9130-4d90-afac-d5defd205ead",
@@ -382,18 +386,18 @@
           "timeout": 15000
         }
       },
-      "credentials": {
-        "supabaseApi": {
-          "id": "CREDENTIAL_ID",
-          "name": "Supabase API | KI-AGT-2606"
-        }
-      },
       "executeOnce": true,
       "retryOnFail": true,
       "maxTries": 3,
       "waitBetweenTries": 2000,
       "alwaysOutputData": true,
-      "onError": "continueErrorOutput"
+      "onError": "continueErrorOutput",
+      "credentials": {
+        "supabaseApi": {
+          "id": "CREDENTIAL_ID",
+          "name": "Supabase API | KI-AGT-2606"
+        }
+      }
     },
     {
       "id": "d5628b7d-1e85-40fd-b382-55218b28d55e",
@@ -407,7 +411,7 @@
       "parameters": {
         "mode": "runOnceForAllItems",
         "language": "javaScript",
-        "jsCode": "// Zweck: baut die Dashboard-Seite aus Vorlage, Läufen, Tageswerten und Kunden. Alle Abfragen liefen serverseitig, im HTML steht kein Schlüssel.\nconst cfg = $('Konfiguration [Edit Fields]').first().json;\n// Warum Vorlage aus Supabase: die Seite (rund 50 KB) liegt als nur lesende Funktion k1_dashboard_template() in der Datenbank und wird dort versioniert.\nconst raw = $('Vorlage laden [HTTP Request]').first().json.data;\nlet TEMPLATE = typeof raw === 'string' ? raw : '';\ntry { const p = JSON.parse(TEMPLATE); if (typeof p === 'string') TEMPLATE = p; } catch (e) { /* Antwort war schon reiner Text */ }\nif (!TEMPLATE.includes('/*__DATA__*/null')) {\n  throw new Error('Vorlage ohne Platzhalter erhalten (' + TEMPLATE.length + ' Zeichen), Seite nicht baubar.');\n}\n// Warum filtern: die Ladeknoten geben bei leerer Tabelle ein leeres Element weiter (alwaysOutputData), das darf nicht als Lauf zählen.\nconst runs = $('Läufe laden [HTTP Request]').all().map(i => i.json).filter(r => r && r.logged_at);\nconst dailyRaw = $('Tageswerte laden [HTTP Request]').all().map(i => i.json).filter(d => d && d.day);\nconst customers = $('Kunden laden [HTTP Request]').all().map(i => i.json).filter(c => c && c.kuerzel).map(c => ({\n  code: c.kuerzel,\n  name: c.name,\n  active: c.aktiv === true,\n  branding: {\n    markenname: c.branding_pack?.markenname ?? null,\n    farben: c.branding_pack?.farben ?? null,\n    schriften: c.branding_pack?.schriften ?? null,\n  },\n}));\n\n// Warum Lücken füllen: ein Tag ohne Lauf soll als leere Spalte sichtbar sein, sonst wirkt die Zeitachse gestaucht.\nconst chartDays = Math.min(Math.max(Number(cfg.chart_days) || 14, 3), 60);\nconst today = $now.setZone('Europe/Berlin').startOf('day');\nconst byDay = Object.fromEntries(dailyRaw.map(d => [String(d.day).slice(0, 10), d]));\nconst known = Object.keys(byDay).sort();\nlet start = today.minus({ days: chartDays - 1 });\nif (known.length) {\n  const first = DateTime.fromISO(known[0], { zone: 'Europe/Berlin' });\n  if (first > start) start = first;\n}\nconst daily = [];\nfor (let d = start; d <= today; d = d.plus({ days: 1 })) {\n  const key = d.toISODate();\n  const v = byDay[key] || {};\n  daily.push({\n    day: key,\n    runs: Number(v.runs) || 0,\n    ok_count: Number(v.ok_count) || 0,\n    fallback_count: Number(v.fallback_count) || 0,\n    error_count: Number(v.error_count) || 0,\n    cost_usd: Number(v.cost_usd) || 0,\n  });\n}\n\nconst data = {\n  generated_at: new Date().toISOString(),\n  config: {\n    dispatch_enabled: cfg.dispatch_enabled === true,\n    branding_allowlist: String(cfg.branding_allowlist || '').split(',').map(s => s.trim()).filter(Boolean),\n  },\n  runs,\n  daily,\n  customers,\n};\n\n// Warum maskieren: ein \"<\" im JSON könnte ein </script> in einem Thema schließen (Testlauf 673 enthält genau so einen Text).\nconst BS = String.fromCharCode(92);\nconst json = JSON.stringify(data).split('<').join(BS + 'u003c').split(String.fromCharCode(0x2028)).join(BS + 'u2028').split(String.fromCharCode(0x2029)).join(BS + 'u2029');\nconst html = TEMPLATE.replace('/*__DATA__*/null', () => json);\nreturn [{ json: { html, run_count: runs.length, day_count: daily.length, customer_count: customers.length, template_chars: TEMPLATE.length } }];\n"
+        "jsCode": "// Zweck: baut die Dashboard-Seite aus Vorlage, Läufen, Tageswerten und Kunden. Alle Abfragen liefen serverseitig, im HTML steht kein Schlüssel.\nconst cfg = $('Konfiguration [Edit Fields]').first().json;\n// Warum Vorlage aus Supabase: die Seite (rund 50 KB) liegt als nur lesende Funktion k1_dashboard_template() in der Datenbank und wird dort versioniert.\nconst raw = $('Vorlage laden [HTTP Request]').first().json.data;\nlet TEMPLATE = typeof raw === 'string' ? raw : '';\ntry { const p = JSON.parse(TEMPLATE); if (typeof p === 'string') TEMPLATE = p; } catch (e) { /* Antwort war schon reiner Text */ }\nif (!TEMPLATE.includes('/*__DATA__*/null')) {\n  throw new Error('Vorlage ohne Platzhalter erhalten (' + TEMPLATE.length + ' Zeichen), Seite nicht baubar.');\n}\n// Warum filtern: die Ladeknoten geben bei leerer Tabelle ein leeres Element weiter (alwaysOutputData), das darf nicht als Lauf zählen.\nconst runs = $('Läufe laden [HTTP Request]').all().map(i => i.json).filter(r => r && r.logged_at);\nconst dailyRaw = $('Tageswerte laden [HTTP Request]').all().map(i => i.json).filter(d => d && d.day);\nconst customers = $('Kunden laden [HTTP Request]').all().map(i => i.json).filter(c => c && c.kuerzel).map(c => ({\n  code: c.kuerzel,\n  name: c.name,\n  active: c.aktiv === true,\n  branding: {\n    markenname: c.branding_pack?.markenname ?? null,\n    farben: c.branding_pack?.farben ?? null,\n    schriften: c.branding_pack?.schriften ?? null,\n    // Warum Version: die Seite sendet sie beim Speichern als erwartete Version mit.\n    version: Number(c.branding_pack?.version) || 0,\n  },\n}));\n\n// Warum Lücken füllen: ein Tag ohne Lauf soll als leere Spalte sichtbar sein, sonst wirkt die Zeitachse gestaucht.\nconst chartDays = Math.min(Math.max(Number(cfg.chart_days) || 14, 3), 60);\nconst today = $now.setZone('Europe/Berlin').startOf('day');\nconst byDay = Object.fromEntries(dailyRaw.map(d => [String(d.day).slice(0, 10), d]));\nconst known = Object.keys(byDay).sort();\nlet start = today.minus({ days: chartDays - 1 });\nif (known.length) {\n  const first = DateTime.fromISO(known[0], { zone: 'Europe/Berlin' });\n  if (first > start) start = first;\n}\nconst daily = [];\nfor (let d = start; d <= today; d = d.plus({ days: 1 })) {\n  const key = d.toISODate();\n  const v = byDay[key] || {};\n  daily.push({\n    day: key,\n    runs: Number(v.runs) || 0,\n    ok_count: Number(v.ok_count) || 0,\n    fallback_count: Number(v.fallback_count) || 0,\n    error_count: Number(v.error_count) || 0,\n    open_count: Number(v.open_count) || 0,\n    // Warum null statt 0: unbekannte Kosten sind keine Nullkosten.\n    cost_usd: v.cost_usd == null ? null : Number(v.cost_usd),\n    cost_unknown_count: Number(v.cost_unknown_count) || 0,\n  });\n}\n\nconst data = {\n  generated_at: new Date().toISOString(),\n  config: {\n    dispatch_enabled: cfg.dispatch_enabled === true,\n    branding_allowlist: String(cfg.branding_allowlist || '').split(',').map(s => s.trim()).filter(Boolean),\n  },\n  runs,\n  daily,\n  customers,\n};\n\n// Warum maskieren: ein \"<\" im JSON könnte ein </script> in einem Thema schließen (Testlauf 673 enthält genau so einen Text).\nconst BS = String.fromCharCode(92);\nconst json = JSON.stringify(data).split('<').join(BS + 'u003c').split(String.fromCharCode(0x2028)).join(BS + 'u2028').split(String.fromCharCode(0x2029)).join(BS + 'u2029');\nconst html = TEMPLATE.replace('/*__DATA__*/null', () => json);\nreturn [{ json: { html, run_count: runs.length, day_count: daily.length, customer_count: customers.length, template_chars: TEMPLATE.length } }];\n"
       },
       "executeOnce": true,
       "onError": "continueErrorOutput"
@@ -519,11 +523,11 @@
         "workflowInputs": {
           "mappingMode": "defineBelow",
           "value": {
-            "kunde_kuerzel": "={{ $json.customer_code }}",
-            "thema": "={{ $json.topic }}",
-            "quelle_art": "={{ $json.source_type }}",
-            "quelle": "={{ $json.source }}",
-            "hinweis": "={{ $json.note }}",
+            "customer_code": "={{ $json.customer_code }}",
+            "topic": "={{ $json.topic }}",
+            "source_type": "={{ $json.source_type }}",
+            "source": "={{ $json.source }}",
+            "note": "={{ $json.note }}",
             "telegram_chat_id": ""
           },
           "matchingColumns": [],
@@ -531,8 +535,8 @@
           "convertFieldsToString": true,
           "schema": [
             {
-              "id": "kunde_kuerzel",
-              "displayName": "kunde_kuerzel",
+              "id": "customer_code",
+              "displayName": "customer_code",
               "required": false,
               "defaultMatch": false,
               "display": true,
@@ -541,8 +545,8 @@
               "removed": false
             },
             {
-              "id": "thema",
-              "displayName": "thema",
+              "id": "topic",
+              "displayName": "topic",
               "required": false,
               "defaultMatch": false,
               "display": true,
@@ -551,8 +555,8 @@
               "removed": false
             },
             {
-              "id": "quelle_art",
-              "displayName": "quelle_art",
+              "id": "source_type",
+              "displayName": "source_type",
               "required": false,
               "defaultMatch": false,
               "display": true,
@@ -561,8 +565,8 @@
               "removed": false
             },
             {
-              "id": "quelle",
-              "displayName": "quelle",
+              "id": "source",
+              "displayName": "source",
               "required": false,
               "defaultMatch": false,
               "display": true,
@@ -571,8 +575,8 @@
               "removed": false
             },
             {
-              "id": "hinweis",
-              "displayName": "hinweis",
+              "id": "note",
+              "displayName": "note",
               "required": false,
               "defaultMatch": false,
               "display": true,
@@ -674,8 +678,9 @@
       "parameters": {
         "mode": "runOnceForAllItems",
         "language": "javaScript",
-        "jsCode": "// Zweck: prüft ein eingereichtes Branding-Paket und baut das neue branding_pack. Gespeichert wird erst danach und nur bei grüner Prüfung.\nconst cfg = $('Konfiguration [Edit Fields]').first().json;\nconst b = cfg.body || {};\nconst s = v => (typeof v === 'string' ? v.trim() : '');\nconst code = s(b.customer_code).toLowerCase();\n// Warum filtern: bei unbekanntem Kunden liefert der Ladeknoten nur ein leeres Element (alwaysOutputData).\nconst rows = $input.all().map(i => i.json).filter(r => r && r.kuerzel);\nconst kunde = rows.find(r => r.kuerzel === code) || null;\nconst allow = String(cfg.branding_allowlist || '').split(',').map(x => x.trim()).filter(Boolean);\nconst errors = [];\n\nif (b.confirmed !== true) errors.push('Die Bestätigung fehlt, nichts wurde gespeichert.');\nif (!/^[a-z0-9-]{2,40}$/.test(code) || !kunde) errors.push(`Kunde ${code || '(leer)'} ist unbekannt.`);\n// Warum eine Freigabeliste: echte Kunden werden erst nach Patricks Entscheidung über das Dashboard geändert.\nif (!(allow.includes('*') || allow.includes(code))) errors.push(`Speichern für ${code || '(leer)'} ist nicht freigegeben (branding_allowlist).`);\n\nconst markenname = s(b.markenname);\nif (markenname.length < 2 || markenname.length > 80) errors.push('Der Markenname braucht 2 bis 80 Zeichen.');\nconst keys = ['primaer', 'sekundaer', 'akzent', 'hintergrund', 'text'];\nconst farbenIn = b.farben || {};\nconst farben = {};\nconst badColors = [];\nfor (const k of keys) {\n  const v = s(farbenIn[k]).toUpperCase();\n  if (/^#[0-9A-F]{6}$/.test(v)) farben[k] = v; else badColors.push(k);\n}\nif (badColors.length) errors.push(`Kein gültiger Hex-Wert bei: ${badColors.join(', ')}.`);\n// Warum nur diese Zeichen: der Name landet später in einer Google-Fonts-Adresse und in CSS.\nconst fontOk = v => /^[A-Za-z0-9 -]{2,60}$/.test(v);\nconst titel = s(b.schriften?.titel);\nconst textFont = s(b.schriften?.text);\nif (!fontOk(titel)) errors.push('Schrift für Titel fehlt oder enthält unerlaubte Zeichen.');\nif (!fontOk(textFont)) errors.push('Schrift für Text fehlt oder enthält unerlaubte Zeichen.');\n\nlet logo = null;\nif (b.logo_data_url) {\n  const m = /^data:(image\\/(png|jpeg|webp));base64,([A-Za-z0-9+/=]+)$/.exec(String(b.logo_data_url));\n  if (!m) {\n    errors.push('Das Logo ist kein PNG, JPG oder WEBP.');\n  } else {\n    const buf = Buffer.from(m[3], 'base64');\n    // Warum Dateikopf prüfen: die Angabe im Data-URL kommt vom Browser und kann falsch sein.\n    const sig = buf.subarray(0, 12).toString('hex');\n    const real = sig.startsWith('89504e47') ? 'png' : sig.startsWith('ffd8ff') ? 'jpeg' : (sig.startsWith('52494646') && sig.slice(16, 24) === '57454250') ? 'webp' : null;\n    if (buf.length > 1000000) errors.push(`Das Logo ist ${(buf.length / 1e6).toFixed(1)} MB groß, erlaubt ist 1 MB.`);\n    else if (real !== m[2]) errors.push('Der Dateiinhalt passt nicht zum Bildformat.');\n    else {\n      const ext = real === 'jpeg' ? 'jpg' : real;\n      logo = { b64: m[3], mime: m[1], path: `logos/${code}.${ext}`, size: buf.length, file_name: `${code}.${ext}` };\n    }\n  }\n}\n\nconst ok = errors.length === 0;\nconst alt = kunde?.branding_pack || {};\nconst stamp = $now.setZone('Europe/Berlin');\nconst branding_pack = ok ? {\n  ...alt,\n  markenname,\n  farben,\n  schriften: { ...(alt.schriften || {}), titel, text: textFont },\n  logo: logo ? { ...(alt.logo || {}), modus: 'datei', pfad: logo.path, text: markenname } : (alt.logo || null),\n  status: 'eingereicht',\n  eingereicht_am: stamp.toISO(),\n  quelle: `K1 Dashboard, eingereicht ${stamp.toFormat('dd.MM.yyyy HH:mm')}`,\n  version: (Number(alt.version) || 0) + 1,\n} : null;\n\nconst out = {\n  ok,\n  customer_code: code,\n  has_logo: ok && !!logo,\n  logo_path: logo?.path || null,\n  logo_size: logo?.size || null,\n  branding_pack,\n  status_code: ok ? 200 : 400,\n  response: ok ? null : { ok: false, message: 'Branding nicht gespeichert.', errors },\n};\nconst item = { json: out };\nif (ok && logo) item.binary = { logo: { data: logo.b64, mimeType: logo.mime, fileName: logo.file_name } };\nreturn [item];\n"
-      }
+        "jsCode": "// Zweck: prüft ein eingereichtes Branding-Paket und baut das neue branding_pack. Gespeichert wird erst danach und nur bei grüner Prüfung.\nconst cfg = $('Konfiguration [Edit Fields]').first().json;\n// Warum Typprüfung zuerst: unerwartete JSON-Typen (Objekt statt Text) sollen eine 400 ergeben, keinen Absturz.\nconst isObj = v => v !== null && typeof v === 'object' && !Array.isArray(v);\nconst b = isObj(cfg.body) ? cfg.body : {};\nconst s = v => (typeof v === 'string' ? v.trim() : '');\nconst errors = [];\nconst typeErr = (feld, erwartet) => errors.push(`Feld ${feld} hat den falschen Typ (erwartet ${erwartet}).`);\nif (!isObj(cfg.body)) typeErr('body', 'Objekt');\nif (b.customer_code !== undefined && typeof b.customer_code !== 'string') typeErr('customer_code', 'Text');\nif (b.markenname !== undefined && typeof b.markenname !== 'string') typeErr('markenname', 'Text');\nif (b.farben !== undefined && !isObj(b.farben)) typeErr('farben', 'Objekt');\nif (b.schriften !== undefined && !isObj(b.schriften)) typeErr('schriften', 'Objekt');\nif (b.logo_data_url !== undefined && b.logo_data_url !== null && typeof b.logo_data_url !== 'string') typeErr('logo_data_url', 'Text oder null');\nif (b.expected_version !== undefined && b.expected_version !== null && !(Number.isInteger(b.expected_version) && b.expected_version >= 0)) typeErr('expected_version', 'ganze Zahl ab 0');\n\nconst code = s(b.customer_code).toLowerCase();\n// Warum filtern: bei unbekanntem Kunden liefert der Ladeknoten nur ein leeres Element (alwaysOutputData).\nconst rows = $input.all().map(i => i.json).filter(r => r && r.kuerzel);\nconst kunde = rows.find(r => r.kuerzel === code) || null;\nconst allow = String(cfg.branding_allowlist || '').split(',').map(x => x.trim()).filter(Boolean);\n\nif (b.confirmed !== true) errors.push('Die Bestätigung fehlt, nichts wurde gespeichert.');\nif (!/^[a-z0-9-]{2,40}$/.test(code) || !kunde) errors.push(`Kunde ${code || '(leer)'} ist unbekannt.`);\n// Warum eine Freigabeliste: echte Kunden werden erst nach Patricks Entscheidung über das Dashboard geändert.\nif (!(allow.includes('*') || allow.includes(code))) errors.push(`Speichern für ${code || '(leer)'} ist nicht freigegeben (branding_allowlist).`);\n\nconst markenname = s(b.markenname);\nif (markenname.length < 2 || markenname.length > 80) errors.push('Der Markenname braucht 2 bis 80 Zeichen.');\nconst keys = ['primaer', 'sekundaer', 'akzent', 'hintergrund', 'text'];\nconst farbenIn = isObj(b.farben) ? b.farben : {};\nconst farben = {};\nconst badColors = [];\nfor (const k of keys) {\n  const v = s(farbenIn[k]).toUpperCase();\n  if (/^#[0-9A-F]{6}$/.test(v)) farben[k] = v; else badColors.push(k);\n}\nif (badColors.length) errors.push(`Kein gültiger Hex-Wert bei: ${badColors.join(', ')}.`);\n// Warum nur diese Zeichen: der Name landet später in einer Google-Fonts-Adresse und in CSS.\nconst fontOk = v => /^[A-Za-z0-9 -]{2,60}$/.test(v);\nconst schriftenIn = isObj(b.schriften) ? b.schriften : {};\nconst titel = s(schriftenIn.titel);\nconst textFont = s(schriftenIn.text);\nif (!fontOk(titel)) errors.push('Schrift für Titel fehlt oder enthält unerlaubte Zeichen.');\nif (!fontOk(textFont)) errors.push('Schrift für Text fehlt oder enthält unerlaubte Zeichen.');\n\n// Warum Bildstruktur statt 4 Byte Signatur: eine abgeschnittene Datei mit gültigem Kopf darf nicht als Logo durchgehen.\n// Geprüft wird der Aufbau der Datei samt Maßen; dekodiert oder neu kodiert wird nicht (keine Bildbibliothek im Code-Knoten).\nconst MAX_PX = 4096;\nconst crcTable = (() => { const t = []; for (let n = 0; n < 256; n++) { let c = n; for (let k = 0; k < 8; k++) c = c & 1 ? 0xEDB88320 ^ (c >>> 1) : c >>> 1; t[n] = c >>> 0; } return t; })();\nconst crc32 = (buf, start, end) => { let c = 0xFFFFFFFF; for (let i = start; i < end; i++) c = crcTable[(c ^ buf[i]) & 0xFF] ^ (c >>> 8); return (c ^ 0xFFFFFFFF) >>> 0; };\nfunction checkPng(buf) {\n  if (buf.length < 8 + 25 + 12 + 12) return 'PNG ist zu kurz.';\n  if (buf.subarray(0, 8).toString('hex') !== '89504e470d0a1a0a') return 'PNG-Kennung fehlt.';\n  let pos = 8, w = 0, h = 0, idat = 0, iend = false, first = true;\n  while (pos + 12 <= buf.length) {\n    const len = buf.readUInt32BE(pos);\n    const type = buf.subarray(pos + 4, pos + 8).toString('latin1');\n    if (!/^[A-Za-z]{4}$/.test(type)) return 'PNG-Block mit ungültigem Namen.';\n    if (pos + 12 + len > buf.length) return `PNG-Block ${type} ist abgeschnitten.`;\n    if (crc32(buf, pos + 4, pos + 8 + len) !== buf.readUInt32BE(pos + 8 + len)) return `PNG-Block ${type} hat eine falsche Prüfsumme.`;\n    if (first) {\n      if (type !== 'IHDR' || len !== 13) return 'PNG beginnt nicht mit IHDR.';\n      w = buf.readUInt32BE(pos + 8); h = buf.readUInt32BE(pos + 12);\n      const depth = buf[pos + 16], ctype = buf[pos + 17];\n      if (![1, 2, 4, 8, 16].includes(depth) || ![0, 2, 3, 4, 6].includes(ctype)) return 'PNG mit ungültiger Farbtiefe.';\n      first = false;\n    }\n    if (type === 'IDAT') idat++;\n    pos += 12 + len;\n    if (type === 'IEND') { iend = true; break; }\n  }\n  if (!idat) return 'PNG ohne Bilddaten.';\n  if (!iend || pos !== buf.length) return 'PNG ist unvollständig oder hat Anhängsel nach dem Ende.';\n  return { w, h };\n}\nfunction checkJpeg(buf) {\n  if (buf.length < 4 || buf[0] !== 0xFF || buf[1] !== 0xD8) return 'JPG-Kennung fehlt.';\n  if (buf[buf.length - 2] !== 0xFF || buf[buf.length - 1] !== 0xD9) return 'JPG ist unvollständig (Endmarke fehlt).';\n  let pos = 2, w = 0, h = 0;\n  while (pos + 4 <= buf.length) {\n    if (buf[pos] !== 0xFF) return 'JPG-Aufbau ist beschädigt.';\n    const m = buf[pos + 1];\n    if (m === 0xFF) { pos++; continue; }\n    if (m === 0xD8 || (m >= 0xD0 && m <= 0xD7) || m === 0x01) { pos += 2; continue; }\n    const len = buf.readUInt16BE(pos + 2);\n    if (len < 2 || pos + 2 + len > buf.length) return 'JPG-Segment ist abgeschnitten.';\n    if (m >= 0xC0 && m <= 0xCF && ![0xC4, 0xC8, 0xCC].includes(m)) { if (len < 7) return 'JPG-Bildkopf ist zu kurz.'; h = buf.readUInt16BE(pos + 5); w = buf.readUInt16BE(pos + 7); }\n    if (m === 0xDA) break;\n    pos += 2 + len;\n  }\n  if (!w || !h) return 'JPG ohne Bildmaße.';\n  return { w, h };\n}\nfunction checkWebp(buf) {\n  if (buf.length < 30) return 'WEBP ist zu kurz.';\n  if (buf.subarray(0, 4).toString('latin1') !== 'RIFF' || buf.subarray(8, 12).toString('latin1') !== 'WEBP') return 'WEBP-Kennung fehlt.';\n  if (buf.readUInt32LE(4) + 8 !== buf.length) return 'WEBP ist unvollständig (Längenangabe passt nicht).';\n  const chunk = buf.subarray(12, 16).toString('latin1');\n  if (chunk === 'VP8 ') {\n    if (buf.subarray(23, 26).toString('hex') !== '9d012a') return 'WEBP-Bildkopf ist beschädigt.';\n    return { w: buf.readUInt16LE(26) & 0x3FFF, h: buf.readUInt16LE(28) & 0x3FFF };\n  }\n  if (chunk === 'VP8L') {\n    if (buf[20] !== 0x2F) return 'WEBP-Bildkopf ist beschädigt.';\n    const bits = buf.readUInt32LE(21);\n    return { w: (bits & 0x3FFF) + 1, h: ((bits >>> 14) & 0x3FFF) + 1 };\n  }\n  if (chunk === 'VP8X') return { w: buf.readUIntLE(24, 3) + 1, h: buf.readUIntLE(27, 3) + 1 };\n  return 'WEBP mit unbekanntem Bildformat.';\n}\n\nlet logo = null;\nif (typeof b.logo_data_url === 'string' && b.logo_data_url) {\n  const m = /^data:(image\\/(png|jpeg|webp));base64,([A-Za-z0-9+/=]+)$/.exec(b.logo_data_url);\n  if (!m) {\n    errors.push('Das Logo ist kein PNG, JPG oder WEBP.');\n  } else {\n    const buf = Buffer.from(m[3], 'base64');\n    if (buf.length > 1000000) errors.push(`Das Logo ist ${(buf.length / 1e6).toFixed(1)} MB groß, erlaubt ist 1 MB.`);\n    else {\n      const res = m[2] === 'png' ? checkPng(buf) : m[2] === 'jpeg' ? checkJpeg(buf) : checkWebp(buf);\n      if (typeof res === 'string') errors.push(`Das Logo ist keine gültige Bilddatei: ${res}`);\n      else if (res.w < 1 || res.h < 1 || res.w > MAX_PX || res.h > MAX_PX) errors.push(`Das Logo misst ${res.w} x ${res.h} Pixel, erlaubt sind 1 bis ${MAX_PX}.`);\n      else {\n        const ext = m[2] === 'jpeg' ? 'jpg' : m[2];\n        logo = { b64: m[3], mime: m[1], ext, size: buf.length, width: res.w, height: res.h };\n      }\n    }\n  }\n}\n\n// Warum Versionsvergleich: zwei gleichzeitige Einreichungen dürfen sich nicht still überschreiben.\nconst alt = isObj(kunde?.branding_pack) ? kunde.branding_pack : {};\nconst dbVersion = /^[0-9]{1,9}$/.test(String(alt.version ?? '')) ? Number(alt.version) : 0;\nconst expected = Number.isInteger(b.expected_version) ? b.expected_version : dbVersion;\nlet status_code = 400;\nif (errors.length === 0 && expected !== dbVersion) {\n  status_code = 409;\n  errors.push(`Das Branding wurde inzwischen geändert (gespeichert ist Version ${dbVersion}, die Seite kannte Version ${expected}). Bitte Seite neu laden und erneut einreichen.`);\n}\n\nconst ok = errors.length === 0;\nconst newVersion = dbVersion + 1;\nconst stamp = $now.setZone('Europe/Berlin');\n// Warum eigener Pfad je Version: das bisherige Logo wird nie überschrieben; erst das erfolgreiche Speichern stellt auf den neuen Pfad um.\nconst logoPath = ok && logo ? `logos/${code}/v${newVersion}-${$execution.id}.${logo.ext}` : null;\nconst branding_pack = ok ? {\n  ...alt,\n  markenname,\n  farben,\n  schriften: { ...(isObj(alt.schriften) ? alt.schriften : {}), titel, text: textFont },\n  logo: logo ? { ...(isObj(alt.logo) ? alt.logo : {}), modus: 'datei', pfad: logoPath, text: markenname } : (alt.logo || null),\n  status: 'eingereicht',\n  eingereicht_am: stamp.toISO(),\n  quelle: `K1 Dashboard, eingereicht ${stamp.toFormat('dd.MM.yyyy HH:mm')}`,\n  version: newVersion,\n} : null;\n\nconst out = {\n  ok,\n  customer_code: code,\n  has_logo: ok && !!logo,\n  logo_path: logoPath,\n  logo_size: logo?.size || null,\n  logo_dimensions: logo ? `${logo.width}x${logo.height}` : null,\n  expected_version: ok ? dbVersion : null,\n  branding_pack,\n  status_code: ok ? 200 : status_code,\n  response: ok ? null : { ok: false, message: 'Branding nicht gespeichert.', errors },\n};\nconst item = { json: out };\nif (ok && logo) item.binary = { logo: { data: logo.b64, mimeType: logo.mime, fileName: `v${newVersion}.${logo.ext}` } };\nreturn [item];\n"
+      },
+      "onError": "continueErrorOutput"
     },
     {
       "id": "d77e4ac5-1c1d-46a1-90fc-d277c6f7e3af",
@@ -756,7 +761,7 @@
           "parameters": [
             {
               "name": "x-upsert",
-              "value": "true"
+              "value": "false"
             },
             {
               "name": "Content-Type",
@@ -771,13 +776,13 @@
           "timeout": 15000
         }
       },
+      "onError": "continueErrorOutput",
       "credentials": {
         "supabaseApi": {
           "id": "CREDENTIAL_ID",
           "name": "Supabase API | KI-AGT-2606"
         }
-      },
-      "onError": "continueErrorOutput"
+      }
     },
     {
       "id": "78571ec6-9aa6-4273-986a-e9f498c64459",
@@ -789,35 +794,26 @@
         1400
       ],
       "parameters": {
-        "method": "PATCH",
-        "url": "={{ $(\"Konfiguration [Edit Fields]\").first().json.supabase_url }}/rest/v1/k1_kunden?kuerzel=eq.{{ $('Branding prüfen [Code]').first().json.customer_code }}",
+        "method": "POST",
+        "url": "={{ $(\"Konfiguration [Edit Fields]\").first().json.supabase_url }}/rest/v1/rpc/k1_dashboard_save_branding",
         "authentication": "predefinedCredentialType",
         "nodeCredentialType": "supabaseApi",
-        "sendHeaders": true,
-        "headerParameters": {
-          "parameters": [
-            {
-              "name": "Prefer",
-              "value": "return=representation"
-            }
-          ]
-        },
         "sendBody": true,
         "contentType": "json",
         "specifyBody": "json",
-        "jsonBody": "={{ JSON.stringify(Object.assign({ branding_pack: $('Branding prüfen [Code]').first().json.branding_pack }, $('Branding prüfen [Code]').first().json.has_logo ? { logo_url: $('Branding prüfen [Code]').first().json.logo_path } : {})) }}",
+        "jsonBody": "={{ JSON.stringify({ p_customer_code: $('Branding prüfen [Code]').first().json.customer_code, p_expected_version: $('Branding prüfen [Code]').first().json.expected_version, p_branding_pack: $('Branding prüfen [Code]').first().json.branding_pack, p_logo_url: $('Branding prüfen [Code]').first().json.has_logo ? $('Branding prüfen [Code]').first().json.logo_path : null }) }}",
         "options": {
           "timeout": 15000
         }
       },
+      "alwaysOutputData": true,
+      "onError": "continueErrorOutput",
       "credentials": {
         "supabaseApi": {
           "id": "CREDENTIAL_ID",
           "name": "Supabase API | KI-AGT-2606"
         }
-      },
-      "alwaysOutputData": true,
-      "onError": "continueErrorOutput"
+      }
     },
     {
       "id": "cf86550d-d7e2-4169-b79a-68e55f721947",
@@ -831,8 +827,9 @@
       "parameters": {
         "mode": "runOnceForAllItems",
         "language": "javaScript",
-        "jsCode": "// Zweck: prüft, ob Supabase die Zeile wirklich geändert hat, und baut die Antwort an die Seite.\nconst pruef = $('Branding prüfen [Code]').first().json;\n// Warum zählen: PATCH mit Filter liefert bei 0 Treffern trotzdem 200, dann wäre \"gespeichert\" gelogen.\nconst rows = $input.all().map(i => i.json).filter(r => r && r.kuerzel === pruef.customer_code);\nif (rows.length !== 1) {\n  return [{ json: { status_code: 409, response: { ok: false, message: `Supabase hat ${rows.length} Zeilen geändert statt 1. Bitte Kunde prüfen.` } } }];\n}\nconst bp = rows[0].branding_pack || {};\nconst logoText = pruef.has_logo ? ` Logo gespeichert unter ${pruef.logo_path}.` : ' Logo unverändert.';\nreturn [{ json: {\n  status_code: 200,\n  response: { ok: true, message: `Branding für ${pruef.customer_code} gespeichert (Version ${bp.version}).${logoText}`, version: bp.version },\n} }];\n"
-      }
+        "jsCode": "// Zweck: wertet die Antwort der Funktion k1_dashboard_save_branding aus und baut die Antwort an die Seite.\nconst pruef = $('Branding prüfen [Code]').first().json;\nconst r = $input.first()?.json || {};\nconst logoHinweis = pruef.has_logo ? ' Das neu hochgeladene Logo wurde nicht übernommen, das bisherige gilt weiter.' : '';\n// Warum Status statt Zeilenzählung: die Funktion speichert nur, wenn die erwartete Version noch gilt.\nif (r.ok === true && r.status === 'saved') {\n  const bp = (r.branding_pack && typeof r.branding_pack === 'object') ? r.branding_pack : {};\n  const logoText = pruef.has_logo ? ` Logo gespeichert unter ${r.logo_url}.` : ' Logo unverändert.';\n  return [{ json: {\n    status_code: 200,\n    response: {\n      ok: true,\n      message: `Branding für ${pruef.customer_code} gespeichert (Version ${bp.version}).${logoText}`,\n      version: bp.version,\n      // Warum mitsenden: die Seite übernimmt den gespeicherten Stand, statt beim nächsten Wechsel den alten zu zeigen.\n      branding: { markenname: bp.markenname ?? null, farben: bp.farben ?? null, schriften: bp.schriften ?? null, version: Number(bp.version) || 0 },\n    },\n  } }];\n}\nif (r.status === 'conflict') {\n  return [{ json: { status_code: 409, response: { ok: false, message: `Nicht gespeichert: Das Branding wurde gleichzeitig geändert (jetzt Version ${r.current_version}, erwartet ${r.expected_version}). Bitte Seite neu laden und erneut einreichen.${logoHinweis}` } } }];\n}\nif (r.status === 'not_found') {\n  return [{ json: { status_code: 404, response: { ok: false, message: `Nicht gespeichert: Kunde ${pruef.customer_code} gibt es nicht mehr.${logoHinweis}` } } }];\n}\nreturn [{ json: { status_code: 502, response: { ok: false, message: `Nicht gespeichert: unerwartete Antwort der Datenbank (${String(r.status || r.message || 'leer').slice(0, 80)}).${logoHinweis}` } } }];\n"
+      },
+      "onError": "continueErrorOutput"
     },
     {
       "id": "4e24639a-f0a8-47c6-a86d-ba576b0804be",
@@ -845,7 +842,7 @@
       ],
       "parameters": {
         "respondWith": "json",
-        "responseBody": "={{ JSON.stringify({ ok: false, message: \"Technischer Fehler: \" + (typeof $json.error === \"string\" ? $json.error : ($json.error?.message || $json.message || \"unbekannt\")) + \". Bitte später erneut versuchen.\" }) }}",
+        "responseBody": "={{ JSON.stringify({ ok: false, message: \"Technischer Fehler: \" + (typeof $json.error === \"string\" ? $json.error : ($json.error?.message || $json.message || \"unbekannt\")) + \". Nichts gespeichert, bisheriges Branding und Logo bleiben gültig. Bitte später erneut versuchen.\" }) }}",
         "options": {
           "responseCode": 502
         }
@@ -877,7 +874,7 @@
         -576
       ],
       "parameters": {
-        "content": "# 🧪 K1 Dashboard\n**Aufgabe:** Eine Webseite zeigt die letzten Läufe von K1, startet neue Aufträge und nimmt Branding-Pakete an.\n**Die Idee:** Ein Webhook liefert die Seite, ein zweiter auf derselben Adresse nimmt Auftrag und Branding an.\n**Warum so?** Alle Supabase-Abfragen laufen serverseitig in n8n, im HTML steht kein Schlüssel.\n**Hinweis:** Vor dem Aktivieren an beiden Webhooks Basic Auth setzen.\nStufe: Durchstich bis 14.10.2026",
+        "content": "# 🧪 K1 Dashboard\n**Aufgabe:** Eine Webseite zeigt die letzten Läufe von K1, startet neue Aufträge und nimmt Branding-Pakete an.\n**Die Idee:** Ein Webhook liefert die Seite, ein zweiter auf derselben Adresse nimmt Auftrag und Branding an.\n**Warum so?** Alle Supabase-Abfragen laufen serverseitig in n8n, im HTML steht kein Schlüssel.\n**Hinweis:** Basic Auth ist an beiden Webhooks eingeschaltet, vor dem Aktivieren das Credential wählen.\nStufe: Durchstich bis 14.10.2026",
         "color": 2,
         "width": 1100,
         "height": 260
@@ -909,7 +906,7 @@
         -576
       ],
       "parameters": {
-        "content": "## Status\n🟢 Verlauf liest echte Daten aus Supabase\n🟡 Probebetrieb: Aufträge werden nur geprüft\n🔴 Basic Auth fehlt, nicht aktivieren\n🔵 Branding nur für test-dashboard frei",
+        "content": "## Status\n🟢 Verlauf liest echte Daten aus Supabase\n🟡 Probebetrieb: Aufträge werden nur geprüft\n🔴 Basic Auth an, Credential fehlt: nicht aktivieren\n🔵 Branding nur für test-dashboard frei",
         "color": 2,
         "width": 508,
         "height": 260
@@ -925,7 +922,7 @@
         -276
       ],
       "parameters": {
-        "content": "## ① Anfrage annehmen\nGET liefert die Seite, POST nimmt Auftrag oder Branding an. Die Weiche verteilt nach dem Feld action, Unbekanntes bekommt 400.\n\n### 🔴 Basic Auth vor dem Aktivieren",
+        "content": "## ① Anfrage annehmen\nGET liefert die Seite, POST nimmt Auftrag oder Branding an. Die Weiche verteilt nach dem Feld action, Unbekanntes bekommt 400.\n\n### 🔴 Basic Auth an, Credential wählen",
         "color": 1,
         "width": 960,
         "height": 200
@@ -1021,7 +1018,7 @@
         1040
       ],
       "parameters": {
-        "content": "## ⑦ Branding prüfen\nPflichtfelder, Hex-Farben, Schriftnamen, Logo höchstens 1 MB mit echtem Dateikopf, Freigabeliste und Bestätigung.\n\n### 🔵 Nur test-dashboard frei",
+        "content": "## ⑦ Branding prüfen\nTypen, Pflichtfelder, Hex-Farben, Schriften, Logo bis 1 MB mit geprüftem Bildaufbau und Maßen, Freigabeliste, Bestätigung und Version.\n\n### 🔵 Nur test-dashboard frei",
         "color": 1,
         "width": 1010,
         "height": 200
@@ -1037,7 +1034,7 @@
         1040
       ],
       "parameters": {
-        "content": "## ⑧ Logo und Speichern\nLogo nach k1-medien/logos, dann branding_pack per PATCH. Danach zählt der Code, ob genau 1 Zeile geändert wurde.\n\n### 🟢 Rückmeldung mit Version",
+        "content": "## ⑧ Logo und Speichern\nLogo unter neuem Pfad je Version, nie überschrieben. Dann branding_pack über k1_dashboard_save_branding mit Versionsvergleich, Konflikt gibt 409.\n\n### 🟢 Rückmeldung mit Version",
         "color": 1,
         "width": 1260,
         "height": 200
@@ -1103,17 +1100,17 @@
           }
         }
       },
+      "onError": "continueErrorOutput",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 2000,
+      "executeOnce": true,
       "credentials": {
         "supabaseApi": {
           "id": "CREDENTIAL_ID",
           "name": "Supabase API | KI-AGT-2606"
         }
-      },
-      "onError": "continueErrorOutput",
-      "retryOnFail": true,
-      "maxTries": 3,
-      "waitBetweenTries": 2000,
-      "executeOnce": true
+      }
     },
     {
       "id": "d773eaca-3c78-47e0-aa17-439dad04d80e",
@@ -1222,6 +1219,13 @@
         [
           {
             "node": "K1 starten? [If]",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Start nicht möglich melden [Respond to Webhook]",
             "type": "main",
             "index": 0
           }
@@ -1355,6 +1359,13 @@
             "type": "main",
             "index": 0
           }
+        ],
+        [
+          {
+            "node": "Branding-Fehler melden [Respond to Webhook]",
+            "type": "main",
+            "index": 0
+          }
         ]
       ]
     },
@@ -1438,6 +1449,13 @@
             "type": "main",
             "index": 0
           }
+        ],
+        [
+          {
+            "node": "Branding-Fehler melden [Respond to Webhook]",
+            "type": "main",
+            "index": 0
+          }
         ]
       ]
     },
@@ -1460,7 +1478,6 @@
       ]
     }
   },
-  "pinData": {},
   "settings": {
     "executionOrder": "v1",
     "availableInMCP": true,
@@ -1475,11 +1492,13 @@
     "aiBuilderAssisted": true,
     "builderVariant": "mcp"
   },
-  "versionId": "296ae67b-ca93-42ed-99a3-6f0e66802e2d",
+  "versionId": "13d41655-ae02-4500-906a-344363a803a2",
   "tags": [
     "KI-AGT-2606",
     "schulung",
     "woche-5"
   ],
+  "nodeGroups": [],
+  "pinData": {},
   "staticData": null
 }
