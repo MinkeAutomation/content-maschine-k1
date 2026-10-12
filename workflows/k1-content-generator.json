@@ -1,7 +1,7 @@
 {
   "id": "Bk8PXBGm3gXMATK1",
-  "name": "AGT-2606 P1 K1 Arbeitskopie Bilder und Branding",
-  "description": "Arbeitskopie der Haupt-K1 (3hntC4X5cw6FIoaj, Stand v06 Paket 3) für den Projekttag 10.10.2026. Haupt-K1 bleibt unverändert.",
+  "name": "AGT-2606 P1 Content-Generator K1",
+  "description": "Haupt-K1 seit 12.10.2026, enthält v06 plus Bilder und Branding plus Telegram-Eingang plus Sonar plus Beitragsqualität plus Layout 4 plus Reparatur .",
   "nodes": [
     {
       "parameters": {
@@ -87,7 +87,7 @@
         "options": {
           "appendAttribution": false,
           "buttonLabel": "Paket erzeugen",
-          "path": "k1-auftrag-ak",
+          "path": "k1-auftrag-w04t04",
           "respondWithOptions": {
             "values": {
               "formSubmittedText": "Auftrag angenommen. Die Vorschau kommt zur Freigabe in Telegram."
@@ -4357,7 +4357,7 @@
     "aiBuilderAssisted": true,
     "builderVariant": "mcp"
   },
-  "versionId": "45220ba9-07d5-40d6-b392-8a26bc87211d",
+  "versionId": "7883fbfc-483b-42c4-9d49-4590657e4fd8",
   "tags": [
     "KI-AGT-2606",
     "woche-4"
