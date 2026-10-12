@@ -1,7 +1,7 @@
 {
   "id": "gcqhN1dEKNBRzk3C",
   "name": "AGT-2606 P1 K1 Telegram-Eingang",
-  "description": "Projekt 1 Paket 2: nimmt Aufträge für K1 per Telegram an (Text, Link, Befehl, Sprache), ordnet sie per Code ein und startet K1. Läuft über den eigenen Test-Bot, nicht veröffentlichen.",
+  "description": "Projekt 1 Paket 2: nimmt Auftraege fuer K1 per Telegram an (Text, Link, Befehl, Sprache), ordnet sie per Code ein und startet K1. Laeuft ueber den eigenen Test-Bot.",
   "nodes": [
     {
       "parameters": {
@@ -348,7 +348,7 @@
         3408,
         1200
       ],
-      "onError": "continueErrorOutput"
+      "onError": "continueRegularOutput"
     },
     {
       "parameters": {
@@ -892,6 +892,40 @@
         },
         "options": {}
       }
+    },
+    {
+      "id": "0b9333f5-28eb-4072-b829-e17e145f18da",
+      "name": "Start geklappt? [If]",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        3576,
+        1376
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "id": "sg1",
+              "leftValue": "={{ !$json.error }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      }
     }
   ],
   "connections": {
@@ -1015,14 +1049,7 @@
       "main": [
         [
           {
-            "node": "Auftrag bestätigen [Telegram]",
-            "type": "main",
-            "index": 0
-          }
-        ],
-        [
-          {
-            "node": "Start fehlgeschlagen melden [Telegram]",
+            "node": "Start geklappt? [If]",
             "type": "main",
             "index": 0
           }
@@ -1129,6 +1156,24 @@
           }
         ]
       ]
+    },
+    "Start geklappt? [If]": {
+      "main": [
+        [
+          {
+            "node": "Auftrag bestätigen [Telegram]",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Start fehlgeschlagen melden [Telegram]",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "settings": {
@@ -1141,7 +1186,7 @@
     "aiBuilderAssisted": true,
     "builderVariant": "mcp"
   },
-  "versionId": "9b37eb7d-0a82-46b5-91c4-b474415b4b75",
+  "versionId": "5ea93949-b12e-43da-baf8-aaa38c5cc0f5",
   "tags": [
     "KI-AGT-2606",
     "woche-4"
