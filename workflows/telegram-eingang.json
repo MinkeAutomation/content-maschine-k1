@@ -70,8 +70,8 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        352,
-        1200
+        416,
+        1008
       ]
     },
     {
@@ -104,8 +104,8 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        688,
-        1200
+        752,
+        1008
       ]
     },
     {
@@ -138,8 +138,8 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        1024,
-        1200
+        1088,
+        1008
       ]
     },
     {
@@ -163,8 +163,8 @@
       "type": "n8n-nodes-base.supabase",
       "typeVersion": 1,
       "position": [
-        2384,
-        1200
+        2448,
+        1008
       ],
       "executeOnce": true,
       "alwaysOutputData": true,
@@ -185,8 +185,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        3040,
-        1568
+        3104,
+        1376
       ],
       "onError": "continueErrorOutput"
     },
@@ -209,8 +209,8 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        3376,
-        1568
+        3440,
+        1376
       ]
     },
     {
@@ -222,8 +222,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        2720,
-        1200
+        2784,
+        1008
       ]
     },
     {
@@ -256,8 +256,8 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        3072,
-        1200
+        3136,
+        1008
       ]
     },
     {
@@ -345,8 +345,8 @@
       "type": "n8n-nodes-base.executeWorkflow",
       "typeVersion": 1.4,
       "position": [
-        3408,
-        1200
+        3472,
+        1008
       ],
       "onError": "continueRegularOutput"
     },
@@ -354,7 +354,7 @@
       "parameters": {
         "content": "# AGT-2606 P1 K1 Telegram-Eingang\nNimmt Aufträge für den Content-Generator K1 per Telegram an (Text, Link, Befehl, Sprachnachricht), ordnet sie ohne Sprachmodell ein und startet K1.",
         "height": 110,
-        "width": 2176,
+        "width": 2160,
         "color": 5
       },
       "id": "ac852117-470d-492d-8b63-f0071545dc82",
@@ -370,7 +370,7 @@
       "parameters": {
         "content": " ",
         "height": 456,
-        "width": 2176
+        "width": 2160
       },
       "id": "0f29a895-0389-40bd-ade9-8a42135563ce",
       "name": "Rahmen Kopf",
@@ -383,7 +383,7 @@
     },
     {
       "parameters": {
-        "content": "# 🧪 Telegram als Eingang für K1\n**Aufgabe:** Ein Auftrag an K1 soll ohne Formular direkt aus Telegram kommen, als Text, Link, Befehl oder Sprachnachricht.\n\n**Die Idee:** Ein Code-Knoten ordnet die Nachricht nach festen Regeln ein und gibt K1 dieselben Felder wie das Formular.\n\n**Warum so?** Was sich mit ein paar Zeilen Code lösen lässt, braucht kein Sprachmodell, das spart Tokens und lässt sich testen.\n\n**Hinweis:** Trigger und Sendeknoten nutzen den eigenen Test-Bot `Telegram API | Test-Bot K1-Eingang`, nie den Freigabe-Bot von K1, denn ein Bot hat nur einen Webhook. Getestet wird mit angepinnten Daten oder über „Execute workflow“, nicht veröffentlichen.\n\nStufe: Durchstich bis 14.10.2026",
+        "content": "# 🧪 Telegram als Eingang für K1\n**Aufgabe:** Ein Auftrag an K1 soll ohne Formular direkt aus Telegram kommen, als Text, Link, Befehl oder Sprachnachricht.\n\n**Die Idee:** Ein Code-Knoten ordnet die Nachricht nach festen Regeln ein und gibt K1 dieselben Felder wie das Formular.\n\n**Warum so?** Was sich mit ein paar Zeilen Code lösen lässt, braucht kein Sprachmodell, das spart Tokens und lässt sich testen.\n\n**Hinweis:** Trigger und Sendeknoten nutzen den eigenen Test-Bot `Telegram API | Test-Bot K1-Eingang`, nie den Freigabe-Bot von K1, denn ein Bot hat nur einen Webhook. Veröffentlicht am 13.10.2026, läuft über den Test-Bot.\n\nStufe: Durchstich bis 16.10.2026",
         "height": 424,
         "width": 1100,
         "color": 7
@@ -425,14 +425,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        1664,
+        1648,
         160
       ]
     },
     {
       "parameters": {
         "content": "## ① Nachricht empfangen\nDer Telegram Trigger hört auf den Test-Bot und lässt nur die eingetragene Nutzer-ID durch. Ein Set-Knoten legt Chat, Absender, Text und Sprachdatei in feste Felder und hält die Einstellungen an einer Stelle.\n### 🟢 Test-Bot eingetragen\n🩺 **Wenn es hakt:** In `Einstellungen setzen` Nutzer-ID und Standardkunde prüfen.",
-        "height": 300,
+        "height": 284,
         "width": 576
       },
       "id": "946fd8f0-2f1d-4eaa-966e-1c6a40c82486",
@@ -440,14 +440,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -64,
-        864
+        0,
+        672
       ]
     },
     {
       "parameters": {
         "content": "## ② Absender und Art prüfen\nNur eingetragene Nutzer-IDs bekommen eine Antwort, fremde Absender laufen still ins Leere. Danach trennt eine Weiche Sprachnachrichten von Text.\n### 🟢 Logik mit Testdaten geprüft\n🩺 **Wenn es hakt:** `erlaubte_nutzer_ids` mit der eigenen ID vergleichen.",
-        "height": 300,
+        "height": 284,
         "width": 512
       },
       "id": "575bda1b-f596-4359-b53f-904f47107a56",
@@ -455,14 +455,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        672,
-        864
+        720,
+        672
       ]
     },
     {
       "parameters": {
         "content": "## ③ Sprache in Text\nDie Sprachdatei kommt über `getFile`, wird zu Base64 und geht an Cloudflare Whisper large v3 turbo (gratis, Sprache de). Jeder Fehler und ein leeres Transkript nehmen den Weg „Bitte tippen“.\n### 🟡 mit Testaufnahme gemessen, echte Stimme offen\n🩺 **Wenn es hakt:** `cloudflare_account_id` in `k1_einstellungen` prüfen (Spalten `setting_key`, `setting_value` seit Ä7).",
-        "height": 220,
+        "height": 188,
         "width": 980
       },
       "id": "e1260e6f-70f9-40a3-8822-1ebf9cae9451",
@@ -470,14 +470,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        1296,
-        1312
+        1344,
+        1136
       ]
     },
     {
       "parameters": {
         "content": "## ④ Kunde und Absicht\nDie aktiven Kunden kommen aus `k1_kunden`. Der Code erkennt Kürzel, Research-Befehl, YouTube- und Artikel-Link, langen Text und Thema, ganz ohne Sprachmodell.\n### 🟢 Regeln mit Testdaten geprüft\n🩺 **Wenn es hakt:** Die Ausgabe von `Nachricht einordnen` zeigt `error_reason`.",
-        "height": 300,
+        "height": 284,
         "width": 480
       },
       "id": "f9ddf0ba-7514-4081-8990-3f39e563707f",
@@ -485,14 +485,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        2352,
-        864
+        2416,
+        672
       ]
     },
     {
       "parameters": {
         "content": "## ⑤ Prüfen und K1 starten\nNur gültige Aufträge starten K1, ohne auf das Ende zu warten. Scheitert der Start, meldet der Fehlerausgang das im Chat.\n### 🟢 K1-ID Bk8PXBGm3gXMATK1, Felder englisch (customer_code, topic, source_type, source, note)\n🩺 **Wenn es hakt:** `k1_workflow_id` in `Einstellungen setzen` eintragen.",
-        "height": 300,
+        "height": 284,
         "width": 560
       },
       "id": "0a62aa96-12be-4488-a79a-9cd2dddfdfb5",
@@ -500,14 +500,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        2992,
-        864
+        3056,
+        672
       ]
     },
     {
       "parameters": {
         "content": "## ⑥ Bestätigen\nDer Chat bekommt Kunde, Quellenart und Thema zurück, damit ein Fehlgriff sofort auffällt.\n### 🟢 Test-Bot eingetragen\n🩺 **Wenn es hakt:** Credential am Knoten prüfen.",
-        "height": 300,
+        "height": 284,
         "width": 300
       },
       "id": "b001729b-2d95-404a-a481-23121e9b348d",
@@ -515,14 +515,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        3664,
-        864
+        3728,
+        672
       ]
     },
     {
       "parameters": {
         "content": " ",
-        "height": 296,
+        "height": 328,
         "width": 332,
         "color": 5
       },
@@ -531,14 +531,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        4032,
-        1808
+        4096,
+        1584
       ]
     },
     {
       "parameters": {
         "content": "## ⑦ Fehlerweg\nKein Fehler bleibt still: Datei oder Transkript fehlt, dann „Bitte tippen“. Ungültiger Auftrag, dann Hilfetext. K1-Start scheitert, dann eine Meldung. Die Kundenliste fällt auf den Standardkunden zurück.\n### 🟢 Wege mit Testdaten geprüft\n🩺 **Wenn es hakt:** Ausführung öffnen, roten Knoten ansehen.",
-        "height": 264,
+        "height": 296,
         "width": 300,
         "color": 3
       },
@@ -547,14 +547,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        4048,
-        1824
+        4112,
+        1600
       ]
     },
     {
       "parameters": {
         "content": " ",
-        "height": 948,
+        "height": 1428,
         "width": 584,
         "color": 5
       },
@@ -563,14 +563,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        4288,
-        672
+        4176,
+        0
       ]
     },
     {
       "parameters": {
-        "content": "# ✅ Setup-Checkliste\nEinrichtung **in dieser Reihenfolge**, ✅ erledigt, ⏳ offen, 🟡 Hinweis.\n\n✅ **1 Test-Bot:** bei @BotFather einen eigenen Bot angelegt, Token als Credential `Telegram API | Test-Bot K1-Eingang`.\n\n✅ **2 Trigger einsetzen:** `Telegram-Nachricht empfangen [Telegram Trigger]` mit Update message und Restrict to User IDs, Credential Test-Bot.\n\n✅ **3 Credential tauschen:** `Sprachdatei laden`, `Auftrag bestätigen`, `Hilfe senden`, `Bitte tippen` und `Start fehlgeschlagen melden` nutzen den Test-Bot, nie `Telegram API | Content-Generator`.\n\n✅ **4 Nutzer-ID:** die eigene Telegram-ID im Trigger und in `Einstellungen setzen` (`erlaubte_nutzer_ids`).\n\n✅ **5 Spracherkennung:** Cloudflare Whisper large v3 turbo mit `Cloudflare Workers AI | Content-Generator`, Konto-ID aus `k1_einstellungen`. ⏳ Groq als Ersatz, sobald ein Groq-Credential existiert.\n\n✅ **6 K1-ID:** `k1_workflow_id` ist `Bk8PXBGm3gXMATK1` (bleibt beim Tausch der Hauptversion gleich).\n\n🟡 Getestet wird nur mit dem Test-Bot über „Execute workflow“, nicht veröffentlichen.",
-        "height": 480,
+        "content": "# ✅ Setup-Checkliste\nEinrichtung **in dieser Reihenfolge**, ✅ erledigt, ⏳ offen, 🟡 Hinweis.\n\n✅ **1 Test-Bot:** bei @BotFather einen eigenen Bot angelegt, Token als Credential `Telegram API | Test-Bot K1-Eingang`.\n\n✅ **2 Trigger einsetzen:** `Telegram-Nachricht empfangen [Telegram Trigger]` mit Update message und Restrict to User IDs, Credential Test-Bot.\n\n✅ **3 Credential tauschen:** `Sprachdatei laden`, `Auftrag bestätigen`, `Hilfe senden`, `Bitte tippen` und `Start fehlgeschlagen melden` nutzen den Test-Bot, nie `Telegram API | Content-Generator`.\n\n✅ **4 Nutzer-ID:** die eigene Telegram-ID im Trigger und in `Einstellungen setzen` (`erlaubte_nutzer_ids`).\n\n✅ **5 Spracherkennung:** Cloudflare Whisper large v3 turbo mit `Cloudflare Workers AI | Content-Generator`, Konto-ID aus `k1_einstellungen`. ⏳ Groq als Ersatz, sobald ein Groq-Credential existiert.\n\n✅ **6 K1-ID:** `k1_workflow_id` ist `Bk8PXBGm3gXMATK1` (bleibt beim Tausch der Hauptversion gleich).\n\n🟡 Veröffentlicht am 13.10.2026, läuft über den Test-Bot `Telegram API | Test-Bot K1-Eingang`, nie über den Freigabe-Bot von K1.",
+        "height": 504,
         "width": 552,
         "color": 7
       },
@@ -579,8 +579,8 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        4304,
-        688
+        4192,
+        16
       ]
     },
     {
@@ -595,8 +595,8 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        4304,
-        1184
+        4192,
+        992
       ]
     },
     {
@@ -641,8 +641,8 @@
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1.2,
       "position": [
-        1360,
-        1568
+        1424,
+        1376
       ],
       "webhookId": "4e71c7f4-90d9-46bb-8253-791cae860652",
       "onError": "continueErrorOutput",
@@ -666,8 +666,8 @@
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1.2,
       "position": [
-        2048,
-        1872
+        2112,
+        1680
       ],
       "webhookId": "02526af2-4745-4ca6-9636-c596c9440cab",
       "credentials": {
@@ -690,8 +690,8 @@
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1.2,
       "position": [
-        3408,
-        1872
+        3472,
+        1680
       ],
       "webhookId": "bc13da82-5a97-4c04-a7e0-2940343674e1",
       "credentials": {
@@ -714,8 +714,8 @@
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1.2,
       "position": [
-        3776,
-        1200
+        3840,
+        1008
       ],
       "webhookId": "2e747d9b-ccaa-42c6-9aa0-d93b084ca034",
       "onError": "continueRegularOutput",
@@ -739,8 +739,8 @@
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1.2,
       "position": [
-        3792,
-        1888
+        3856,
+        1696
       ],
       "webhookId": "a4c77d5b-fb4c-4957-8600-31dffa21cf3c",
       "credentials": {
@@ -764,8 +764,8 @@
       "type": "n8n-nodes-base.telegramTrigger",
       "typeVersion": 1.5,
       "position": [
-        0,
-        1200
+        64,
+        1008
       ],
       "webhookId": "f6de4d19-32ec-4989-943b-55600d6aa47f",
       "credentials": {
@@ -786,8 +786,8 @@
       "type": "n8n-nodes-base.extractFromFile",
       "typeVersion": 1.1,
       "position": [
-        1696,
-        1568
+        1760,
+        1376
       ],
       "onError": "continueErrorOutput"
     },
@@ -812,8 +812,8 @@
       "type": "n8n-nodes-base.supabase",
       "typeVersion": 1,
       "position": [
-        2032,
-        1568
+        2096,
+        1376
       ],
       "executeOnce": true,
       "alwaysOutputData": true,
@@ -843,8 +843,8 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        2704,
-        1568
+        2768,
+        1376
       ],
       "retryOnFail": true,
       "maxTries": 3,
@@ -888,8 +888,8 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        2368,
-        1568
+        2432,
+        1376
       ]
     },
     {
@@ -922,8 +922,8 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        3584,
-        1376
+        3648,
+        1184
       ]
     },
     {
@@ -935,8 +935,24 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        3920,
-        1376
+        3984,
+        1184
+      ]
+    },
+    {
+      "parameters": {
+        "content": "# 🌐 Plattform-Hinweise\n### 💬 Telegram (Test-Bot K1-Eingang)\n**Erlaubt:** Text, Link, `/research`, `/hilfe` und Sprachnachricht, nur von eingetragenen Nutzer-IDs.\n🟡 **Besonderheit:** Ein Bot hat nur einen Webhook, deshalb ein eigener Test-Bot, nie der Freigabe-Bot von K1.\n\n### 🎙️ Cloudflare Workers AI (Whisper large v3 turbo)\n**Erlaubt:** Sprachnachrichten auf Deutsch in Text umwandeln, im Gratis-Kontingent.\n🟡 **Besonderheit:** Kundenkürzel werden oft falsch gehört, im Zweifel den Auftrag als Text schicken.\n\n### 🖥️ n8n auf N8N_URL\n**Erlaubt:** startet K1 `Bk8PXBGm3gXMATK1` ohne Warten.\n🟡 **Besonderheit:** Echte Nachrichten empfängt nur der veröffentlichte Stand.",
+        "height": 440,
+        "width": 552,
+        "color": 7
+      },
+      "id": "efea66a2-670d-4150-b0c6-fdb45cd87d99",
+      "name": "Plattform-Hinweise",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        4192,
+        544
       ]
     }
   ],
@@ -1209,7 +1225,7 @@
     "aiBuilderAssisted": true,
     "builderVariant": "mcp"
   },
-  "versionId": "90dfcb86-214c-430c-a5e6-8ac28a8021e7",
+  "versionId": "be1cda12-1fec-4c33-8466-3074fe0b73eb",
   "tags": [
     "KI-AGT-2606",
     "woche-4"
