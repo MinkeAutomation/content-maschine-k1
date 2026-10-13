@@ -6,7 +6,7 @@
       "parameters": {
         "content": "# AGT-2606 P1 SUB Nextcloud-Ablage\nLegt einen freigegebenen Beitrag mit Text und Bildern geordnet in Nextcloud ab.",
         "height": 110,
-        "width": 2192,
+        "width": 1968,
         "color": 5
       },
       "id": "5525876f-f06d-4fc5-8ca6-04114fc79791",
@@ -15,14 +15,14 @@
       "typeVersion": 1,
       "position": [
         -48,
-        -336
+        -400
       ]
     },
     {
       "parameters": {
         "content": "",
-        "height": 224,
-        "width": 2200
+        "height": 272,
+        "width": 1964
       },
       "id": "3c013fe0-7e1d-4461-b04d-08ee864fe576",
       "name": "Rahmen Kopf",
@@ -30,13 +30,13 @@
       "typeVersion": 1,
       "position": [
         -48,
-        -192
+        -256
       ]
     },
     {
       "parameters": {
-        "content": "# 🧪 SUB Nextcloud-Ablage\n\n**Aufgabe:** Ein freigegebener Beitrag der Haupt-K1 wird mit Text und Bildern im Ordner des Kunden in Nextcloud abgelegt.\n\n**Die Idee:** Ordner /K1/Kunde/Datum_Beitrag_Thema anlegen, beitrag.md und die Folien hineinlegen, am Ende ok, Ordnerpfad und Dateizahl zurückgeben.\n\n**Warum so?** Die Ablage steckt in einem Sub, damit die Haupt-K1 klein bleibt und ein Fehler hier den Aufrufer nicht abbricht.\n\n**Hinweis:** Stufe: Durchstich bis 14.10.2026",
-        "height": 200,
+        "content": "# 🧪 SUB Nextcloud-Ablage\n\n**Aufgabe:** Ein freigegebener Beitrag der Haupt-K1 wird mit Text und Bildern im Ordner des Kunden in Nextcloud abgelegt.\n\n**Die Idee:** Ordner /K1/Kunde/Datum_Beitrag_Thema anlegen, beitrag.md und die Folien hineinlegen, am Ende ok, Ordnerpfad und Dateizahl zurückgeben.\n\n**Warum so?** Die Ablage steckt in einem Sub, damit die Haupt-K1 klein bleibt und ein Fehler hier den Aufrufer nicht abbricht.\n\n**Hinweis:** Die Ablage läuft nur als Sub, jeder Fehler kommt als ok:false zurück.\nStufe: Durchstich bis 16.10.2026",
+        "height": 240,
         "width": 1100,
         "color": 7
       },
@@ -46,14 +46,14 @@
       "typeVersion": 1,
       "position": [
         -32,
-        -176
+        -240
       ]
     },
     {
       "parameters": {
         "content": "## Ablauf\n① Eingabe prüfen\n② Eingabe gültig?\n③ Ordner anlegen\n④ Beitragstext ablegen\n⑤ Bilder ablegen\n⑥ Ergebnis melden",
-        "height": 200,
-        "width": 508,
+        "height": 240,
+        "width": 380,
         "color": 7
       },
       "id": "c7efd730-bcdd-4342-bcf3-61ec57fca783",
@@ -61,15 +61,15 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        1104,
-        -176
+        1088,
+        -240
       ]
     },
     {
       "parameters": {
-        "content": "## Status\n🟢 Getestet am 12.10.2026, Läufe 916 bis 919\n🟡 Anzeigefehler bei Bild-Upload, Ergebnis stimmt\n🔴 Nicht aktiv, nur als Sub aufrufbar\n🔵 Andocken an die Haupt-K1 offen",
-        "height": 200,
-        "width": 508,
+        "content": "## Status\n🟢 Getestet am 12.10.2026, Läufe 916 bis 919\n🟡 Anzeigefehler bei Bild-Upload, Ergebnis stimmt\n🔴 Kein eigener Auslöser, läuft nur als Sub\n🔵 Aktiv seit 13.10.2026, aufgerufen von K1 nach der Freigabe",
+        "height": 240,
+        "width": 412,
         "color": 7
       },
       "id": "a8f2be86-2722-4d95-a35b-a28693e5e13a",
@@ -77,8 +77,8 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        1632,
-        -176
+        1488,
+        -240
       ]
     },
     {
@@ -137,7 +137,7 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        1840,
+        1856,
         64
       ]
     },
@@ -145,7 +145,7 @@
       "parameters": {
         "content": "## ⑤ Bilder ablegen\nJede Folie als eigene Datei, mit eigenem Fehlerausgang. \n🟡 n8n zeigt bei Bildern einen Anzeigefehler (TypeError), das Ergebnis stimmt, ⑥ prüft es in der Dateiliste.\n\n### 🟢 getestet, Lauf 917",
         "height": 190,
-        "width": 802
+        "width": 738
       },
       "id": "6d8a5adb-1953-4d29-960b-148f7d9b990b",
       "name": "Schritt 5",
@@ -160,21 +160,21 @@
       "parameters": {
         "content": "## ⑥ Ergebnis melden\nDateiliste des Ordners lesen, Soll gegen Ist zählen, dann ok, Ordnerpfad und Dateizahl zurückgeben.\n\n### 🟢 getestet, Lauf 917 und 919",
         "height": 190,
-        "width": 804
+        "width": 772
       },
       "id": "a76bd4cb-4a19-4c2d-a8f0-1814c6d89c76",
       "name": "Schritt 6",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        3104,
+        3024,
         64
       ]
     },
     {
       "parameters": {
         "content": "",
-        "height": 224,
+        "height": 208,
         "width": 340,
         "color": 5
       },
@@ -183,14 +183,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        4288,
+        4176,
         592
       ]
     },
     {
       "parameters": {
         "content": "## ⑦ Fehlerweg\nJeder Fehler wird zu ok:false mit Grund. Der Aufrufer bricht nie ab.\n\n### 🟢 getestet, Lauf 918 und 919",
-        "height": 184,
+        "height": 168,
         "width": 300,
         "color": 3
       },
@@ -199,7 +199,7 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        4304,
+        4192,
         608
       ]
     },
@@ -321,7 +321,7 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        4016,
+        3936,
         640
       ]
     },
@@ -443,7 +443,7 @@
       "type": "n8n-nodes-base.nextCloud",
       "typeVersion": 1,
       "position": [
-        1920,
+        1968,
         304
       ],
       "executeOnce": true,
@@ -542,7 +542,7 @@
       "type": "n8n-nodes-base.nextCloud",
       "typeVersion": 1,
       "position": [
-        2880,
+        2800,
         304
       ],
       "onError": "continueErrorOutput",
@@ -562,7 +562,7 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        3584,
+        3472,
         304
       ]
     },
@@ -573,7 +573,7 @@
       "type": "n8n-nodes-base.merge",
       "typeVersion": 3.2,
       "position": [
-        3152,
+        3040,
         304
       ]
     },
@@ -605,7 +605,7 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        3776,
+        3664,
         304
       ]
     },
@@ -676,7 +676,7 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        4688,
+        4608,
         304
       ]
     },
@@ -691,7 +691,7 @@
       "type": "n8n-nodes-base.nextCloud",
       "typeVersion": 1,
       "position": [
-        3376,
+        3264,
         304
       ],
       "executeOnce": true,
@@ -760,7 +760,7 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        4064,
+        3984,
         304
       ],
       "executeOnce": true,
@@ -781,7 +781,7 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        4384,
+        4304,
         304
       ]
     },
@@ -789,14 +789,14 @@
       "parameters": {
         "content": "## ⑥a Freigabelink\nNach der Ablage erzeugt Nextcloud einen öffentlichen Link auf den Beitragsordner, nur lesend, gültig 30 Tage, ohne Passwort, damit der Kunde ihn direkt öffnet.\n🟡 Schlägt der Link fehl, bleibt ok unverändert, freigabe_link ist leer und grund_link nennt den Grund.\n🟡 Option später: ein Passwort kann als Feld password im Aufruf mitgegeben werden (Link dann nur mit Passwort offen).\n\n### 🟢 getestet, Lauf 941 und 945",
         "height": 190,
-        "width": 940
+        "width": 908
       },
       "id": "66768d3d-63e3-423a-ad60-3e3e97609402",
       "name": "Schritt 6a Freigabelink",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        3952,
+        3872,
         64
       ]
     },
@@ -835,6 +835,54 @@
       "position": [
         2096,
         544
+      ]
+    },
+    {
+      "parameters": {
+        "content": " ",
+        "height": 448,
+        "width": 1768,
+        "color": 5
+      },
+      "id": "09426156-2910-4920-a696-c95a7e952ae2",
+      "name": "Rahmen Hilfe-Spalte",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        3008,
+        -400
+      ]
+    },
+    {
+      "parameters": {
+        "content": "# ✅ Setup-Checkliste\nEinrichtung **in dieser Reihenfolge**, ✅ erledigt, ⏳ offen, 🟡 Hinweis.\n\n### 🔑 Setup 1: Nextcloud-Zugang\n✅ Credential `Nextcloud | n8n-k1 K1-Ablage` (Benutzer und Passwort) in allen 7 Nextcloud-Knoten und im Knoten `Freigabelink erzeugen [HTTP Request]` auswählen.\n\n### 🗂️ Setup 2: Ablageort\n✅ Wurzel `/K1` auf `NEXTCLOUD_URL`, darunter je Kunde ein Ordner; fehlende Ordner legt der Sub selbst an.\n\n### 🔗 Setup 3: Aufrufrecht\n✅ Aufrufbar nur von Workflows desselben Eigentümers; K1 ruft den Sub nach der Freigabe auf.\n\n### 🧪 Schritt 4: Test\n✅ Läufe 916 bis 919 (Ablage und Fehlerweg), 941 und 945 (Freigabelink).\n\n### 🚀 Schritt 5: Aktivieren\n✅ Veröffentlicht am 13.10.2026.",
+        "height": 416,
+        "width": 1160,
+        "color": 7
+      },
+      "id": "dcf99050-b790-42fb-8ec8-503693892fce",
+      "name": "Setup-Checkliste",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        3600,
+        -384
+      ]
+    },
+    {
+      "parameters": {
+        "content": "# 🌐 Plattform-Hinweise\n### ☁️ Nextcloud (NEXTCLOUD_URL, eigener Server)\n**Erlaubt:** Ordner anlegen, `beitrag.md` und Bilder (png, jpg, jpeg, webp) hochladen, öffentlicher Link nur lesend, 30 Tage gültig.\n🟡 **Besonderheit:** Der Bild-Upload zeigt in n8n einen Anzeigefehler (TypeError), obwohl die Datei ankommt; gezählt wird deshalb über die Dateiliste.\n\n### 🖥️ n8n auf N8N_URL\n**Erlaubt:** Aufruf nur als Sub aus K1, kein eigener Auslöser.\n🟡 **Besonderheit:** Jeder Fehler wird zu `ok: false` mit Grund, der Aufrufer bricht nie ab.",
+        "height": 416,
+        "width": 552,
+        "color": 7
+      },
+      "id": "6f0c3f16-0737-4cc6-a332-6eb7dffc7fd3",
+      "name": "Plattform-Hinweise",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        3024,
+        -384
       ]
     }
   ],
@@ -1184,7 +1232,7 @@
     "aiBuilderAssisted": true,
     "builderVariant": "mcp"
   },
-  "versionId": "34944aa1-a147-4e8d-98ce-5a937f36aef5",
+  "versionId": "07fbc7ac-2a21-4574-9dfc-ceb9ad361273",
   "tags": [
     "sub-workflow",
     "KI-AGT-2606",
