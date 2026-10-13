@@ -1,7 +1,7 @@
 {
   "id": "gcqhN1dEKNBRzk3C",
   "name": "AGT-2606 P1 K1 Telegram-Eingang",
-  "description": "Projekt 1 Paket 2: nimmt Auftraege fuer K1 per Telegram an (Text, Link, Befehl, Sprache), ordnet sie per Code ein und startet K1. Laeuft ueber den eigenen Test-Bot.",
+  "description": "Projekt 1 Paket 2: nimmt Aufträge für K1 per Telegram an (Text, Link, Befehl, Sprache), ordnet sie per Code ein und startet K1. Läuft über den eigenen Test-Bot, nicht veröffentlichen.",
   "nodes": [
     {
       "parameters": {
@@ -215,7 +215,7 @@
     },
     {
       "parameters": {
-        "jsCode": "// Zweck: Telegram-Nachricht ohne Sprachmodell einordnen (Kunde, Quellenart, Thema), Regeln laut Planung 10.10.2026.\nconst cfg = $('Einstellungen setzen [Edit Fields]').first().json;\n// Text: aus dem Sprachzweig, wenn er gelaufen ist, sonst aus der Nachricht selbst.\nconst ausSprache = $('Text übernehmen [Edit Fields]').isExecuted;\nconst roh = ausSprache ? $('Text übernehmen [Edit Fields]').first().json.text : cfg.text;\nlet text = String(roh || '').replace(/\\s+/g, ' ').trim();\nconst hinweise = ['Auftrag über Telegram (' + (ausSprache ? 'Sprachnachricht' : 'Text') + ')'];\n// Kundenliste aus Supabase; kommt ein Fehler-Item, gilt nur der Standardkunde (Fallback mit Spur).\nconst zeilen = $input.all().map(i => i.json);\nconst listeFehlt = zeilen.some(z => z.error);\nif (listeFehlt) hinweise.push('Kundenliste nicht lesbar, Standardkunde genommen');\nconst kuerzel = zeilen.filter(z => z.kuerzel).map(z => String(z.kuerzel).toLowerCase());\nconst standard = String(cfg.standard_kunde || '').toLowerCase();\nconst max = Number(cfg.max_text) || 12000;\n// Ausgabe mit denselben Feldern wie das K1-Formular, dazu Steuerfelder fuer die Weiche.\n// Warum englisch (12.10.2026, Ae7): K1 Bk8PXBGm3gXMATK1 erwartet seit v09 customer_code, topic, source_type, source, note; der Eingang sendet sie jetzt direkt.\nconst aus = { valid: false, error_reason: '', customer_code: '', customer_recognized: false, topic: '', source_type: '', source: '', note: '', chat_id: cfg.chat_id, channel: ausSprache ? 'sprache' : 'text', k1_workflow_id: String(cfg.k1_workflow_id || '') };\nfunction fertig(grund) {\n  aus.error_reason = grund;\n  aus.valid = !grund;\n  aus.note = hinweise.join('; ');\n  // Telegram sendet mit parse_mode HTML, deshalb das Thema fuer die Anzeige maskieren.\n  aus.topic_display = aus.topic.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');\n  return [{ json: aus }];\n}\n// Regel 1: leer oder Hilfebefehl.\nif (!text) return fertig('leere Nachricht');\nif (/^\\/(start|hilfe|help)\\b/i.test(text)) return fertig('Hilfe angefordert');\n// Zu lange Texte kuerzen wie K1 mit max_quelltext.\nif (text.length > max) { text = text.slice(0, max); hinweise.push('Text auf ' + max + ' Zeichen gekürzt'); }\n// Regel 2: Kundenkuerzel als erstes Wort, sonst Standardkunde.\nconst erstes = text.split(' ')[0].toLowerCase().replace(/[:,;.]+$/, '');\nif (kuerzel.includes(erstes)) {\n  aus.customer_code = erstes;\n  aus.customer_recognized = true;\n  const leer = text.indexOf(' ');\n  text = leer > 0 ? text.slice(leer + 1).trim() : '';\n} else {\n  aus.customer_code = standard;\n}\nif (!aus.customer_code) return fertig('kein Standardkunde eingestellt');\nif (!listeFehlt && !kuerzel.includes(aus.customer_code)) return fertig('Kunde ' + aus.customer_code + ' ist in k1_kunden nicht aktiv');\nif (!text) return fertig('nur ein Kundenkürzel, kein Auftrag');\n// Regel 3: Research-Befehl.\nconst research = text.match(/^(\\/research|recherchier(e|en)?)\\b\\s*:?\\s*(.*)$/i);\nconst url = (text.match(/https?:\\/\\/\\S+/i) || [''])[0];\nconst ohneUrl = url ? text.replace(url, '').trim() : text;\nif (research) {\n  aus.source_type = 'Research';\n  aus.topic = research[3].trim();\n} else if (url && /(youtube\\.com\\/(watch|shorts)|youtu\\.be\\/)/i.test(url)) {\n  // Regel 4: YouTube-Link.\n  aus.source_type = 'YouTube-Link';\n  aus.source = url;\n  aus.topic = ohneUrl || 'Beitrag zum verlinkten Video';\n} else if (url) {\n  // Regel 5: andere Adresse ist ein Artikel-Link.\n  aus.source_type = 'Artikel-Link';\n  aus.source = url;\n  aus.topic = ohneUrl || 'Beitrag zum verlinkten Artikel';\n} else if (text.length > 300) {\n  // Regel 6: langer Text ist eigener Text, weil K1 als Thema hoechstens 300 Zeichen annimmt.\n  aus.source_type = 'Eigener Text';\n  aus.source = text;\n  aus.topic = (text.split(/(?<=[.!?])\\s/)[0] || text).slice(0, 120);\n} else {\n  // Regel 7: sonst Thema.\n  aus.source_type = 'Thema';\n  aus.topic = text;\n}\naus.topic = aus.topic.slice(0, 300);\n// Pruefung wie vorgesehen: Thema mindestens 3 Zeichen.\nif (aus.topic.length < 3) return fertig('Thema zu kurz');\nreturn fertig('');"
+        "jsCode": "// Zweck: Telegram-Nachricht ohne Sprachmodell einordnen (Kunde, Quellenart, Thema), Regeln laut Planung 10.10.2026.\nconst cfg = $('Einstellungen setzen [Edit Fields]').first().json;\n// Warum Wiederzustellungsschutz: stellt Telegram dieselbe Nachricht erneut zu, entstanden 2 Auftraege.\n// Hier wird nur nachgesehen. Gemerkt wird erst in 'Nachricht merken [Code]' nach erfolgreichem K1-Start, ein Startfehler blockiert also keine Wiederholung.\n// Warum 48 Stunden statt 200 Eintraege: Telegram stellt ein unbestaetigtes Update hoechstens 24 Stunden lang erneut zu; 48 Stunden geben Reserve.\nlet upd = {};\ntry { upd = $('Telegram-Nachricht empfangen [Telegram Trigger]').first().json || {}; } catch (err) { upd = {}; }\nconst nachrichtId = String(cfg.message_id || upd.update_id || '');\nconst merker = $getWorkflowStaticData('global');\nconst schluessel = String(cfg.chat_id || '') + ':' + nachrichtId;\nconst gesehen = merker.gesehen_zeit && typeof merker.gesehen_zeit === 'object' ? merker.gesehen_zeit : {};\nif (nachrichtId && gesehen[schluessel] && Date.now() - gesehen[schluessel] < 48 * 3600000) return [];\n// Text: aus dem Sprachzweig, wenn er gelaufen ist, sonst aus der Nachricht selbst.\nconst ausSprache = $('Text übernehmen [Edit Fields]').isExecuted;\nconst roh = ausSprache ? $('Text übernehmen [Edit Fields]').first().json.text : cfg.text;\nlet text = String(roh || '').replace(/\\s+/g, ' ').trim();\nconst hinweise = ['Auftrag über Telegram (' + (ausSprache ? 'Sprachnachricht' : 'Text') + ')'];\n// Kundenliste aus Supabase; kommt ein Fehler-Item, gilt nur der Standardkunde (Fallback mit Spur).\nconst zeilen = $input.all().map(i => i.json);\nconst listeFehlt = zeilen.some(z => z.error);\nif (listeFehlt) hinweise.push('Kundenliste nicht lesbar, Standardkunde genommen');\nconst kuerzel = zeilen.filter(z => z.kuerzel).map(z => String(z.kuerzel).toLowerCase());\nconst standard = String(cfg.standard_kunde || '').toLowerCase();\nconst max = Number(cfg.max_text) || 12000;\n// Ausgabe mit denselben Feldern wie das K1-Formular, dazu Steuerfelder fuer die Weiche.\n// Warum englisch (12.10.2026, Ae7): K1 Bk8PXBGm3gXMATK1 erwartet seit v09 customer_code, topic, source_type, source, note; der Eingang sendet sie jetzt direkt.\nconst aus = { merker_schluessel: nachrichtId ? schluessel : '', valid: false, error_reason: '', customer_code: '', customer_recognized: false, topic: '', source_type: '', source: '', note: '', chat_id: cfg.chat_id, channel: ausSprache ? 'sprache' : 'text', k1_workflow_id: String(cfg.k1_workflow_id || '') };\nfunction fertig(grund) {\n  aus.error_reason = grund;\n  aus.valid = !grund;\n  aus.note = hinweise.join('; ');\n  // Telegram sendet mit parse_mode HTML, deshalb das Thema fuer die Anzeige maskieren.\n  aus.topic_display = aus.topic.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');\n  return [{ json: aus }];\n}\n// Regel 1: leer oder Hilfebefehl.\nif (!text) return fertig('leere Nachricht');\nif (/^\\/(start|hilfe|help)\\b/i.test(text)) return fertig('Hilfe angefordert');\n// Zu lange Texte kuerzen wie K1 mit max_quelltext.\nif (text.length > max) { text = text.slice(0, max); hinweise.push('Text auf ' + max + ' Zeichen gekürzt'); }\n// Regel 2: Kundenkuerzel als erstes Wort, sonst Standardkunde.\nconst erstes = text.split(' ')[0].toLowerCase().replace(/[:,;.]+$/, '');\nif (kuerzel.includes(erstes)) {\n  aus.customer_code = erstes;\n  aus.customer_recognized = true;\n  const leer = text.indexOf(' ');\n  text = leer > 0 ? text.slice(leer + 1).trim() : '';\n} else {\n  aus.customer_code = standard;\n}\nif (!aus.customer_code) return fertig('kein Standardkunde eingestellt');\nif (!listeFehlt && !kuerzel.includes(aus.customer_code)) return fertig('Kunde ' + aus.customer_code + ' ist in k1_kunden nicht aktiv');\nif (!text) return fertig('nur ein Kundenkürzel, kein Auftrag');\n// Regel 3: Research-Befehl.\nconst research = text.match(/^(\\/research|recherchier(e|en)?)\\b\\s*:?\\s*(.*)$/i);\nconst url = (text.match(/https?:\\/\\/\\S+/i) || [''])[0];\nconst ohneUrl = url ? text.replace(url, '').trim() : text;\nif (research) {\n  aus.source_type = 'Research';\n  aus.topic = research[3].trim();\n} else if (url && /(youtube\\.com\\/(watch|shorts)|youtu\\.be\\/)/i.test(url)) {\n  // Regel 4: YouTube-Link.\n  aus.source_type = 'YouTube-Link';\n  aus.source = url;\n  aus.topic = ohneUrl || 'Beitrag zum verlinkten Video';\n} else if (url) {\n  // Regel 5: andere Adresse ist ein Artikel-Link.\n  aus.source_type = 'Artikel-Link';\n  aus.source = url;\n  aus.topic = ohneUrl || 'Beitrag zum verlinkten Artikel';\n} else if (text.length > 300) {\n  // Regel 6: langer Text ist eigener Text, weil K1 als Thema hoechstens 300 Zeichen annimmt.\n  aus.source_type = 'Eigener Text';\n  aus.source = text;\n  aus.topic = (text.split(/(?<=[.!?])\\s/)[0] || text).slice(0, 120);\n} else {\n  // Regel 7: sonst Thema.\n  aus.source_type = 'Thema';\n  aus.topic = text;\n}\naus.topic = aus.topic.slice(0, 300);\n// Pruefung wie vorgesehen: Thema mindestens 3 Zeichen.\nif (aus.topic.length < 3) return fertig('Thema zu kurz');\nreturn fertig('');"
       },
       "id": "10e0b7f1-c7e6-4c47-ac3e-63a97c3de1d1",
       "name": "Nachricht einordnen [Code]",
@@ -415,7 +415,7 @@
     },
     {
       "parameters": {
-        "content": "## Status\n🟢 Text, Link, Befehl und Kunde: mit Testdaten geprüft, Läufe im Bau-Protokoll\n🟡 Trigger-Filter und echte Stimme erst mit einer echten Nachricht messbar\n🔴 Kundenkürzel in Sprachnachrichten werden falsch gehört (Ordwin als Kundenort Win), Abgleich offen\n🔵 Seit 12.10.2026 englische Feldnamen an K1, K1-ID gesetzt; echter Lauf mit K1 erst beim Tausch (T2)",
+        "content": "## Status\n🟢 Text, Link, Befehl und Kunde: mit Testdaten geprüft, Läufe im Bau-Protokoll\n🟡 Trigger-Filter und echte Stimme erst mit einer echten Nachricht messbar\n🔴 Kundenkürzel in Sprachnachrichten werden falsch gehört (Ordwin als Kundenort Win), Abgleich offen\n🔵 Seit 12.10.2026 englische Feldnamen an K1, K1-ID gesetzt; echter Lauf mit K1 erst beim Tausch (T2)\n🟡 Bekannte Grenze: kommt dieselbe Nachricht zweimal fast gleichzeitig, können beide K1 starten. Grund: n8n speichert die Workflow-Daten erst am Laufende; eine echte Sperre bräuchte eine Tabelle mit eindeutigem Schlüssel (Datenbankänderung, nicht in diesem Auftrag).",
         "height": 424,
         "width": 492,
         "color": 7
@@ -433,14 +433,14 @@
       "parameters": {
         "content": "## ① Nachricht empfangen\nDer Telegram Trigger hört auf den Test-Bot und lässt nur die eingetragene Nutzer-ID durch. Ein Set-Knoten legt Chat, Absender, Text und Sprachdatei in feste Felder und hält die Einstellungen an einer Stelle.\n### 🟢 Test-Bot eingetragen\n🩺 **Wenn es hakt:** In `Einstellungen setzen` Nutzer-ID und Standardkunde prüfen.",
         "height": 300,
-        "width": 480
+        "width": 576
       },
       "id": "946fd8f0-2f1d-4eaa-966e-1c6a40c82486",
       "name": "Karte ①",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -48,
+        -64,
         864
       ]
     },
@@ -448,14 +448,14 @@
       "parameters": {
         "content": "## ② Absender und Art prüfen\nNur eingetragene Nutzer-IDs bekommen eine Antwort, fremde Absender laufen still ins Leere. Danach trennt eine Weiche Sprachnachrichten von Text.\n### 🟢 Logik mit Testdaten geprüft\n🩺 **Wenn es hakt:** `erlaubte_nutzer_ids` mit der eigenen ID vergleichen.",
         "height": 300,
-        "width": 480
+        "width": 512
       },
       "id": "575bda1b-f596-4359-b53f-904f47107a56",
       "name": "Karte ②",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        640,
+        672,
         864
       ]
     },
@@ -463,14 +463,14 @@
       "parameters": {
         "content": "## ③ Sprache in Text\nDie Sprachdatei kommt über `getFile`, wird zu Base64 und geht an Cloudflare Whisper large v3 turbo (gratis, Sprache de). Jeder Fehler und ein leeres Transkript nehmen den Weg „Bitte tippen“.\n### 🟡 mit Testaufnahme gemessen, echte Stimme offen\n🩺 **Wenn es hakt:** `cloudflare_account_id` in `k1_einstellungen` prüfen (Spalten `setting_key`, `setting_value` seit Ä7).",
         "height": 220,
-        "width": 1012
+        "width": 980
       },
       "id": "e1260e6f-70f9-40a3-8822-1ebf9cae9451",
       "name": "Karte ③",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        1328,
+        1296,
         1312
       ]
     },
@@ -493,14 +493,14 @@
       "parameters": {
         "content": "## ⑤ Prüfen und K1 starten\nNur gültige Aufträge starten K1, ohne auf das Ende zu warten. Scheitert der Start, meldet der Fehlerausgang das im Chat.\n### 🟢 K1-ID Bk8PXBGm3gXMATK1, Felder englisch (customer_code, topic, source_type, source, note)\n🩺 **Wenn es hakt:** `k1_workflow_id` in `Einstellungen setzen` eintragen.",
         "height": 300,
-        "width": 480
+        "width": 560
       },
       "id": "0a62aa96-12be-4488-a79a-9cd2dddfdfb5",
       "name": "Karte ⑤",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        3024,
+        2992,
         864
       ]
     },
@@ -515,14 +515,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        3712,
+        3664,
         864
       ]
     },
     {
       "parameters": {
         "content": " ",
-        "height": 392,
+        "height": 296,
         "width": 332,
         "color": 5
       },
@@ -531,14 +531,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        4096,
-        1824
+        4032,
+        1808
       ]
     },
     {
       "parameters": {
         "content": "## ⑦ Fehlerweg\nKein Fehler bleibt still: Datei oder Transkript fehlt, dann „Bitte tippen“. Ungültiger Auftrag, dann Hilfetext. K1-Start scheitert, dann eine Meldung. Die Kundenliste fällt auf den Standardkunden zurück.\n### 🟢 Wege mit Testdaten geprüft\n🩺 **Wenn es hakt:** Ausführung öffnen, roten Knoten ansehen.",
-        "height": 360,
+        "height": 264,
         "width": 300,
         "color": 3
       },
@@ -547,14 +547,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        4112,
-        1840
+        4048,
+        1824
       ]
     },
     {
       "parameters": {
         "content": " ",
-        "height": 1268,
+        "height": 948,
         "width": 584,
         "color": 5
       },
@@ -563,14 +563,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        4480,
-        144
+        4288,
+        672
       ]
     },
     {
       "parameters": {
         "content": "# ✅ Setup-Checkliste\nEinrichtung **in dieser Reihenfolge**, ✅ erledigt, ⏳ offen, 🟡 Hinweis.\n\n✅ **1 Test-Bot:** bei @BotFather einen eigenen Bot angelegt, Token als Credential `Telegram API | Test-Bot K1-Eingang`.\n\n✅ **2 Trigger einsetzen:** `Telegram-Nachricht empfangen [Telegram Trigger]` mit Update message und Restrict to User IDs, Credential Test-Bot.\n\n✅ **3 Credential tauschen:** `Sprachdatei laden`, `Auftrag bestätigen`, `Hilfe senden`, `Bitte tippen` und `Start fehlgeschlagen melden` nutzen den Test-Bot, nie `Telegram API | Content-Generator`.\n\n✅ **4 Nutzer-ID:** die eigene Telegram-ID im Trigger und in `Einstellungen setzen` (`erlaubte_nutzer_ids`).\n\n✅ **5 Spracherkennung:** Cloudflare Whisper large v3 turbo mit `Cloudflare Workers AI | Content-Generator`, Konto-ID aus `k1_einstellungen`. ⏳ Groq als Ersatz, sobald ein Groq-Credential existiert.\n\n✅ **6 K1-ID:** `k1_workflow_id` ist `Bk8PXBGm3gXMATK1` (bleibt beim Tausch der Hauptversion gleich).\n\n🟡 Getestet wird nur mit dem Test-Bot über „Execute workflow“, nicht veröffentlichen.",
-        "height": 800,
+        "height": 480,
         "width": 552,
         "color": 7
       },
@@ -579,8 +579,8 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        4496,
-        160
+        4304,
+        688
       ]
     },
     {
@@ -595,8 +595,8 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        4496,
-        976
+        4304,
+        1184
       ]
     },
     {
@@ -634,8 +634,7 @@
       "parameters": {
         "resource": "file",
         "fileId": "={{ $json.voice_file_id }}",
-        "additionalFields": {},
-        "download": true
+        "additionalFields": {}
       },
       "id": "701551dd-cb3b-4814-889c-15c7e756632c",
       "name": "Sprachdatei laden [Telegram]",
@@ -715,10 +714,11 @@
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1.2,
       "position": [
-        3744,
+        3776,
         1200
       ],
       "webhookId": "2e747d9b-ccaa-42c6-9aa0-d93b084ca034",
+      "onError": "continueRegularOutput",
       "credentials": {
         "telegramApi": {
           "id": "CREDENTIAL_ID",
@@ -739,8 +739,8 @@
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1.2,
       "position": [
-        3744,
-        1872
+        3792,
+        1888
       ],
       "webhookId": "a4c77d5b-fb4c-4957-8600-31dffa21cf3c",
       "credentials": {
@@ -751,14 +751,6 @@
       }
     },
     {
-      "id": "949284e8-dd2d-4086-b9bb-0faa7328f931",
-      "name": "Telegram-Nachricht empfangen [Telegram Trigger]",
-      "type": "n8n-nodes-base.telegramTrigger",
-      "typeVersion": 1.5,
-      "position": [
-        0,
-        1200
-      ],
       "parameters": {
         "updates": [
           "message"
@@ -767,6 +759,14 @@
           "userIds": "TELEGRAM_USER_ID"
         }
       },
+      "id": "949284e8-dd2d-4086-b9bb-0faa7328f931",
+      "name": "Telegram-Nachricht empfangen [Telegram Trigger]",
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.5,
+      "position": [
+        0,
+        1200
+      ],
       "webhookId": "f6de4d19-32ec-4989-943b-55600d6aa47f",
       "credentials": {
         "telegramApi": {
@@ -776,6 +776,11 @@
       }
     },
     {
+      "parameters": {
+        "operation": "binaryToPropery",
+        "destinationKey": "audio_b64",
+        "options": {}
+      },
       "id": "80906a26-ce80-49dd-8be2-bd5ba233ab81",
       "name": "Audio in Base64 umwandeln [Extract From File]",
       "type": "n8n-nodes-base.extractFromFile",
@@ -784,27 +789,13 @@
         1696,
         1568
       ],
-      "parameters": {
-        "operation": "binaryToPropery",
-        "destinationKey": "audio_b64"
-      },
       "onError": "continueErrorOutput"
     },
     {
-      "id": "7116fe0a-2eeb-4486-946f-18b43f2e6515",
-      "name": "Cloudflare-Konto laden [Supabase]",
-      "type": "n8n-nodes-base.supabase",
-      "typeVersion": 1,
-      "position": [
-        2032,
-        1568
-      ],
       "parameters": {
-        "resource": "row",
         "operation": "getAll",
         "tableId": "k1_einstellungen",
         "returnAll": true,
-        "filterType": "manual",
         "matchType": "allFilters",
         "filters": {
           "conditions": [
@@ -816,9 +807,17 @@
           ]
         }
       },
-      "onError": "continueErrorOutput",
+      "id": "7116fe0a-2eeb-4486-946f-18b43f2e6515",
+      "name": "Cloudflare-Konto laden [Supabase]",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        2032,
+        1568
+      ],
       "executeOnce": true,
       "alwaysOutputData": true,
+      "onError": "continueErrorOutput",
       "credentials": {
         "supabaseApi": {
           "id": "CREDENTIAL_ID",
@@ -827,14 +826,6 @@
       }
     },
     {
-      "id": "77880a94-a8d4-4be6-8eea-33ee0b8cc950",
-      "name": "Cloudflare Whisper [HTTP Request]",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
-      "position": [
-        2704,
-        1568
-      ],
       "parameters": {
         "method": "POST",
         "url": "=https://api.cloudflare.com/client/v4/accounts/{{ $('Cloudflare-Konto laden [Supabase]').first().json.setting_value }}/ai/run/@cf/openai/whisper-large-v3-turbo",
@@ -847,11 +838,19 @@
           "timeout": 60000
         }
       },
-      "onError": "continueErrorOutput",
+      "id": "77880a94-a8d4-4be6-8eea-33ee0b8cc950",
+      "name": "Cloudflare Whisper [HTTP Request]",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2704,
+        1568
+      ],
       "retryOnFail": true,
       "maxTries": 3,
       "waitBetweenTries": 2000,
       "executeOnce": true,
+      "onError": "continueErrorOutput",
       "credentials": {
         "httpHeaderAuth": {
           "id": "CREDENTIAL_ID",
@@ -860,14 +859,6 @@
       }
     },
     {
-      "id": "8d22c258-f7eb-4d03-8d94-d19b7c1d3428",
-      "name": "Konto-ID vorhanden? [If]",
-      "type": "n8n-nodes-base.if",
-      "typeVersion": 2.2,
-      "position": [
-        2368,
-        1568
-      ],
       "parameters": {
         "conditions": {
           "options": {
@@ -891,17 +882,17 @@
           "combinator": "and"
         },
         "options": {}
-      }
-    },
-    {
-      "id": "0b9333f5-28eb-4072-b829-e17e145f18da",
-      "name": "Start geklappt? [If]",
+      },
+      "id": "8d22c258-f7eb-4d03-8d94-d19b7c1d3428",
+      "name": "Konto-ID vorhanden? [If]",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        3576,
-        1376
-      ],
+        2368,
+        1568
+      ]
+    },
+    {
       "parameters": {
         "conditions": {
           "options": {
@@ -925,7 +916,28 @@
           "combinator": "and"
         },
         "options": {}
-      }
+      },
+      "id": "0b9333f5-28eb-4072-b829-e17e145f18da",
+      "name": "Start geklappt? [If]",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        3584,
+        1376
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Zweck: die Nachricht erst nach erfolgreichem K1-Start als erledigt merken.\n// Warum hier: scheitert der Start, bleibt die Nachricht ungemerkt und eine erneute Zustellung startet K1 noch einmal.\n// Warum 48 Stunden: Telegram stellt ein Update hoechstens 24 Stunden lang erneut zu; aeltere Eintraege werden entfernt.\nconst merker = $getWorkflowStaticData('global');\nconst gesehen = merker.gesehen_zeit && typeof merker.gesehen_zeit === 'object' ? merker.gesehen_zeit : {};\nconst jetzt = Date.now();\nfor (const s of Object.keys(gesehen)) if (jetzt - gesehen[s] >= 48 * 3600000) delete gesehen[s];\nconst schluessel = String($('Nachricht einordnen [Code]').first().json.merker_schluessel || '');\nif (schluessel) gesehen[schluessel] = jetzt;\nmerker.gesehen_zeit = gesehen;\ndelete merker.gesehen;\nreturn $input.all();"
+      },
+      "id": "17e9e7e9-ed60-4192-8d80-fa9245f17090",
+      "name": "Nachricht merken [Code]",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3920,
+        1376
+      ]
     }
   ],
   "connections": {
@@ -1045,17 +1057,6 @@
         ]
       ]
     },
-    "K1 starten [Execute Workflow]": {
-      "main": [
-        [
-          {
-            "node": "Start geklappt? [If]",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
     "Telegram-Nachricht empfangen [Telegram Trigger]": {
       "main": [
         [
@@ -1157,11 +1158,22 @@
         ]
       ]
     },
+    "K1 starten [Execute Workflow]": {
+      "main": [
+        [
+          {
+            "node": "Start geklappt? [If]",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
     "Start geklappt? [If]": {
       "main": [
         [
           {
-            "node": "Auftrag bestätigen [Telegram]",
+            "node": "Nachricht merken [Code]",
             "type": "main",
             "index": 0
           }
@@ -1169,6 +1181,17 @@
         [
           {
             "node": "Start fehlgeschlagen melden [Telegram]",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Nachricht merken [Code]": {
+      "main": [
+        [
+          {
+            "node": "Auftrag bestätigen [Telegram]",
             "type": "main",
             "index": 0
           }
@@ -1186,7 +1209,7 @@
     "aiBuilderAssisted": true,
     "builderVariant": "mcp"
   },
-  "versionId": "5ea93949-b12e-43da-baf8-aaa38c5cc0f5",
+  "versionId": "90dfcb86-214c-430c-a5e6-8ac28a8021e7",
   "tags": [
     "KI-AGT-2606",
     "woche-4"
