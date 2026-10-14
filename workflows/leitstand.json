@@ -1787,7 +1787,7 @@
     "availableInMCP": true,
     "errorWorkflow": "vdWjTLYejCK2YrMP",
     "timezone": "Europe/Berlin",
-    "saveManualExecutions": true,
+    "saveManualExecutions": false,
     "saveDataErrorExecution": "none",
     "saveDataSuccessExecution": "none",
     "callerPolicy": "none",
