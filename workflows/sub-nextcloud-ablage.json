@@ -841,7 +841,7 @@
       "parameters": {
         "content": " ",
         "height": 448,
-        "width": 1768,
+        "width": 1752,
         "color": 5
       },
       "id": "09426156-2910-4920-a696-c95a7e952ae2",
@@ -849,7 +849,7 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        3008,
+        3024,
         -400
       ]
     },
@@ -873,7 +873,7 @@
       "parameters": {
         "content": "# 🌐 Plattform-Hinweise\n### ☁️ Nextcloud (NEXTCLOUD_URL, eigener Server)\n**Erlaubt:** Ordner anlegen, `beitrag.md` und Bilder (png, jpg, jpeg, webp) hochladen, öffentlicher Link nur lesend, 30 Tage gültig.\n🟡 **Besonderheit:** Der Bild-Upload zeigt in n8n einen Anzeigefehler (TypeError), obwohl die Datei ankommt; gezählt wird deshalb über die Dateiliste.\n\n### 🖥️ n8n auf N8N_URL\n**Erlaubt:** Aufruf nur als Sub aus K1, kein eigener Auslöser.\n🟡 **Besonderheit:** Jeder Fehler wird zu `ok: false` mit Grund, der Aufrufer bricht nie ab.",
         "height": 416,
-        "width": 552,
+        "width": 536,
         "color": 7
       },
       "id": "6f0c3f16-0737-4cc6-a332-6eb7dffc7fd3",
@@ -881,7 +881,7 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        3024,
+        3040,
         -384
       ]
     }
@@ -1232,7 +1232,7 @@
     "aiBuilderAssisted": true,
     "builderVariant": "mcp"
   },
-  "versionId": "07fbc7ac-2a21-4574-9dfc-ceb9ad361273",
+  "versionId": "5e32d2f8-817a-4c7e-83a0-953958882189",
   "tags": [
     "sub-workflow",
     "KI-AGT-2606",
