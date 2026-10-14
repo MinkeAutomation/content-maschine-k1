@@ -52,7 +52,7 @@
             {
               "id": "c4",
               "name": "dispatch_enabled",
-              "value": false,
+              "value": true,
               "type": "boolean"
             },
             {
@@ -1797,7 +1797,7 @@
     "aiBuilderAssisted": true,
     "builderVariant": "mcp"
   },
-  "versionId": "4378ac67-9a9a-4438-9aad-935e649d29b2",
+  "versionId": "81e9f73b-22ec-4b79-b575-28e8618348e2",
   "tags": [
     "KI-AGT-2606",
     "schulung",
