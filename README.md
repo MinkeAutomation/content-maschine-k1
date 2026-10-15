@@ -41,6 +41,10 @@ Das Diagramm ist vereinfacht (Stand 14.10.2026); Laufprotokoll und Supabase-Obje
 | [`workflows/leitstand.json`](workflows/leitstand.json) | AGT-2606 P1 K1 Dashboard | Webseite mit Basic Auth: Läufe, Kosten, Verlauf, Auftrag starten |
 | [`workflows/error-workflow.json`](workflows/error-workflow.json) | AGT-2606 W03T04 Zentraler Error Workflow | Alarm-Mail, wenn ein automatisch gestarteter Lauf rot endet |
 
+## Ausführliche Anleitung
+
+Schritt für Schritt vom Anlegen der Zugänge bis zum Stand vom 14.10.2026, mit 100 Abbildungen, als gestaltete Seite: [`docs/anleitung/index.html`](docs/anleitung/index.html). Auf GitHub zeigt dieser Link den Quelltext; gestaltet lesbar ist die Seite unter https://minkeautomation.github.io/content-maschine-k1/anleitung/, sobald GitHub Pages für dieses Repository eingeschaltet ist. Änderungen an der Anleitung stehen wie alles andere im [CHANGELOG](CHANGELOG.md).
+
 ## Voraussetzungen
 
 - n8n, selbst gehostet (gebaut und getestet auf einer eigenen Instanz; die Exporte enthalten nur Standard-Knoten, keine Community Nodes)

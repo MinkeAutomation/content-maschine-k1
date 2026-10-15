@@ -1,6 +1,6 @@
 # Abgaben
 
-Je Kurstag die abgegebene PDF. Im Repository liegen nur die PDFs ohne Verweise auf externe Ablagen, unverändert; die übrigen sind in Moodle abgegeben und hier nur genannt. Die Workflow-Stände jeder Abgabe sind die Git-Tags, siehe [versionen.md](../versionen.md).
+Je Kurstag die abgegebene PDF. Im Repository liegen nur die PDFs ohne Verweise auf externe Ablagen, unverändert; die übrigen sind in Moodle abgegeben und hier nur genannt. Die ausführliche Anleitung, auf die diese PDFs verweisen, liegt als Seite unter [docs/anleitung](../docs/anleitung/index.html) (gestaltet: https://minkeautomation.github.io/content-maschine-k1/anleitung/, sobald GitHub Pages eingeschaltet ist). Die Workflow-Stände jeder Abgabe sind die Git-Tags, siehe [versionen.md](../versionen.md).
 
 | Abgabe | Hochgeladen | Tag | PDF |
 |---|---|---|---|
