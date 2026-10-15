@@ -1,0 +1,86 @@
+# Externer Wächter Stufe 1 für die n8n-Instanz
+# Prüft alle 15 Minuten von außen, OHNE Zugangsdaten:
+#   1. /healthz            Instanz erreichbar
+#   2. /healthz/readiness  Datenbank verbunden und migriert
+#   3. /webhook/waechter-lebenszeichen  Zeitpläne laufen (Herzschlag) und
+#      der zentrale Error Workflow lebt (Quittung der stündlichen Probe)
+# Fällt eine Prüfung durch, endet der Job rot. GitHub schickt dann eine Mail
+# an die Person, die den Zeitplan in dieser Datei zuletzt geändert hat.
+# Zusätzlich legt der Job ein Issue an (nur mit dem eingebauten GITHUB_TOKEN,
+# kein eigenes Geheimnis), höchstens eins offen gleichzeitig.
+#
+# UMZUG: beim geplanten Wechsel auf n8n.autima.cloud nur N8N_BASIS ändern.
+#
+# ZEITPLAN NOCH AUS: Die n8n-Workflows „Wächter Lebenszeichen“ und „Wächter Probe“
+# sind noch nicht in Betrieb. Bis dahin nur Handstart; danach die zwei Zeilen
+# unter „schedule“ wieder einkommentieren.
+
+name: Waechter n8n
+
+on:
+  # schedule:
+  #   - cron: "*/15 * * * *"   # UTC; GitHub startet geplante Läufe oft verspätet
+  workflow_dispatch: {}       # Handstart zum Testen
+
+permissions:
+  contents: read
+  issues: write
+
+env:
+  N8N_BASIS: "https://auto.autima.cloud"
+  HERZSCHLAG_MAX_S: "1200"     # Herzschlag alle 5 Min, Grenze 20 Min
+  ERRORWF_MAX_S: "7800"        # Probe stündlich, Grenze 2 Std 10 Min
+
+concurrency:
+  group: waechter
+  cancel-in-progress: false
+
+jobs:
+  pruefen:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Erreichbarkeit /healthz
+        run: |
+          curl -fsS --retry 3 --retry-delay 20 --retry-all-errors --max-time 15 \
+            "$N8N_BASIS/healthz" -o /dev/null
+          echo "healthz ok"
+
+      - name: Datenbank /healthz/readiness
+        run: |
+          curl -fsS --retry 3 --retry-delay 20 --retry-all-errors --max-time 15 \
+            "$N8N_BASIS/healthz/readiness" -o /dev/null
+          echo "readiness ok"
+
+      - name: Lebenszeichen und Error Workflow
+        run: |
+          antwort=$(curl -fsS --retry 3 --retry-delay 20 --retry-all-errors --max-time 20 \
+            "$N8N_BASIS/webhook/waechter-lebenszeichen")
+          echo "$antwort"
+          hs=$(echo "$antwort" | jq -r '.herzschlag_alter_s // "null"')
+          ew=$(echo "$antwort" | jq -r '.error_workflow_alter_s // "null"')
+          fehler=0
+          if [ "$hs" = "null" ] || [ "$hs" -gt "$HERZSCHLAG_MAX_S" ]; then
+            echo "::error::Herzschlag fehlt oder zu alt ($hs s): Zeitpläne laufen nicht."
+            fehler=1
+          fi
+          if [ "$ew" = "null" ] || [ "$ew" -gt "$ERRORWF_MAX_S" ]; then
+            echo "::error::Keine Quittung des Error Workflows seit $ew s: Fehlermeldungen kommen womöglich nicht an."
+            fehler=1
+          fi
+          exit $fehler
+
+      - name: Issue anlegen bei Fehler (höchstens eins offen)
+        if: failure() && github.event_name == 'schedule'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          offen=$(gh issue list --repo "$GITHUB_REPOSITORY" --label waechter --state open --json number --jq 'length')
+          if [ "$offen" = "0" ]; then
+            gh label create waechter --repo "$GITHUB_REPOSITORY" --color B60205 2>/dev/null || true
+            gh issue create --repo "$GITHUB_REPOSITORY" --label waechter \
+              --title "Wächter: n8n-Prüfung fehlgeschlagen $(date -u +%Y-%m-%dT%H:%MZ)" \
+              --body "Lauf: $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+          else
+            echo "Es ist schon ein Wächter-Issue offen, kein neues."
+          fi
