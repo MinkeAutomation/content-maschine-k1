@@ -4658,7 +4658,8 @@
     "saveDataSuccessExecution": "all",
     "binaryMode": "separate",
     "callerPolicy": "workflowsFromAList",
-    "callerIds": "gcqhN1dEKNBRzk3C,xVnV4s2yVnkdGXeH"
+    "callerIds": "gcqhN1dEKNBRzk3C,xVnV4s2yVnkdGXeH",
+    "timeSavedPerExecution": 45
   },
   "staticData": null,
   "meta": {
