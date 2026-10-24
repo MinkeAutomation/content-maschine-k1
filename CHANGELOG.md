@@ -4,6 +4,10 @@ Neueste oben. `V` zählt die Änderungen am ganzen Projekt, `vNN` ist die Versio
 
 Die Einträge V01 bis V80 stammen aus den Abgaben vom 12.10. und 14.10.2026. Sie nennen die Dateinamen der damaligen Exporte (zum Beispiel `content-generator-k1_2026-10-14_v23.json`); im Repository heißen die Dateien fest `workflows/k1-content-generator.json`, `workflows/telegram-eingang.json`, `workflows/sub-nextcloud-ablage.json`, `workflows/leitstand.json` und `workflows/error-workflow.json`. In den Exporten des Repositorys sind Adressen der eigenen Infrastruktur, Telegram-Kennung, Mailadressen und Credential-IDs durch Platzhalter ersetzt.
 
+## Sa 24.10.2026
+
+- **V97, 24.10., Doku auf Endstand.** Architektur-Diagramm (`docs/architektur.excalidraw`, `docs/architektur.png`) und `docs/architektur.md` zeigen K1 mit 114 Knoten, Leitstand v17 mit 56 Knoten, Vorschau nur mit Folien, LinkedIn-Bild als Diagramm und die Fallback-Notizen an den 5 KI-Knoten. Die ausführliche Anleitung unter `docs/anleitung/` ist auf den Endstand nachgezogen: Abschnitt 6a mit den Änderungen vom 17. bis 24.10., Pläne 1, 2 und 5 neu gezeichnet, 15 neue Abbildungen, jetzt 115. Stand-Sätze im README angepasst. Auf K1 wirken am 24.10. nur Notizen (Karte ④ berichtigt, Fallback-Notiz an `Virale Posts Sonar`, `Recherche Sonar`, `Content-Paket schreiben`, `Ersatzpaket schreiben`, `Einzelbild erzeugen`, aktive Version `80d0c810`); Ablauf, Knoten und Verbindungen sind gleich K1 v25; der Export `workflows/k1-content-generator.json` enthält diese Notizen noch nicht. Das Bildschirmfoto `docs/leitstand.png` zeigt weiter den Stand vom 14.10. (v16). Grund: Diagramm und Anleitung zeigten noch den Stand vom 14.10. (`99e45166`, 113 Knoten).
+
 ## 17. bis 22.10.2026: Fixes nach den Probeläufen
 
 Alle Einträge betreffen die Haupt-K1. Im Repository liegt nur der Endstand als K1 v25 (`4a2e6a4d`); die Zwischenstände sind in n8n als Versionen abrufbar.

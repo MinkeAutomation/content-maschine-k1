@@ -4,6 +4,8 @@ Ein n8n-System, das aus einem Auftrag (Thema, Artikel-Link, YouTube-Link, eigene
 
 ![Leitstand](docs/leitstand.png)
 
+_Leitstand, Bildschirmfoto vom 14.10.2026 (v16). Die aufklappbaren Lauf-Details von v17 sind darauf noch nicht zu sehen, beschrieben im [CHANGELOG](CHANGELOG.md) unter V81._
+
 ## Was es tut
 
 1. **Auftrag:** per Telegram (Text, Link, `/research`, Sprachnachricht), über das K1-Formular oder aus dem Leitstand.
@@ -16,7 +18,7 @@ Ergebnis: Karussell, Einzelbild, Instagram-Text, LinkedIn-Post und ein Link zum 
 
 ## Musskriterien und wo man sie sieht
 
-Belegt mit der Abgabe W05T03 vom 14.10.2026; seither kamen K1 v24 (Zeitgrenze des Schreibaufrufs, Einstellung „Estimated time saved“), Leitstand v17 (Lauf-Details, Modellpfad) und SUB Nextcloud-Ablage v04 (nur Layout der Notizen) dazu, die Zahlen der Tabelle gelten auch für diesen Stand. Am 24.10.2026 kam K1 v25 dazu (Änderungen nach den Probeläufen vom 17. bis 22.10., siehe CHANGELOG V84 bis V96); für v25 sind die Zahlen der Tabelle nicht neu gemessen. Jede Zeile verweist auf die Stelle, an der sie belegt ist.
+Belegt mit der Abgabe W05T03 vom 14.10.2026; seither kamen K1 v24 (Zeitgrenze des Schreibaufrufs, Einstellung „Estimated time saved“), Leitstand v17 (Lauf-Details, Modellpfad) und SUB Nextcloud-Ablage v04 (nur Layout der Notizen) dazu, die Zahlen der Tabelle gelten auch für diesen Stand. Am 24.10.2026 kam K1 v25 dazu (Änderungen nach den Probeläufen vom 17. bis 22.10., siehe CHANGELOG V84 bis V96); für v25 sind die Zahlen der Tabelle nicht neu gemessen. Architektur-Diagramm und ausführliche Anleitung zeigen seit dem 24.10.2026 den Endstand (V97). Jede Zeile verweist auf die Stelle, an der sie belegt ist.
 
 | Kriterium | Woran man es sieht |
 |---|---|
@@ -31,7 +33,7 @@ Belegt mit der Abgabe W05T03 vom 14.10.2026; seither kamen K1 v24 (Zeitgrenze de
 
 ![Architektur](docs/architektur.png)
 
-Das Diagramm ist vereinfacht (Stand 14.10.2026); Laufprotokoll und Supabase-Objekte vollständig unter „Einrichtung“ und „Betrieb“.
+Das Diagramm ist vereinfacht (Stand 24.10.2026, K1 v25 plus die Notizen vom 24.10., aktive Version `80d0c810`); Laufprotokoll und Supabase-Objekte vollständig unter „Einrichtung“ und „Betrieb“.
 
 | Datei | Workflow | Aufgabe |
 |---|---|---|
@@ -43,7 +45,7 @@ Das Diagramm ist vereinfacht (Stand 14.10.2026); Laufprotokoll und Supabase-Obje
 
 ## Ausführliche Anleitung
 
-Schritt für Schritt vom Anlegen der Zugänge bis zum Stand vom 14.10.2026, mit 100 Abbildungen, als gestaltete Seite: [`docs/anleitung/index.html`](docs/anleitung/index.html). Auf GitHub zeigt dieser Link den Quelltext; gestaltet lesbar ist die Seite unter https://minkeautomation.github.io/content-maschine-k1/anleitung/, sobald GitHub Pages für dieses Repository eingeschaltet ist. Änderungen an der Anleitung stehen wie alles andere im [CHANGELOG](CHANGELOG.md).
+Schritt für Schritt vom Anlegen der Zugänge bis zum Endstand vom 24.10.2026, mit 115 Abbildungen, als gestaltete Seite: [`docs/anleitung/index.html`](docs/anleitung/index.html). Auf GitHub zeigt dieser Link den Quelltext; gestaltet lesbar ist die Seite unter https://minkeautomation.github.io/content-maschine-k1/anleitung/, sobald GitHub Pages für dieses Repository eingeschaltet ist. Änderungen an der Anleitung stehen wie alles andere im [CHANGELOG](CHANGELOG.md).
 
 ## Voraussetzungen
 
