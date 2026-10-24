@@ -1,8 +1,26 @@
 # CHANGELOG Content-Maschine K1
 
-Neueste oben. `V` zählt die Änderungen am ganzen Projekt, `vNN` ist die Version des jeweiligen Workflow-Exports. Jede Workflow-Version ist im Repository ein eigener Commit mit Datum und Uhrzeit der Version, siehe [versionen.md](versionen.md). „Lauf“ ist die Ausführungsnummer in n8n.
+Neueste oben. `V` zählt die Änderungen am ganzen Projekt, `vNN` ist die Version des jeweiligen Workflow-Exports. Bis v24 ist jede Workflow-Version im Repository ein eigener Commit mit Datum und Uhrzeit der Version; ab v25 liegt je Nachzug nur der Endstand im Repository, siehe [versionen.md](versionen.md). „Lauf“ ist die Ausführungsnummer in n8n.
 
 Die Einträge V01 bis V80 stammen aus den Abgaben vom 12.10. und 14.10.2026. Sie nennen die Dateinamen der damaligen Exporte (zum Beispiel `content-generator-k1_2026-10-14_v23.json`); im Repository heißen die Dateien fest `workflows/k1-content-generator.json`, `workflows/telegram-eingang.json`, `workflows/sub-nextcloud-ablage.json`, `workflows/leitstand.json` und `workflows/error-workflow.json`. In den Exporten des Repositorys sind Adressen der eigenen Infrastruktur, Telegram-Kennung, Mailadressen und Credential-IDs durch Platzhalter ersetzt.
+
+## 17. bis 22.10.2026: Fixes nach den Probeläufen
+
+Alle Einträge betreffen die Haupt-K1. Im Repository liegt nur der Endstand als K1 v25 (`4a2e6a4d`); die Zwischenstände sind in n8n als Versionen abrufbar.
+
+- **V96, 22.10. 13:53, K1 v25 (`4a2e6a4d`), veröffentlicht.** Das Schreibmodell liefert je Ablaufschritt eine eigene kurze Erklärung (neues Feld `process_step_explanations`, Regel 16a, Prompt-Version k1-p5); das LinkedIn-Bild nimmt die Erklärung nur noch aus diesem Feld. Grund: In Lauf 1192 stand an Station 3 ein Listenstück aus dem Folientext. Probelauf 1200: 4 von 4 Erklärungen übernommen. Im Export sind wie bisher Adressen der eigenen Infrastruktur und Credential-IDs durch Platzhalter ersetzt, aus den Code-Kommentaren sind interne Prüf- und Arbeitskennungen entfernt; Programmtext, Prompts und Verbindungen sind unverändert.
+- **V95, 20.10. 16:37, `bdb0c0ee`, veröffentlicht.** LinkedIn-Bild als Diagramm (Pipeline oder Kreislauf mit Symbol und Nummer je Station), Schriftfarben mit Kontrast mindestens 4,5 zu 1; das LinkedIn-Bild kommt in der Telegram-Vorschau nicht mehr doppelt. Grund: Probelauf 1188. Probelauf 1192.
+- **V94, 19.10. 20:33, `4fa24ae7`, veröffentlicht.** Vorschau beginnt mit Folie 1, Folie 1 als Thumbnail, LinkedIn-Ablauf als Zeitstrahl mit Symbolen, Schrittzahl im Titel korrigiert, LinkedIn-Text in Absätze gesetzt. Grund: Probelauf 1186. Probelauf 1188.
+- **V93, 19.10. 17:25, `d07a5e4c`, veröffentlicht.** LinkedIn-Bild als eigene Vorlage statt Foto von Folie 1, neues Feld `thumbnail_hook` für Folie 1, LinkedIn in der Anrede der Marke mit 5 bis 6 Absätzen und Schlussfrage, keine Hände oder Gesichter in Nahaufnahme im Bildprompt. Bekannte Grenze: die Siezen-Prüfung warnt bei manchen Du-Texten fälschlich, nur als Hinweis in der Freigabe. Grund: Probelauf 1183. Probelauf 1186.
+- **V92, 19.10. 14:41, `265d9ec2`, veröffentlicht.** Themenabdeckung in der Recherche (Teilaspekte, Zeile ABDECKUNGSLÜCKE statt erfundener Fakten), Titel an der Wortgrenze gekürzt, bis zu 5 Hashtags im LinkedIn-Post, wechselnde Schlussfrage auf der letzten Folie. Grund: Probeläufe 1160 und 1181. Probelauf 1183.
+- **V91, 19.10. 11:22, `7983de63`, veröffentlicht.** Fotosuche nur mit fotografierbarer Szene (3 bis 4 englische Wörter), Liste von 145 abstrakten Wörtern, Mindestpassung 2 Treffer, sonst KI-Bild mit Hinweis. Bekannte Grenze: die Wortliste wird nie vollständig. Grund: Lauf 1175. Probelauf 1181.
+- **V90, 17.10. 17:47, `1308985a`, veröffentlicht.** Passendere Stockfotos: Suchbegriffe englisch aus den Kernpunkten, Mindestpassung, bestes Foto über alle Anfragen. Grund: Läufe 1160, 1164, 1172. Probelauf 1175.
+- **V89, 17.10. 17:20, `c991afbc`, veröffentlicht.** Freigabe-Nachricht zurück auf den Stand von V85, der Einleitungs-Hinweis bleibt in den Layout-Hinweisen. Grund: Läufe 1167 und 1171 brachen beim Senden der Freigabe ab. Probelauf 1172 freigegeben.
+- **V88, 17.10. 17:10, `cde2bbd7`, veröffentlicht.** Versuch, die Freigabe-Nachricht ohne Spread-Schreibweise zu bauen; half nicht, abgelöst durch V89. Grund: Probelauf 1167 ohne Freigabeknöpfe.
+- **V87, 17.10. 17:00, `947fda80`, veröffentlicht.** Folie 2 bekommt eine eigene Einleitung (Pflichtfeld `intro`, Regel 17), mit geprüfter Ersatzkette. Grund: Probelauf 1164, Folie 1 und 2 mit gleicher Überschrift.
+- **V86, 17.10. 15:41, `f8f44cde`, veröffentlicht.** Jede Überschrift eine Mini-Schlagzeile mit eigener Aussage (Regel 8), Warnung bei Wiederholung zwischen Folien in den Qualitätshinweisen. Grund: Lauf 1160, Folie 1 gleich Folie 2.
+- **V85, 17.10. 14:47, `3e469860`, veröffentlicht.** Quellen-Domains in der Freigabe zusammengefasst, Markdown-Zeichen statt HTML-Escaping. Grund: Probeläufe 1156 und 1160.
+- **V84, 17.10. 14:24, `98280198`, veröffentlicht.** Die Telegram-Freigabe nennt statt der bloßen Quellenzahl die Domains der Recherche-Quellen, nur den Hostnamen nach einer Positivliste (sonst „interne Adresse“); der Recherche-Hinweis steht vor den Qualitätshinweisen, das Thema ist auf 200 Zeichen begrenzt, gekürzt wird vor dem HTML-Escaping statt danach. Grund: Wer freigibt, soll sehen, woher die Fakten stammen; nur die Domain und kein Pfad, damit keine Adressdetails in die Nachricht gelangen.
 
 ## Do 15.10.2026
 

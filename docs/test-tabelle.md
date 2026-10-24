@@ -20,13 +20,15 @@ _Stand der Abgabe W05T03 vom 14.10.2026 (K1 v23, Telegram-Eingang v08, SUB Nextc
 | 11 | Video-Text-Dienst liefert nichts (F2) | Edge Case | PASS | 1089 |
 | 12 | Artikel zu kurz (F1) | Edge Case | PASS | 1088 |
 | 13 | Kunde unbekannt (F6) | Edge Case | PASS | 899 |
-| 14 | Bild in falscher Größe, Rückfall auf das bisherige Layout | Edge Case | PASS | 769 (offen) |
+| 14 | Bild in falscher Größe, Rückfall auf das bisherige Layout | Edge Case | PASS | 769 (älterer Stand) |
 | 21 | Thema „ab“ über das Formular (E5) | Edge Case | PASS | 1084 |
 | 15 | Hauptmodell fällt aus (F3) | Fehler | PASS | 900 |
 | 16 | Rendern scheitert (F5) | Fehler | PASS | 901 |
 | 17 | Foto-Download scheitert | Fehler | PASS | 903 |
 | 18 | Telegram-Versand scheitert (F8) | Fehler | PASS | 847, live 1118 |
-| 19 | Folientexte passen nicht zu den Bildern (F8) | Fehler | PASS | 880 (offen) |
+| 19 | Folientexte passen nicht zu den Bildern (F8) | Fehler | PASS | 880 (älterer Stand) |
 | 22 | Leitstand ohne oder mit falschen Zugangsdaten | Fehler | PASS | 4 Aufrufe, 403 |
+
+„Älterer Stand“: Der Fall bestand auf diesem Lauf, ist auf den Versionen ab v17b nicht neu gelaufen, weil er sich über das Formular nicht auslösen lässt (siehe Absatz oben).
 
 **Fails auf dem Weg dorthin:** 12 eingeordnet, davon 10 Bugs im Workflow (z. B. Lauf 672: ohne Eingabeprüfung erfand das Modell ein Paket; heute Stopp vor dem Modell) und 2 unrealistische Testfälle, die ersetzt wurden. Ein Fail ist nicht eingeordnet: Lauf 902 (Foto-Fehlerweg mit angepinntem Bilddienst), der Nachtest braucht 2 einzelne Pins im Editor. Fall 22 lehnt richtig ab, liefert aber 403 statt des erwarteten 401; das ist Verhalten von n8n bei Basic Auth, kein Bug im Workflow.
