@@ -16,7 +16,7 @@ Ergebnis: Karussell, Einzelbild, Instagram-Text, LinkedIn-Post und ein Link zum 
 
 ## Musskriterien und wo man sie sieht
 
-Belegt mit der Abgabe W05T03 vom 14.10.2026; seither kamen K1 v24 (Zeitgrenze des Schreibaufrufs, Einstellung „Estimated time saved“), Leitstand v17 (Lauf-Details, Modellpfad) und SUB Nextcloud-Ablage v04 (nur Layout der Notizen) dazu, die Zahlen der Tabelle gelten auch für diesen Stand. Jede Zeile verweist auf die Stelle, an der sie belegt ist.
+Belegt mit der Abgabe W05T03 vom 14.10.2026; seither kamen K1 v24 (Zeitgrenze des Schreibaufrufs, Einstellung „Estimated time saved“), Leitstand v17 (Lauf-Details, Modellpfad) und SUB Nextcloud-Ablage v04 (nur Layout der Notizen) dazu, die Zahlen der Tabelle gelten auch für diesen Stand. Am 24.10.2026 kam K1 v25 dazu (Änderungen nach den Probeläufen vom 17. bis 22.10., siehe CHANGELOG V84 bis V96); für v25 sind die Zahlen der Tabelle nicht neu gemessen. Jede Zeile verweist auf die Stelle, an der sie belegt ist.
 
 | Kriterium | Woran man es sieht |
 |---|---|
@@ -68,7 +68,7 @@ Schritt für Schritt vom Anlegen der Zugänge bis zum Stand vom 14.10.2026, mit 
 
 ## Versionen
 
-Jede Workflow-Version ist ein Commit mit Datum und Uhrzeit der Version; jede Abgabe ist ein Tag (`abgabe-JJJJ-MM-TT-wNNtNN`). Übersicht mit Links auf Commit und Unterschied: [versionen.md](versionen.md). Änderungen mit Begründung: [CHANGELOG.md](CHANGELOG.md). Die Abgabe W04T04 lief auf einer Kopie von K1 und liegt auf dem Zweig `w04t04-token-logging`.
+Bis K1 v24 ist jede Workflow-Version ein Commit mit Datum und Uhrzeit der Version, ab v25 liegt je Nachzug nur der Endstand im Repository; jede Abgabe ist ein Tag (`abgabe-JJJJ-MM-TT-wNNtNN`), Nachzüge tragen `stand-JJJJ-MM-TT-…`. Übersicht mit Links auf Commit und Unterschied: [versionen.md](versionen.md). Änderungen mit Begründung: [CHANGELOG.md](CHANGELOG.md). Die Abgabe W04T04 lief auf einer Kopie von K1 und liegt auf dem Zweig `w04t04-token-logging`.
 
 ## Bekannte Einschränkungen
 
